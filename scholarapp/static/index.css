@@ -3,3 +3,12 @@
   width: 30px;
   height: 24px;
 }
+
+.pre-scrollable {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.divider {
+  border-right: 1px dashed black;
+}
