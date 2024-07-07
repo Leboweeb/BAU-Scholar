@@ -54,18 +54,21 @@
             </li>
           </ul>
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link"
-                 href=""
-                 data-bs-target="#SignInModal"
-                 data-bs-toggle="modal">Log In</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link"
-                 href=""
-                 data-bs-target="#SignUpModal"
-                 data-bs-toggle="modal">Create Account</a>
-            </li>
+            {% if not user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup' %}">Create Account</a>
+              </li>
+            {% else %}
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <li class="nav-item">
+                  <button class="nav-link" type="submit">Log Out</button>
+                </li>
+              </form>
+            {% endif %}
           </ul>
           <form class="d-flex" role="search">
             <input class="form-control me-2"
