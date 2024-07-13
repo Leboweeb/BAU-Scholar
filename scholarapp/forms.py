@@ -9,4 +9,7 @@ from scholarapp.models import CustomUser
 class SignUpForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ("email",)
+        fields = (
+            "name",
+            "email",
+        )
