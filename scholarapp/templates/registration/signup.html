@@ -1,1 +1,133 @@
-{% include "login_sign_up.html" with title="Create An Account" button_text="Sign Up" other_text="Log In" other_url="login" endpoint="signup" %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <title>Create An Account</title>
+</head>
+<style>
+    .center_to_page {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .lh-lg {
+        line-height: 2.5rem !important;
+    }
+
+    form .form-text {
+        display: none;
+    }
+
+    .user-profile:hover {
+        box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+        ;
+    }
+
+    .active {
+        box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+    }
+</style>
+
+<body>
+    {% load crispy_forms_tags %}
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="ImportAccountModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalCenteredScrollableTitle">Import From ResearchGate</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% comment %} {% for i in '012345'|make_list %} {% endcomment %}
+                    {% include "components/profile_import.html" %}
+                    {% comment %} {% endfor %} {% endcomment %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container d-flex justify-content-center align-items-center center_to_page">
+        <div class="card" style="width: 65%; ">
+            <div class="card-body">
+                <h4 class="card-title">Create An Account</h4>
+                <form method="post" action="{% url 'signup' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    {{ form | crispy }}
+                    <!-- Bottom Panel of Signup form -->
+                    <div class="mt-3">
+                        <ul class="list-inline d-flex justify-content-center align-items-center mb-4 gap-2">
+                            <li class="list-inline-item">
+                                <a href="javascript:void(0)" onclick="import_if_name()">Import Account</a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="">Forgot Password</a>
+                            </li>
+                        </ul>
+                        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                        <a class="float-end lh-lg" href="{% url 'login' %}">Log In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function add_card() {
+
+    }
+
+    function card_active(event) {
+        let other_cards = document.querySelectorAll(".user-profile")
+        let node = event.target.tagName === "DIV" ? event.target : event.target.parentElement;
+        node.classList.add("active")
+        other_cards.forEach((value) => {
+            if (value !== node)
+                value.classList.remove("active")
+        })
+    }
+
+    function import_if_name() {
+        const name = document.querySelector("#id_name").value || ""
+        const myModal = new bootstrap.Modal("#exampleModal",
+            {
+                keyboard: false
+            }
+        )
+        const modalToggle = document.getElementById('#exampleModal');
+        const cardList = document.querySelector("#results")
+        if (name) {
+            for (let i = 0; i < 6; i++) {
+                let node = new DOMParser().parseFromString(`
+                <div class="col-12">
+                    <div class="card p-2 d-flex justify-items-center align-items-center flex-row gap-3 user-profile" onclick="card_active(event)">
+                        <img style="vertical-align: middle;width: 50px;height: 50px;border-radius: 50%;" src="https://i1.rgstatic.net/ii/profile.image/413052794097682-1475490868328_Q64/Ali-Haidar-4.jpg"
+                             alt="User Profile"
+                             srcset="">
+                        <h5 style="line-height: 350%;">Ali Haidar</h5>
+                    </div>
+                </div>
+                `, "text/html").body.firstElementChild;
+                node.addEventListener("click", (event), true)
+                cardList.appendChild(node)
+            }
+            myModal.show(modalToggle)
+
+        }
+        else {
+            alert("Please provide a name to import from Research Gate.")
+        }
+    }
+</script>
+
+</html>
