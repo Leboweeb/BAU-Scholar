@@ -1,20 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-    <div class="row mt-4">
-        <div class="container">
-            <div class="card w-100 p-3 ">
-                <div class="d-flex flex-column align-item-center justify-content-center text-center">
-                    <a href="">
-                        <svg class="rounded-circle shadow rounded" width="64" height="64"
-                            xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                            preserveAspectRatio="xMidYMid slice" focusable="false">
-                            <title>Placeholder</title>
-                            <rect width="100%" height="100%" fill="#868e96"></rect>
-                        </svg>
+    <div class="container">
+        <div class="row mt-4">
+            <div class="container">
+                <div class="card w-100 p-3 ">
+                    <div class="d-flex flex-column align-item-center justify-content-center text-center">
+                        <a href={{ user.avatar }}>
+                            <img style="vertical-align: middle;
+                                        width: 64px;
+                                        height: 64px;
+                                        border-radius: 50%"
+                                 src="{{ user.avatar }}"
+                                 alt="">
+                        </img>
                     </a>
-                    <h4><b>John Doe</b></h4>
-                    <p>Architect & Engineer</p>
+                    <h4>
+                        <b>{{ user.name }}</b>
+                    </h4>
+                    <p>{{ user.department }}</p>
                 </div>
             </div>
         </div>
@@ -25,21 +28,15 @@
                 <img src="" alt="">
                 <strong>Tags</strong>
                 <div class="d-flex flex-wrap gap-1 ">
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
-                    <span class="badge rounded-pill bg-secondary">Secondary</span>
+                    {% with user.tags|split:"," as  tags %}
+                        {% for tag in tags %}<span class="badge rounded-pill bg-secondary">{{ tag }}</span>{% endfor %}
+                    {% endwith %}
                 </div>
                 <strong>Skills</strong>
                 <ul>
-                    <li>Skill 1</li>
-                    <li>Skill 2</li>
-                    <li>Skill 3</li>
-                    <li>Skill 4</li>
-                    <li>Skill 5</li>
+                    {% with user.skills|split:"," as skills %}
+                        {% for skill in skills %}<li>{{ skill }}</li>{% endfor %}
+                    {% endwith %}
                 </ul>
             </div>
         </div>
@@ -50,27 +47,17 @@
                 <img src="" alt="">
                 <strong>Research</strong>
                 <div class="container d-flex flex-column mt-3 gap-4">
-                    {% for i in '0123456789'|make_list %}
-                    <div class="card">
-                        <svg class="bd-placeholder-img card-img-top" width="100%" height="180"
-                            xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap"
-                            preserveAspectRatio="xMidYMid slice" focusable="false">
-                            <title>Placeholder</title>
-                            <rect width="100%" height="100%" fill="#868e96"></rect>
-                        </svg>
-                        <div class="card-body">
-                            <h5 class="card-title">Card title</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                            <a href="#" class="btn btn-primary">Go somewhere</a>
+                    {% for i in publications %}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ i.title }}</h5>
+                                <p class="card-text">{{ i.description }}</p>
+                            </div>
                         </div>
-                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-
 </div>
-
 {% endblock content %}

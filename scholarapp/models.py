@@ -37,12 +37,21 @@ class CustomUser(AbstractUser):
     username = None
     name = models.CharField(max_length=120)
     email = models.EmailField(_("email address"), unique=True)
+    avatar = models.URLField(default="")
+    profile_url = models.URLField(default="")
+    skills = models.CharField(max_length=256, default="")
+    department = models.CharField(max_length=120, default="")
+    tags = models.CharField(max_length=256, default="")
     USERNAME_FIELD = "email"
-    objects = CustomUserManager()
+    objects = CustomUserManager()  # type: ignore
     REQUIRED_FIELDS = ["name"]
 
     def __str__(self) -> str:
         return self.email
 
 
-# class ResearchEvent(models.Model): ...
+class Publication(models.Model):
+    title = models.CharField(max_length=120)
+    description = models.CharField(max_length=512)
+    authors = models.ManyToManyField(CustomUser, blank=True)
+    author_str = models.CharField(max_length=120)

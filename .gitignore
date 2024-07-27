@@ -164,3 +164,6 @@ cython_debug/
 # Django project ignores
 
 settings.py
+
+# My Ignores
+scratch.py
