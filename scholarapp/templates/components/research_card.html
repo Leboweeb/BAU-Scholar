@@ -1,0 +1,18 @@
+<div class="card">
+    {% comment %} <img src="" class="card-img-top" alt="Image"> {% endcomment %}
+    <div class="card-body">
+        <h5 class="card-title">{{ title }}</h5>
+        <p class="card-text">{{ description }}</p>
+        <strong class="d-block mb-2">Authors</strong>
+        <ul style="display: inline-flex;
+                   list-style-type:none;
+                   padding-left:0px;
+                   gap:5px">
+            {% for author in authors %}
+                <li>
+                    <a href="{% url "profile" author.pk %}">{{ author.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

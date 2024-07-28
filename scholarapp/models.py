@@ -40,8 +40,10 @@ class CustomUser(AbstractUser):
     avatar = models.URLField(default="")
     profile_url = models.URLField(default="")
     skills = models.CharField(max_length=256, default="")
-    department = models.CharField(max_length=120, default="")
     tags = models.CharField(max_length=256, default="")
+    following = models.ManyToManyField(
+        "self", through="Following", symmetrical=False, related_name="related_to"
+    )
     USERNAME_FIELD = "email"
     objects = CustomUserManager()  # type: ignore
     REQUIRED_FIELDS = ["name"]
@@ -55,3 +57,9 @@ class Publication(models.Model):
     description = models.CharField(max_length=512)
     authors = models.ManyToManyField(CustomUser, blank=True)
     author_str = models.CharField(max_length=120)
+    date_created = models.DateTimeField(null=True)
+
+
+class Following(models.Model):
+    from_person = models.ForeignKey(CustomUser, related_name="from_people", on_delete=models.CASCADE)  # type: ignore
+    to_person = models.ForeignKey(CustomUser, related_name="to_people", on_delete=models.CASCADE)  # type: ignore

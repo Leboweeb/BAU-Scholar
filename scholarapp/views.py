@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 import re
 from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
@@ -14,7 +15,7 @@ from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-from scholarapp.utils.scrape_user import scrape_publications
+from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 
 load_dotenv()
 
@@ -30,12 +31,20 @@ def split(value, key):
 
 @login_required
 def index(request):
-    return render(request, "home.html")
+    categories = [
+        Publication.objects.order_by("-date_created")[:5],
+        Publication.objects.order_by("-date_created")[:5],
+        Publication.objects.order_by("-date_created")[:5],
+    ]
+    return render(
+        request, "home.html", context={"user": request.user, "categories": categories}
+    )
 
 
 @login_required
-def profile(request):
-    user = request.user
+def profile(request, user_id: str):
+    user = CustomUser.objects.get(pk=user_id)
+    is_current_user = request.user == user
     # process tags first
     if not user.tags:
         gemini_model = genai.GenerativeModel("gemini-1.5-flash")
@@ -45,7 +54,6 @@ def profile(request):
         user.tags = re.sub("\n", "", user.tags).strip()
         user.save()
     # then publications
-
     user_publications = Publication.objects.filter(authors=user)
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
@@ -54,12 +62,17 @@ def profile(request):
                 title=publication["title"],
                 description=publication["description"],
                 author_str=publication["authors"],
+                date_created=parse(publication["date_created"]),
             )
             for publication in scraped_publications
         ]
         for publication, _ in publication_pairs:
             publication.authors.add(user)
-    context = {"user": user, "publications": user_publications.all()}
+    context = {
+        "user": user,
+        "publications": user_publications.all(),
+        "is_current_user": is_current_user,
+    }
     return render(request, "profile.html", context=context)
 
 
@@ -67,45 +80,10 @@ def profile(request):
 def import_user(request):
     serializer = ImportUserSerializer(data=request.data)
     if request.method == "POST":
-        return Response(
-            {
-                "profiles": [
-                    {
-                        "thumbnail": "https://i1.rgstatic.net/ii/profile.image/677218942459904-1538472986249_Q64/Ziad-Doughan.jpg",
-                        "profile_page": "https://www.researchgate.net/profile/Ziad-Doughan?_sg=9tDrbt4ShKHKwgMgzz5nd0NjFu9UpJO-DO-nBz0FwGtLu1wk35VYo6tfR9RWwo0GLMl2Wwo78MaxE70",
-                        "name": "Ziad Doughan",
-                        "Institution": "Beirut Arab University",
-                        "Department": "Department of Electrical and Computer Engineering",
-                        "Skills": [
-                            "Artificial Neural Networks",
-                            "Artificial Intelligence",
-                            "Neuromorphic Engineering",
-                            "Bioinspired Engineering and Biomimetic Design",
-                            "Biomimetics",
-                        ],
-                        "Latest publication": "A Novel Neural Network-Based Recommender System for Drug Recommendation",
-                    },
-                    {
-                        "thumbnail": "https://c5.rgstatic.net/m/4671872220764/images/template/default/profile/profile_default_m.jpg",
-                        "profile_page": "https://www.researchgate.net/profile/Colibri-Beirut?_sg=ZGx39Logb7hifnpUNrXJUUWHTIAENNon6e17UC5xJVxVyT196j1lS4WSsto-xMiy3LrbT7c2sUaAYKY",
-                        "name": "Colibri Beirut",
-                        "Institution": "Beirut Arab University",
-                        "Department": "Department of Business Administration",
-                        "Skills": [
-                            "Leadership",
-                            "Strategic Management",
-                            "Business",
-                            "Management",
-                            "Strategic Planning",
-                        ],
-                    },
-                ]
-            }
-        )
-        # if serializer.is_valid():
-        #     name = serializer.validated_data["name"]  # type: ignore
-        #     scraped_profiles = scrape_author(name)
-        #     return Response({"profiles": scraped_profiles})
+        if serializer.is_valid():
+            name = serializer.validated_data["name"]  # type: ignore
+            scraped_profiles = scrape_author(name)
+            return Response({"profiles": scraped_profiles})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
