@@ -57,10 +57,10 @@ class Publication(models.Model):
     date_created = models.DateTimeField(null=True)
 
 
-class Following(models.Model):
-    from_person = models.ForeignKey(
-        CustomUser, related_name="from_people", on_delete=models.CASCADE
+class Followers(models.Model):
+    follower = models.ForeignKey(
+        CustomUser, related_name="from_user", on_delete=models.CASCADE
     )
-    to_person = models.ForeignKey(
-        CustomUser, related_name="to_people", on_delete=models.CASCADE
+    following = models.ForeignKey(
+        CustomUser, related_name="to_users", on_delete=models.CASCADE
     )

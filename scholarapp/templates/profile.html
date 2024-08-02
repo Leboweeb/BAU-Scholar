@@ -37,8 +37,15 @@
                     <h4>
                         <b>{{ user.name }}</b>
                     </h4>
-                    {% comment %} <p>{{ user.department }}</p> {% endcomment %}
-                    {% if not is_current_user %}<button class="btn btn-primary m-auto">Follow</button>{% endif %}
+                    {% if not is_current_user %}
+                        {% if not is_following %}
+                            <a href="{% url 'follow_status' user.id 'follow' %}"
+                               class="btn btn-primary m-auto">Follow</a>
+                        {% else %}
+                            <a href="{% url 'follow_status' user.id 'unfollow' %}"
+                               class="btn btn-primary m-auto">Unfollow</a>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>

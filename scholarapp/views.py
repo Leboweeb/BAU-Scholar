@@ -1,6 +1,6 @@
 from dateutil.parser import parse
 import re
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from scholarapp.forms import SignUpForm
-from scholarapp.models import CustomUser, Publication
+from scholarapp.models import CustomUser, Followers, Publication
 from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -45,6 +45,7 @@ def index(request):
 def profile(request, user_id: str):
     user = CustomUser.objects.get(pk=user_id)
     is_current_user = request.user == user
+    is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
     # process tags first
     if not user.tags:
         gemini_model = genai.GenerativeModel("gemini-1.5-flash")
@@ -72,8 +73,20 @@ def profile(request, user_id: str):
         "user": user,
         "publications": user_publications.all(),
         "is_current_user": is_current_user,
+        "is_following": is_following_user,
     }
     return render(request, "profile.html", context=context)
+
+
+@login_required
+def follow_status(request, to_user_id: int, status: str):
+    to_user = get_object_or_404(CustomUser, id=to_user_id)
+    if status == "follow":
+        if not request.user.from_user.filter(following_id=to_user_id).exists():
+            Followers.objects.create(follower=request.user, following=to_user)
+    elif status == "unfollow":
+        request.user.from_user.filter(following_id=to_user_id).delete()
+    return redirect("profile", user_id=to_user_id)
 
 
 @api_view(["POST"])

@@ -10,4 +10,9 @@ urlpatterns = [
     path("logout", LogoutView.as_view(), name="logout"),
     path("signup/", views.sign_in, name="signup"),
     path("import_user", views.import_user, name="import"),
+    path(
+        "follow_status/<int:to_user_id>/<str:status>",
+        views.follow_status,
+        name="follow_status",
+    ),
 ]
