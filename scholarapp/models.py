@@ -41,9 +41,6 @@ class CustomUser(AbstractUser):
     profile_url = models.URLField(default="")
     skills = models.CharField(max_length=256, default="")
     tags = models.CharField(max_length=256, default="")
-    following = models.ManyToManyField(
-        "self", through="Following", symmetrical=False, related_name="related_to"
-    )
     USERNAME_FIELD = "email"
     objects = CustomUserManager()  # type: ignore
     REQUIRED_FIELDS = ["name"]
@@ -61,5 +58,9 @@ class Publication(models.Model):
 
 
 class Following(models.Model):
-    from_person = models.ForeignKey(CustomUser, related_name="from_people", on_delete=models.CASCADE)  # type: ignore
-    to_person = models.ForeignKey(CustomUser, related_name="to_people", on_delete=models.CASCADE)  # type: ignore
+    from_person = models.ForeignKey(
+        CustomUser, related_name="from_people", on_delete=models.CASCADE
+    )
+    to_person = models.ForeignKey(
+        CustomUser, related_name="to_people", on_delete=models.CASCADE
+    )
