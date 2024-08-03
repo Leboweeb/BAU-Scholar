@@ -50,10 +50,10 @@ class CustomUser(AbstractUser):
 
 
 class Publication(models.Model):
-    title = models.CharField(max_length=120)
+    title = models.CharField(max_length=350)
     description = models.CharField(max_length=512)
     authors = models.ManyToManyField(CustomUser, blank=True)
-    author_str = models.CharField(max_length=120)
+    author_str = models.CharField(max_length=256)
     date_created = models.DateTimeField(null=True)
 
 

@@ -7,10 +7,13 @@ def get_tag_text(tag: Selector):
     return tag.xpath("normalize-space()")[0].get()
 
 
+HEADLESS = True
+
+
 def scrape_author(query: str) -> list[dict[str, list[str] | str]]:
     with sync_playwright() as p:
-
-        browser = p.firefox.launch(headless=False, timeout=0)
+        browser = p.firefox.launch(headless=HEADLESS, timeout=0)
+        browser.new_context().set_default_timeout(0)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36"
         )
@@ -55,10 +58,11 @@ def scrape_author(query: str) -> list[dict[str, list[str] | str]]:
 
 def scrape_publications(link: str):
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False, timeout=0)
+        browser = p.firefox.launch(headless=HEADLESS, timeout=0)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36"
         )
+        context.set_default_timeout(0)
         page = context.new_page()
         page.goto(link, timeout=None)
         selector = Selector(text=page.content())

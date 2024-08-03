@@ -105,14 +105,20 @@ def sign_in(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             model = form.save(commit=False)
-            for attr in ("avatar", "profile_url", "skills"):
+            attrs = ("avatar", "profile_url", "skills")
+            for attr in attrs:
                 setattr(model, attr, request.POST.get(attr))
             model.save()
             return redirect("/")
         return render(request, "registration/signup.html", context={"form": form})
     else:
         form = SignUpForm()
-        return render(request, "registration/signup.html", context={"form": form})
+        request.session["next"] = request.GET.get("next", "/")
+        return render(
+            request,
+            "registration/signup.html",
+            context={"form": form, "next": request.session["next"]},
+        )
 
 
 class MyLoginView(LoginView):

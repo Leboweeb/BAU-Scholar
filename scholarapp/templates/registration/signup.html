@@ -72,6 +72,7 @@
                           action="{% url 'signup' %}"
                           enctype="multipart/form-data">
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
                         <input type="hidden" name="skills">
                         <input type="hidden" name="profile_url">
                         <input type="hidden" name="avatar">
@@ -100,11 +101,10 @@
         </div>
     </body>
     <script>
-
     function submit_form(form) {
         const cardList = document.querySelector("#results")
         if (!cardList.children.length)
-            form.submit();
+            return;
         else {
             let selectedCard = document.querySelector(".active")
             if (!selectedCard) {
@@ -113,17 +113,20 @@
             }
             let cardJson = JSON.parse(selectedCard.dataset.profile)
             let inputNames = ["skills", "profile_url", "avatar"];
-            let attrs = ["Skills", "profile_page", "thumbnail", "name"].map((attr) => cardJson[attr])
-            attrs[0] = attrs[0].join(",")
-            attrs.forEach((attr, index) => document.querySelector(`[name=${inputNames[index]}]`).value = attr)
-            fetch("http://127.0.0.1:8000/sign_in", {
-                method: "POST",
-                body: formData
-            }).then((response) => console.log(response))
+            let attrs = ["Skills", "profile_page", "thumbnail"].map((attr) => cardJson[attr])
+            // fuck you cloudflare, eat a dick
+            try {
+                if (typeof attrs[0] === "object")
+                    attrs[0] = attrs[0].join(",");
+                attrs.forEach((attr, index) => document.querySelector(`[name=${inputNames[index]}]`).value = attr);
+            }
+            catch (e) {
+                console.log(e);
+            }
+
         }
+        form.submit();
     }
-
-
 
 
     function add_card(profileJson) {
