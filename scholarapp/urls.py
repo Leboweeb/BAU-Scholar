@@ -15,4 +15,9 @@ urlpatterns = [
         views.follow_status,
         name="follow_status",
     ),
+    path(
+        "create_conversation_room",
+        views.create_conversation_room,
+        name="create_conversation_room",
+    ),
 ]

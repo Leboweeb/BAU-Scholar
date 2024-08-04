@@ -1,14 +1,41 @@
-from channels.generic.websocket import WebsocketConsumer
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
+from .models import Conversation, Message
 
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.accept()
+class ChatConsumer(AsyncWebsocketConsumer):
 
-    def disconnect(self, close_code):
-        print("Closing...")
-        pass
+    async def connect(self):
+        self.room_name = self.scope["url_route"]["kwargs"]["room_slug"]
+        self.room_group_name = f"chat_{self.room_name}"
+        self.user = self.scope["user"]
 
-    def receive(self, text_data):
-        self.send(text_data=text_data)
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)  # type: ignore
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)  # type: ignore
+
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json["message"]
+        username = self.user.username
+
+        await self.channel_layer.group_send(  # type: ignore
+            self.room_group_name,
+            {
+                "type": "chat_message",
+                "message": message,
+                "username": username,
+            },
+        )
+
+    async def chat_message(self, event):
+        message = event["message"]
+        username = event["username"]
+
+        await self.send(
+            text_data=json.dumps({"message": message, "username": username})
+        )

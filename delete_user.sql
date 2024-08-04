@@ -1,1 +1,0 @@
-DELETE FROM scholarapp_customuser WHERE NAME="Mohammad Ayache"

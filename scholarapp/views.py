@@ -6,11 +6,12 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.template.defaulttags import register
+from django.utils.text import slugify
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from scholarapp.forms import SignUpForm
-from scholarapp.models import CustomUser, Followers, Publication
+from scholarapp.models import Conversation, CustomUser, Followers, Publication
 from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -87,6 +88,19 @@ def follow_status(request, to_user_id: int, status: str):
     elif status == "unfollow":
         request.user.from_user.filter(following_id=to_user_id).delete()
     return redirect("profile", user_id=to_user_id)
+
+
+@api_view(["POST"])
+def create_conversation_room(request):
+    user_ids = [int(_id) for _id in request.data["user_ids"]]
+    conversation = Conversation.objects.create()
+    for user in [CustomUser.objects.get(id=_id) for _id in user_ids]:
+        conversation.users.add(user)
+    conversation.room_slug = slugify(
+        "_".join(user.name for user in conversation.users.all())
+    )
+    conversation.save()
+    return Response({"conversation_room": conversation.room_slug})
 
 
 @api_view(["POST"])

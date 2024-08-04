@@ -64,3 +64,19 @@ class Followers(models.Model):
     following = models.ForeignKey(
         CustomUser, related_name="to_users", on_delete=models.CASCADE
     )
+
+
+class Conversation(models.Model):
+    users = models.ManyToManyField(CustomUser)
+    room_slug = models.SlugField(max_length=240, unique=True, null=False)
+
+
+class Message(models.Model):
+    parent_conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    user_from = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="user_from"
+    )
+    user_to = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="user_to"
+    )
+    time_sent = models.DateTimeField(auto_now_add=True)

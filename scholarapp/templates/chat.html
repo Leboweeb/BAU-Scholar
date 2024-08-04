@@ -12,6 +12,13 @@
         background-color: #f8f8f8;
     }
 
+    .contact:hover {
+        background-color: #f4f4f4;
+    }
+
+    .selected {
+        background-color: #f4f4f4;
+    }
 
     .bottom-right-fixed {
         position: fixed;
@@ -21,7 +28,7 @@
     }
 
     #chat-box {
-        width: 365px;
+        width: 380px;
         height: 350px;
         bottom: 75px !important;
     }
@@ -76,41 +83,14 @@
                     </svg>
                 </a>
             </div>
-            <ul class="list-group list-group-flush scroll">
-                {% for i in '0123456789'|make_list %}
-                    <li class="list-group-item contact">
-                        <div class="d-flex flex-row gap-2">
-                            <a href="javascript:void(0)">
-                                <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                                     src="https://raw.githubusercontent.com/twbs/icons/main/icons/person-fill.svg"
-                                     alt="User Image">
-                            </a>
-                            <p style="line-height: 300%;">First Last</p>
-                        </div>
-                    </li>
-                {% endfor %}
+            <ul id="contacts" class="list-group list-group-flush scroll">
             </ul>
         </div>
         <div class="card col-6 p-0 no-border">
-            <div class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
-                 style="line-height: 235%">
-                <a href="">
-                    <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                         src="https://raw.githubusercontent.com/twbs/icons/main/icons/person-fill.svg"
-                         alt="User Profile" />
-                </a>
-                <!-- Needs to be 15 characters -->
-                <p style="line-height: 300%;">First Last</p>
-            </div>
-            <div class="container p-3 scroll">
-                <div>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Est cum
-                    consectetur
-                    voluptatibus
-                    soluta, sapiente vel, sequi quo eveniet eius saepe officia asperiores nesciunt itaque, quis debitis.
-                    Obcaecati laudantium omnis nesciunt.
-                </div>
-            </div>
+            <div id="current_chat"
+                 class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
+                 style="line-height: 235%"></div>
+            <div class="container p-3 scroll"></div>
         </div>
     </div>
 </div>
