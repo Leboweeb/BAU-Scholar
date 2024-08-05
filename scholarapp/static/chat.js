@@ -1,13 +1,15 @@
-function add_profile(name) {
+function add_profile(contact) {
+  let name = contact["name"];
+  let avatar = contact["avatar"];
   const contacts = document.querySelector("#contacts");
   if (!document.querySelector(`.contact[data-name="${name}"]`)) {
     let node = new DOMParser().parseFromString(
       `
-            <li class="list-group-item contact" data-name="${name}">
+            <li class="list-group-item contact" data-name="${name}" data-avatar="${avatar}">
                 <div class="d-flex flex-row gap-2">
                     <a href="javascript:void(0)">
                         <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-person-fill' viewBox='0 0 16 16'%3E%3Cpath d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6'/%3E%3C/svg%3E"
+                                src="${avatar}"
                                 alt="User Image">
                     </a>
                     <p  style="line-height: 300%;">${name}</p>
@@ -21,28 +23,30 @@ function add_profile(name) {
     };
     contacts.appendChild(node);
   }
-  set_current_chat(name);
+  set_current_chat(name, avatar);
 }
 
 function show_chatbox() {
   document.querySelector("#chat-box").classList.remove("d-none");
 }
 
-function set_current_chat(name) {
-  let selected_html = new DOMParser().parseFromString(
-    `
+function set_current_chat(name, avatar) {
+  let selected_html = `
                 <a href="">
                     <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-person-fill' viewBox='0 0 16 16'%3E%3Cpath d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6'/%3E%3C/svg%3E"
+                         src="${avatar}"
                          alt="User Profile" />
                 </a>
                 <!-- Needs to be 15 characters -->
                 <p style="line-height: 300%;">${name}</p>
-  `,
-    "text/html"
-  ).body.childNodes;
+  `;
+  const messages = document.querySelector("#messages");
   let current_chat = document.querySelector("#current_chat");
-  if (!current_chat.childElementCount) current_chat.append(...selected_html);
+  let current_conversation_slug =
+    document.querySelector(".selected").dataset.conversation;
+  messages.setAttribute("hx-ws", `connect:/chat/${current_conversation_slug}`);
+  htmx.process(messages);
+  current_chat.innerHTML = selected_html;
 }
 
 function select_chat(node) {
@@ -51,5 +55,5 @@ function select_chat(node) {
   other_chats.forEach((value) => {
     if (value !== node) value.classList.remove("selected");
   });
-  set_current_chat(node.dataset.name);
+  set_current_chat(node.dataset.name, node.dataset.avatar);
 }

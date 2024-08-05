@@ -1,6 +1,9 @@
 from dateutil.parser import parse
 import re
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template import Context, Template
+from django.utils.safestring import mark_safe
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -88,6 +91,24 @@ def follow_status(request, to_user_id: int, status: str):
     elif status == "unfollow":
         request.user.from_user.filter(following_id=to_user_id).delete()
     return redirect("profile", user_id=to_user_id)
+
+
+@api_view(["POST"])
+def get_contacts(request):
+    user = CustomUser.objects.get(pk=int(request.data["user_id"]))
+    query = Conversation.objects.filter(users=user)[:5]
+    contacts = [
+        conversation.users.all().exclude(id=user.pk)[0] for conversation in query
+    ]
+    conversations = [c.room_slug for c in query]
+    contacts = zip(contacts, conversations)
+    return render(
+        request,
+        "components/contacts.html",
+        context={
+            "contacts": contacts,
+        },
+    )
 
 
 @api_view(["POST"])
