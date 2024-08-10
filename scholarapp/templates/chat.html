@@ -77,6 +77,8 @@
     padding-block:0px;
   }
 </style>
+<input type="hidden" id="user_id">
+</input>
 <a id="chat_bubble"
    class="btn btn-primary bottom-right-fixed"
    role="button"
@@ -123,16 +125,20 @@
       <div id="current_chat"
            class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
            style="line-height: 235%"></div>
-      <div class="wrapper" hx-ws="connect:/chat/imane-haidar_ziad-doughan">
+      <div class="wrapper"
+           hx-ext="ws"
+           ws-connect="/chat/imane-haidar_ziad-doughan">
         <div id="messages" class="container p-3 scroll"></div>
         <div class="message-footer">
-          <form hx-ws="send:submit"
+          <form ws-send
                 hx-vals='{"user_id_from" : "{{ request.user.pk }}", "user_id_to" : "13","message" : "test"  }'>
             <input name="message"
                    type="text"
                    data-placeholder="Send a message to {0}"
                    placeholder="Send a message...">
-            <input class="fit-text" type="submit">
+            <input class="fit-text"
+                   type="submit"
+                   htmx-on::before-request="send_message()">
             Send
           </input>
         </form>
