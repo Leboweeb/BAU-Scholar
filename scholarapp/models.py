@@ -79,4 +79,5 @@ class Message(models.Model):
     user_to = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="user_to"
     )
+    message = models.TextField(null=True)
     time_sent = models.DateTimeField(auto_now_add=True)

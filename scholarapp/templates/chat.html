@@ -1,5 +1,11 @@
 {% load static %}
 <style>
+
+    .fit-text {
+      width:max-content;
+      margin:auto;
+    }
+
     .no-border {
         border-radius: 0 !important;
     }
@@ -54,14 +60,21 @@
   .message-footer {
   border-top: 1px solid #ddd;
   background: #eee;
-  padding: 10px;
   display: flex;
+  padding-inline:5px;
   height: 60px;
   }
-  .message-footer input {
+  .message-footer input:nth-child(1) {
     flex: 1;
+    width: 10rem;
+    margin:auto;
     padding: 0 10px;
     border-radius: 5px;
+  }
+  .message-footer form {
+    display:flex;
+    gap:1rem;
+    padding-block:0px;
   }
 </style>
 <a id="chat_bubble"
@@ -110,15 +123,21 @@
       <div id="current_chat"
            class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
            style="line-height: 235%"></div>
-      <div id="messages" class="container p-3 scroll"></div>
-      <div class="message-footer">
-        <form hx-ws="send:submit">
-          <input name="message"
-                 type="text"
-                 data-placeholder="Send a message to {0}"
-                 placeholder="Send a message...">
+      <div class="wrapper" hx-ws="connect:/chat/imane-haidar_ziad-doughan">
+        <div id="messages" class="container p-3 scroll"></div>
+        <div class="message-footer">
+          <form hx-ws="send:submit"
+                hx-vals='{"user_id_from" : "{{ request.user.pk }}", "user_id_to" : "13","message" : "test"  }'>
+            <input name="message"
+                   type="text"
+                   data-placeholder="Send a message to {0}"
+                   placeholder="Send a message...">
+            <input class="fit-text" type="submit">
+            Send
+          </input>
         </form>
       </div>
     </div>
   </div>
+</div>
 </div>

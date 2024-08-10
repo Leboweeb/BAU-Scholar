@@ -40,12 +40,12 @@ function set_current_chat(name, avatar) {
                 <!-- Needs to be 15 characters -->
                 <p style="line-height: 300%;">${name}</p>
   `;
-  const messages = document.querySelector("#messages");
   let current_chat = document.querySelector("#current_chat");
-  let current_conversation_slug =
-    document.querySelector(".selected").dataset.conversation;
-  messages.setAttribute("hx-ws", `connect:/chat/${current_conversation_slug}`);
-  htmx.process(messages);
+  let current_conversation = document.querySelector(".selected");
+  let current_conversation_slug = current_conversation.dataset.conversation;
+  let wrapper = document.querySelector(".wrapper");
+  wrapper.setAttribute("hx-ws", `connect:/chat/${current_conversation_slug}`);
+  htmx.process(wrapper);
   current_chat.innerHTML = selected_html;
 }
 
@@ -56,4 +56,19 @@ function select_chat(node) {
     if (value !== node) value.classList.remove("selected");
   });
   set_current_chat(node.dataset.name, node.dataset.avatar);
+}
+
+function send_message() {
+  let current_conversation = document.querySelector(".selected");
+  let form = document.querySelector(".wrapper form");
+  let user_id_from = document.querySelector("#user_id").dataset.user;
+  let user_id_to = current_conversation.dataset.user;
+  let message = document.querySelector(
+    ".message-footer input:nth-child(1)"
+  ).value;
+  form.setAttribute(
+    "hx-vals",
+    `'{"user_id_from" : "${user_id_from}", "user_id_to" : "${user_id_to}","message" : "${message}"  }'`
+  );
+  htmx.process(form);
 }
