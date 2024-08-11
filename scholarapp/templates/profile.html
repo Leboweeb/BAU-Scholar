@@ -6,7 +6,7 @@
                 <div class="card w-100 p-3 ">
                     <div class="d-flex flex-column align-item-center justify-content-center text-center">
                         {% if not is_current_user %}
-                            <button onclick='add_profile("{{ user.name }}");show_chatbox();'
+                            <button onclick="add_conversation_ajax('{{ user.name }}','{{ user.avatar }}','{{ user.id }}')"
                                     class="btn btn-primary"
                                     style="position:relative;
                                            width : max-content;
