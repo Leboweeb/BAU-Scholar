@@ -1,3 +1,5 @@
+let socket;
+
 function add_profile(contact) {
   let name = contact["name"];
   let avatar = contact["avatar"];
@@ -41,11 +43,6 @@ function set_current_chat(name, avatar) {
                 <p style="line-height: 300%;">${name}</p>
   `;
   let current_chat = document.querySelector("#current_chat");
-  let current_conversation = document.querySelector(".selected");
-  let current_conversation_slug = current_conversation.dataset.conversation;
-  let wrapper = document.querySelector(".wrapper");
-  wrapper.setAttribute("hx-ws", `connect:/chat/${current_conversation_slug}`);
-  htmx.process(wrapper);
   current_chat.innerHTML = selected_html;
 }
 
@@ -55,20 +52,52 @@ function select_chat(node) {
   other_chats.forEach((value) => {
     if (value !== node) value.classList.remove("selected");
   });
+  clearMessages();
+  if (socket) {
+    socket.close();
+  }
+  socket = createSocket();
   set_current_chat(node.dataset.name, node.dataset.avatar);
 }
 
-function send_message() {
+function add_conversation() {
+  let messageInfo = getMessageInfo();
+  let json = JSON.stringify({
+    message: messageInfo.message,
+    user_id_from: messageInfo.user_id_from,
+    user_id_to: messageInfo.user_id_to,
+  });
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(json);
+  }
+}
+
+function createSocket() {
+  const messages = document.querySelector("#messages");
   let current_conversation = document.querySelector(".selected");
-  let form = document.querySelector(".wrapper form");
-  let user_id_from = document.querySelector("#user_id").dataset.user;
-  let user_id_to = current_conversation.dataset.user;
-  let message = document.querySelector(
-    ".message-footer input:nth-child(1)"
-  ).value;
-  form.setAttribute(
-    "hx-vals",
-    `'{"user_id_from" : "${user_id_from}", "user_id_to" : "${user_id_to}","message" : "${message}"  }'`
-  );
-  htmx.process(form);
+  let current_conversation_slug = current_conversation.dataset.conversation;
+  const socket = new WebSocket(`/chat/${current_conversation_slug}`);
+  socket.onopen = (ev) => {};
+
+  socket.onmessage = (ev) => {
+    let response = JSON.parse(ev.data);
+    messages.appendChild(
+      new DOMParser().parseFromString(response["message"], "text/html")
+        .firstElementChild
+    );
+  };
+  return socket;
+}
+
+function getMessageInfo() {
+  return {
+    user_id_from: document.querySelector("#user_id").dataset.user,
+    user_id_to: document.querySelector(".selected").dataset.user,
+    message: document.querySelector(".message-footer input:nth-child(1)").value,
+  };
+}
+
+function clearMessages() {
+  let element = document.querySelector("#messages");
+  element.innerHTML = "";
 }
