@@ -1,0 +1,11 @@
+{% for message in messages %}
+    {% if message.user_from.id == user_id %}
+        <div class="message me">
+            <p>{{ message.message }}</p>
+        </div>
+    {% else %}
+        <div class="message">
+            <p>{{ message.message }}</p>
+        </div>
+    {% endif %}
+{% endfor %}

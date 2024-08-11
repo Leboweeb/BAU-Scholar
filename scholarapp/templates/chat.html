@@ -4,6 +4,7 @@
     .fit-text {
       width:max-content;
       margin:auto;
+      flex:1;
     }
 
     .no-border {
@@ -63,21 +64,37 @@
   display: flex;
   padding-inline:5px;
   height: 60px;
+  gap : 1rem;
   }
   .message-footer input:nth-child(1) {
     flex: 1;
-    width: 10rem;
     margin:auto;
+    width: 160px;
     padding: 0 10px;
     border-radius: 5px;
+    
   }
-  .message-footer form {
-    display:flex;
-    gap:1rem;
-    padding-block:0px;
+
+  .message {
+    align-self: flex-start;
+    max-width: 70%; 
+    background: #f0f0f0;
+    box-shadow: 0 5px 15px -5px rgba(0,0,0,.1);
+    padding: 10px 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+
+  .me {
+    align-self: flex-end;
+    background: #bde2f7;
+    color: #111;
   }
 </style>
-<input type="hidden" id="user_id" data-user="{{ request.user.pk }}">
+<input type="hidden"
+       id="user_id"
+       data-user="{{ request.user.pk }}"
+       data-csrf="{{ csrf_token }}">
 </input>
 <a id="chat_bubble"
    class="btn btn-primary bottom-right-fixed"
@@ -126,10 +143,11 @@
            class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
            style="line-height: 235%"></div>
       <div class="wrapper">
-        <div id="messages" class="container p-3 scroll"></div>
+        <div id="messages" class="container p-3 d-flex flex-column scroll"></div>
         <div class="message-footer">
           <input name="message"
                  type="text"
+                 autocomplete="off"
                  data-placeholder="Send a message to {0}"
                  placeholder="Send a message...">
           <button class="fit-text" type="submit" onclick="add_conversation()">Send</button>

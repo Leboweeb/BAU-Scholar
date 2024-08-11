@@ -1,9 +1,7 @@
 from dateutil.parser import parse
 import re
-from django.http import JsonResponse
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template import Context, Template
-from django.utils.safestring import mark_safe
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -91,6 +89,18 @@ def follow_status(request, to_user_id: int, status: str):
     elif status == "unfollow":
         request.user.from_user.filter(following_id=to_user_id).delete()
     return redirect("profile", user_id=to_user_id)
+
+
+@api_view(["POST"])
+def get_chat_history(request):
+    slug = request.data["conversation_slug"]
+    conversation = Conversation.objects.get(room_slug=slug)
+    messages: QuerySet = conversation.message_set.all()  # type: ignore
+    return render(
+        request,
+        "components/message_history.html",
+        context={"messages": messages, "user_id": request.user.pk},
+    )
 
 
 @api_view(["POST"])

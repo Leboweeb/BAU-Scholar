@@ -21,4 +21,5 @@ urlpatterns = [
         name="create_conversation_room",
     ),
     path("get_contacts", views.get_contacts, name="get_contacts"),
+    path("get_chat_history", views.get_chat_history, name="get_chat_history"),
 ]

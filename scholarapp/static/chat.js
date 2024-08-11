@@ -1,4 +1,6 @@
 let socket;
+const user_id = document.querySelector("#user_id").dataset.user;
+const csrf_token = document.querySelector("#user_id").dataset.csrf;
 
 function add_profile(contact) {
   let name = contact["name"];
@@ -53,6 +55,7 @@ function select_chat(node) {
     if (value !== node) value.classList.remove("selected");
   });
   clearMessages();
+  getChatHistory();
   if (socket) {
     socket.close();
   }
@@ -61,6 +64,11 @@ function select_chat(node) {
 }
 
 function add_conversation() {
+  if (!document.querySelector(".selected")) {
+    alert("Please select conversation to send message to.");
+    return;
+  }
+
   let messageInfo = getMessageInfo();
   let json = JSON.stringify({
     message: messageInfo.message,
@@ -81,10 +89,13 @@ function createSocket() {
 
   socket.onmessage = (ev) => {
     let response = JSON.parse(ev.data);
-    messages.appendChild(
-      new DOMParser().parseFromString(response["message"], "text/html")
-        .firstElementChild
-    );
+    let incomingElement = new DOMParser().parseFromString(
+      response["message"],
+      "text/html"
+    ).body.firstElementChild;
+    incomingElement.classList.add("message");
+    if (response["user_id"] === user_id) incomingElement.classList.add("me");
+    messages.appendChild(incomingElement);
   };
   return socket;
 }
@@ -100,4 +111,20 @@ function getMessageInfo() {
 function clearMessages() {
   let element = document.querySelector("#messages");
   element.innerHTML = "";
+}
+
+function getChatHistory() {
+  let current_conversation_slug =
+    document.querySelector(".selected").dataset.conversation;
+  let values = {
+    conversation_slug: current_conversation_slug,
+  };
+  htmx
+    .ajax("POST", "/get_chat_history", {
+      target: "#messages",
+      swap: "innerHTML",
+      values: values,
+      headers: { "X-CSRFToken": `${csrf_token}` },
+    })
+    .then(() => {});
 }
