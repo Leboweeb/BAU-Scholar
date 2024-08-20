@@ -1,0 +1,33 @@
+{
+    "profiles": [
+        {
+            "thumbnail": "https://i1.rgstatic.net/ii/profile.image/677218942459904-1538472986249_Q64/Ziad-Doughan.jpg",
+            "profile_page": "https://www.researchgate.net/profile/Ziad-Doughan?_sg=0ni5qmSoRfJkoLt4UVzTHyLABvzrI-5cp7OV3gqXekLlJ8j_DJxMjZIHgmdxXi0CwOqD5qtYV89MUNw",
+            "name": "Ziad Doughan",
+            "Institution": "Beirut Arab University",
+            "Department": "Department of Electrical and Computer Engineering",
+            "Skills": [
+                "Artificial Neural Networks",
+                "Artificial Intelligence",
+                "Neuromorphic Engineering",
+                "Bioinspired Engineering and Biomimetic Design",
+                "Biomimetics"
+            ],
+            "Latest publication": "ResNet-Based Detection of SYN Flood DDoS Attacks"
+        },
+        {
+            "thumbnail": "https://c5.rgstatic.net/m/4671872220764/images/template/default/profile/profile_default_m.jpg",
+            "profile_page": "https://www.researchgate.net/profile/Colibri-Beirut?_sg=HYZ8qM04HQZvbE7ZRIani9VPPeSWeZDineYsvvfL8K0onrwmtRK90FKwCw6eJjJ1tmh_hNHqYsuRdDw",
+            "name": "Colibri Beirut",
+            "Institution": "Beirut Arab University",
+            "Department": "Department of Business Administration",
+            "Skills": [
+                "Leadership",
+                "Strategic Management",
+                "Business",
+                "Management",
+                "Strategic Planning"
+            ]
+        }
+    ]
+}

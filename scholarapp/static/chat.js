@@ -11,7 +11,7 @@ function add_profile(name, avatar, contact_id) {
                 <div class="d-flex flex-row gap-2">
                     <a href="javascript:void(0)">
                         <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                                src="${avatar}"
+                                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-person-fill' viewBox='0 0 16 16'%3E%3Cpath d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6'/%3E%3C/svg%3E"
                                 alt="User Image">
                     </a>
                     <p  style="line-height: 300%;">${name}</p>
@@ -52,7 +52,7 @@ function set_current_chat(name, avatar) {
   let selected_html = `
                 <a href="">
                     <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                         src="${avatar}"
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-person-fill' viewBox='0 0 16 16'%3E%3Cpath d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6'/%3E%3C/svg%3E"
                          alt="User Profile" />
                 </a>
                 <!-- Needs to be 15 characters -->

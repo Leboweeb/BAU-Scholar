@@ -1,3 +1,5 @@
+import json
+import os
 from dateutil.parser import parse
 import re
 from django.db.models.query import QuerySet
@@ -33,10 +35,11 @@ def split(value, key):
 
 @login_required
 def index(request):
+    followed_users = [follow.following for follow in request.user.from_user.all()]
     categories = [
         Publication.objects.order_by("-date_created")[:5],
         Publication.objects.order_by("-date_created")[:5],
-        Publication.objects.order_by("-date_created")[:5],
+        Publication.objects.filter(authors__in=followed_users)[:5],
     ]
     return render(
         request, "home.html", context={"user": request.user, "categories": categories}
@@ -140,6 +143,14 @@ def import_user(request):
     if request.method == "POST":
         if serializer.is_valid():
             name = serializer.validated_data["name"]  # type: ignore
+            if name in list(
+                map(
+                    lambda file: file.replace(".json", ""),
+                    os.listdir("./scholarapp/cached"),
+                )
+            ):
+                with open(f"./scholarapp/cached/{name}.json") as f:
+                    return Response(json.load(f))
             scraped_profiles = scrape_author(name)
             return Response({"profiles": scraped_profiles})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -162,7 +173,7 @@ def sign_in(request):
         return render(
             request,
             "registration/signup.html",
-            context={"form": form, "next": request.session["next"]},
+            context={"form": form},
         )
 
 

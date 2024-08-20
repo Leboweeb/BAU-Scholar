@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -100,5 +101,5 @@
             </div>
         </div>
     </body>
-    <script src={% url static "signup.js" %}></script>
+    <script defer src="{% static 'signup.js' %}"></script>
 </html>
