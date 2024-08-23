@@ -106,6 +106,22 @@ def get_chat_history(request):
     )
 
 
+def update_profile(request):
+    skills, tags = (
+        request.POST.get("skills") or request.user.skills,
+        request.POST.get("tags") or request.user.tags,
+    )
+    user = CustomUser.objects.get(id=request.user.pk)
+    user.skills, user.tags = skills, tags
+    user.save()
+    is_current_user = request.user == user
+    return render(
+        request,
+        "components/profile_update_fragment.html",
+        context={"user": user, "is_current_user": is_current_user},
+    )
+
+
 @api_view(["POST"])
 def get_contacts(request):
     user = CustomUser.objects.get(pk=int(request.data["user_id"]))
