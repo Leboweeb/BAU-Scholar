@@ -20,11 +20,6 @@
                         </svg>
                     </button>
                     {% endif %}
-                    {% comment %} <a id="profile_picture" href="javascript:void(0)" class="mb-2">
-                        <img style="vertical-align: middle; width: 64px; height: 64px; border-radius: 50%"
-                            src="{{ user.avatar }}" alt="">
-                        </img>
-                    </a> {% endcomment %}
                     <form id="profilePictureForm" method="post" enctype="multipart/form-data" hx-post="/update_profile"
                         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-target="#profile-info" hx-swap="innerHTML">
                         <input class="d-none" type="file" name="profilePicture" id="profilePicture">
@@ -54,6 +49,8 @@
                         <a href="{% url 'follow_status' user.id 'unfollow' %}"
                             class="btn btn-primary m-auto">Unfollow</a>
                         {% endif %}
+                        {% else %}
+                        <a onclick='downloadCV("{{user.name}}")' class="btn btn-primary m-auto">Generate CV</a>
                         {% endif %}
                     </form>
                 </div>

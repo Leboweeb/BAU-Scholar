@@ -1,8 +1,11 @@
+import base64
+from io import BytesIO
 import json
 import os
 from dateutil.parser import parse
 import re
 from django.db.models.query import QuerySet
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -19,6 +22,7 @@ from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
 
+from scholarapp.utils.generate_cv import generate_cv
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 
 load_dotenv()
@@ -105,6 +109,23 @@ def get_chat_history(request):
         "components/message_history.html",
         context={"messages": messages, "user_id": request.user.pk},
     )
+
+
+@api_view(["POST"])
+def generate_user_cv(request):
+    try:
+        user = CustomUser.objects.get(pk=request.user.pk)
+        user_publications = [
+            (f"{publication.author_str} : {publication.title}\n\n")
+            for publication in Publication.objects.filter(authors=user)
+        ]
+        buffer = BytesIO()
+        # docx is saved to buffer now
+        generate_cv(user_publications, buffer)
+        b64_data = base64.b64encode(buffer.getvalue())
+        return JsonResponse({"data": b64_data.decode()})
+    except CustomUser.DoesNotExist:
+        return HttpResponseForbidden()
 
 
 def update_profile(request):

@@ -78,12 +78,16 @@ def scrape_publications(link: str):
                 ".nova-legacy-v-publication-item__person-list span[itemprop='name']"
             )
             date_created = publication.css('span[class=""]')[0]
+            publication_link = publication.css(
+                ".nova-legacy-v-publication-item__title > a"
+            )
             publication_list.append(
                 {
                     "title": get_tag_text(title),
                     "description": get_tag_text(description) if description else "",
                     "authors": ",".join([get_tag_text(text) for text in authors]),
                     "date_created": get_tag_text(date_created),
+                    "link": publication_link,
                 }
             )
         return publication_list

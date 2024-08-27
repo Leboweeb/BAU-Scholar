@@ -54,6 +54,7 @@ class Publication(models.Model):
     description = models.CharField(max_length=512)
     authors = models.ManyToManyField(CustomUser, blank=True)
     author_str = models.CharField(max_length=256)
+    external_link = models.URLField(null=True)
     date_created = models.DateTimeField(null=True)
 
 

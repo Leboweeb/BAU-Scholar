@@ -20,3 +20,24 @@ function uploadPicture() {
   };
   input.click();
 }
+
+function downloadCV(filename) {
+  let b64String;
+  fetch("/generate_user_cv", {
+    method: "POST",
+    headers: { "X-CSRFToken": `${csrf_token}` },
+  })
+    .then((response) => response.json())
+    .then((json) => (b64String = json["data"]));
+  var element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:application/octet-stream;base64," + b64String
+  );
+  element.setAttribute("download", `${filename}.docx`);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
