@@ -6,8 +6,8 @@ function toggleEdit() {
 }
 
 function uploadPicture() {
-  event.stopPropagation();
-  event.preventDefault();
+  // event.stopPropagation();
+  // event.preventDefault();
   var input = document.querySelector("#profilePicture");
   input.onchange = function () {
     let formData = new FormData();

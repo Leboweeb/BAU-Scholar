@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from scholarapp.models import CustomUser
+from scholarapp.models import CustomUser, Publication
 
 
 class SignUpForm(UserCreationForm):
@@ -16,3 +16,11 @@ class SignUpForm(UserCreationForm):
             "profile_url": forms.HiddenInput(),
             "skills": forms.HiddenInput(),
         }
+
+
+class CreateEventForm(forms.ModelForm):
+
+    class Meta:
+        model = Publication
+        fields = ("title", "description")
+        authors = forms.TextInput()

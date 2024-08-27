@@ -13,7 +13,7 @@ from django.utils.text import slugify
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from scholarapp.forms import SignUpForm
+from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import Conversation, CustomUser, Followers, Publication
 from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
@@ -79,6 +79,7 @@ def profile(request, user_id: str):
         "publications": user_publications.all(),
         "is_current_user": is_current_user,
         "is_following": is_following_user,
+        "form": CreateEventForm(),
     }
     return render(request, "profile.html", context=context)
 
@@ -115,11 +116,13 @@ def update_profile(request):
     user.skills, user.tags = skills, tags
     user.save()
     is_current_user = request.user == user
-    return render(
+    response = render(
         request,
         "components/profile_update_fragment.html",
         context={"user": user, "is_current_user": is_current_user},
     )
+    response["HX-Refresh"] = "true"
+    return response
 
 
 @api_view(["POST"])
