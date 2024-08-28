@@ -50,7 +50,13 @@
                             class="btn btn-primary m-auto">Unfollow</a>
                         {% endif %}
                         {% else %}
-                        <a onclick='downloadCV("{{user.name}}")' class="btn btn-primary m-auto">Generate CV</a>
+                        <select id="documentSelector" style="width: 250px;margin: auto;" class="form-select"
+                            aria-label="Default select example" onchange='downloadDocument("{{ user.name }}")'>
+                            <option selected>Select Personal Document to Download</option>
+                            <option value="0">Generate CV</option>
+                            <option value="1">Generate Staff Achievements</option>
+                        </select>
+                        <!-- <a onclick='downloadCV("{{user.name}}")' class="btn btn-primary m-auto">Generate CV</a> -->
                         {% endif %}
                     </form>
                 </div>

@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 import json
 import os
+from typing import Callable
 from dateutil.parser import parse
 import re
 from django.db.models.query import QuerySet
@@ -22,7 +23,7 @@ from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-from scholarapp.utils.generate_cv import generate_cv
+from scholarapp.utils.generate_cv import generate_cv, generate_staff_achievements
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 
 load_dotenv()
@@ -112,20 +113,24 @@ def get_chat_history(request):
 
 
 @api_view(["POST"])
-def generate_user_cv(request):
-    try:
-        user = CustomUser.objects.get(pk=request.user.pk)
-        user_publications = [
-            (f"{publication.author_str} : {publication.title}\n\n")
-            for publication in Publication.objects.filter(authors=user)
-        ]
-        buffer = BytesIO()
-        # docx is saved to buffer now
-        generate_cv(user_publications, buffer)
-        b64_data = base64.b64encode(buffer.getvalue())
-        return JsonResponse({"data": b64_data.decode()})
-    except CustomUser.DoesNotExist:
-        return HttpResponseForbidden()
+def generate_user_document(request):
+    # try:
+    document_generator: Callable[[list[str], BytesIO], None] = [
+        generate_cv,
+        generate_staff_achievements,
+    ][int(request.data["selected_document"])]
+    user = CustomUser.objects.get(pk=int(request.data["user_id"]))
+    user_publications = [
+        (f"{publication.author_str} : {publication.title}\n\n")
+        for publication in Publication.objects.filter(authors=user)
+    ]
+    buffer = BytesIO()
+    # docx is saved to buffer now
+    document_generator(user_publications, buffer)
+    b64_data = base64.b64encode(buffer.getvalue())
+    return JsonResponse({"data": b64_data.decode()})
+    # except CustomUser.DoesNotExist:
+    #     return HttpResponseForbidden()
 
 
 def update_profile(request):

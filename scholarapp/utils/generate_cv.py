@@ -11,6 +11,42 @@ document = Document()
 
 
 def generate_cv(publications: list[str], buffer: BytesIO):
+    current_year = datetime.now().year
+    document = Document()
+    document.add_heading(
+        f"\t\t\tBeirut Arab University\n\t\t\tFaculty CV\n\t\t\tYear {current_year}/{current_year+1}",
+        0,
+    )
+    document.add_paragraph("Name and Academic rank:", style="List Number")
+    document.add_paragraph(
+        "Education: Degrees, discipline, institution, and date:", style="List Number"
+    )
+    document.add_paragraph("Academic experience:", style="List Number")
+    document.add_paragraph("Non-academic experience:", style="List Number")
+    document.add_paragraph(
+        "Certification or professional Registration:", style="List Number"
+    )
+    document.add_paragraph(
+        "Current membership in professional organizations", style="List Number"
+    )
+    document.add_paragraph("Honors and Awards:", style="List Number")
+    document.add_paragraph("Service activities:", style="List Number")
+    document.add_paragraph(
+        "Experience Courses (Graduate and Undergraduate)", style="List Number"
+    )
+    document.add_paragraph("Research	Interests:", style="List Number")
+    document.add_paragraph("References:", style="List Number")
+    document.add_paragraph("Rank Link: Assistant Professor", style="List Number")
+    document.add_paragraph("Publications:", style="List Number")
+    for publication in publications:
+        document.add_paragraph(publication, style="List Number 2")
+    document.add_paragraph(
+        "Professional development activities in the last years:", style="List Number"
+    )
+    document.save(buffer)
+
+
+def generate_staff_achievements(publications: list[str], buffer: BytesIO):
     doc = Document()
     # Add title and heading
     current_year = datetime.now().year

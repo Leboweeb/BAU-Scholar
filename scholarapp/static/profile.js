@@ -21,23 +21,36 @@ function uploadPicture() {
   input.click();
 }
 
-function downloadCV(filename) {
+function downloadDocument(filename) {
+  let selectedDocument = document.querySelector("#documentSelector").value;
+  if (selectedDocument === "Select Personal Document to Download") {
+    return;
+  }
   let b64String;
   fetch("/generate_user_cv", {
+    body: JSON.stringify({
+      selected_document: selectedDocument,
+      user_id: user_id,
+    }),
     method: "POST",
-    headers: { "X-CSRFToken": `${csrf_token}` },
+    headers: {
+      "X-CSRFToken": `${csrf_token}`,
+      "Content-Type": "application/json",
+    },
   })
     .then((response) => response.json())
-    .then((json) => (b64String = json["data"]));
-  var element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:application/octet-stream;base64," + b64String
-  );
-  element.setAttribute("download", `${filename}.docx`);
+    .then((json) => {
+      b64String = json["data"];
+      var element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:application/octet-stream;base64," + b64String
+      );
+      element.setAttribute("download", `${filename}.docx`);
 
-  element.style.display = "none";
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
+      element.style.display = "none";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    });
 }

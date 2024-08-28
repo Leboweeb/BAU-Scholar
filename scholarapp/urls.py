@@ -23,5 +23,5 @@ urlpatterns = [
     path("get_contacts", views.get_contacts, name="get_contacts"),
     path("get_chat_history", views.get_chat_history, name="get_chat_history"),
     path("update_profile", views.update_profile, name="update_profile"),
-    path("generate_user_cv", views.generate_user_cv, name="generate_user_cv"),
+    path("generate_user_cv", views.generate_user_document, name="generate_user_cv"),
 ]
