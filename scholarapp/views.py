@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from io import BytesIO
 import json
 import os
@@ -17,13 +18,13 @@ from django.utils.text import slugify
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from scholarapp.forms import CreateEventForm, SignUpForm
-from scholarapp.models import Conversation, CustomUser, Followers, Publication
+from scholarapp.forms import CreateEventForm, PostSignUpForm, SignUpForm
+from scholarapp.models import Conversation, CustomUser, Followers, Profile, Publication
 from scholarapp.serializers import ImportUserSerializer
 import google.generativeai as genai
 from dotenv import load_dotenv
-
 from scholarapp.utils.generate_cv import generate_cv, generate_staff_achievements
+from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 
 load_dotenv()
@@ -38,8 +39,14 @@ def split(value, key):
     return value.split(key)
 
 
+@register.filter(name="as_id")
+def as_id(value: str):
+    return value.lower().replace(" ", "_")
+
+
 @login_required
 def index(request):
+    current_year = datetime.now().year
     followed_users = [follow.following for follow in request.user.from_user.all()]
     categories = [
         Publication.objects.order_by("-date_created")[:5],
@@ -47,8 +54,51 @@ def index(request):
         Publication.objects.filter(authors__in=followed_users)[:5],
     ]
     return render(
-        request, "home.html", context={"user": request.user, "categories": categories}
+        request,
+        "home.html",
+        context={
+            "user": request.user,
+            "categories": categories,
+            "current_year": current_year,
+        },
     )
+
+
+@login_required
+def update_info(request):
+    labels = [
+        {"label": "Rank", "required": True, "single": True},
+        {"label": "Department", "required": True, "single": True},
+        {"label": "Program", "required": True, "single": True},
+        {"label": "Research Interests", "required": False, "single": True},
+        {"label": "Rank Link", "required": False, "single": True},
+        {"label": "Education", "required": False},
+        {"label": "Academic Experience", "required": False},
+        {"label": "Non Academic Experience", "required": False},
+        {"label": "Certifications", "required": False},
+        {
+            "label": "Membership in Professional Organizations",
+            "required": False,
+        },
+        {"label": "Honors and Awards", "required": False},
+        {"label": "Service Activities", "required": False},
+        {"label": "Experience Courses", "required": False},
+        {"label": "References", "required": False},
+        {"label": "Professional Development Activities", "required": False},
+    ]
+    if request.method == "GET":
+        context = {
+            "form": PostSignUpForm(),
+            "skip_intro": True,
+            "labels": labels,
+        }
+        return render(request, "update_info.html", context=context)
+    else:
+        user_profile = create_user_profile(
+            request.POST, [l["label"] for l in labels], request.user.pk
+        )
+        Profile.objects.update_or_create(defaults=user_profile)
+        return redirect("/")
 
 
 @login_required
@@ -115,7 +165,7 @@ def get_chat_history(request):
 @api_view(["POST"])
 def generate_user_document(request):
     # try:
-    document_generator: Callable[[list[str], BytesIO], None] = [
+    document_generator = [
         generate_cv,
         generate_staff_achievements,
     ][int(request.data["selected_document"])]
@@ -126,7 +176,7 @@ def generate_user_document(request):
     ]
     buffer = BytesIO()
     # docx is saved to buffer now
-    document_generator(user_publications, buffer)
+    document_generator(request.user, user_publications, buffer)
     b64_data = base64.b64encode(buffer.getvalue())
     return JsonResponse({"data": b64_data.decode()})
     # except CustomUser.DoesNotExist:

@@ -82,3 +82,23 @@ class Message(models.Model):
     )
     message = models.TextField(null=True)
     time_sent = models.DateTimeField(auto_now_add=True)
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    rank = models.CharField(max_length=256, default="")
+    department = models.CharField(max_length=256, default="")
+    program = models.CharField(max_length=256, default="")
+    research_interests = models.CharField(max_length=256, default="")
+    rank_link = models.URLField()
+    education = models.TextField(default="")
+    academic_experience = models.TextField(default="")
+    non_academic_experience = models.TextField(default="")
+    certifications = models.TextField(default="")
+    memberships = models.TextField(default="")
+    honors = models.TextField(default="")
+    service_activities = models.TextField(default="")
+    courses = models.TextField(default="")
+    references = models.TextField(default="")
+    development_activities = models.TextField(default="")
+    staff_member_achievements = models.TextField(null=True)

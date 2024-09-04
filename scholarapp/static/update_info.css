@@ -1,0 +1,36 @@
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0%;
+  }
+}
+
+#welcome-container {
+  height: 100vh;
+}
+
+.header-padding {
+  padding-block: 9rem;
+}
+
+.first-text {
+  position: absolute;
+  opacity: 0;
+  animation-name: fadeInOut;
+  animation-duration: 3s;
+}
+
+.second-text {
+  opacity: 0;
+  position: absolute;
+  animation-name: fadeInOut;
+  animation-delay: 3s;
+  animation-duration: 3s;
+}

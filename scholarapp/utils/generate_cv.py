@@ -5,13 +5,18 @@ from docx import Document
 from docx.shared import Inches
 from docx.enum.style import WD_STYLE_TYPE
 
+from scholarapp.models import CustomUser, Profile
+
 
 # document = Document("Staff Member Achievements Template.docx")
 document = Document()
 
 
-def generate_cv(publications: list[str], buffer: BytesIO):
+def generate_cv(user: CustomUser, publications: list[str], buffer: BytesIO):
     current_year = datetime.now().year
+    user_profile: Profile = user.profile  # type: ignore
+    if not user_profile:
+        raise Exception("Couldn't find user profile!")
     document = Document()
     document.add_heading(
         f"\t\t\tBeirut Arab University\n\t\t\tFaculty CV\n\t\t\tYear {current_year}/{current_year+1}",
@@ -19,23 +24,44 @@ def generate_cv(publications: list[str], buffer: BytesIO):
     )
     document.add_paragraph("Name and Academic rank:", style="List Number")
     document.add_paragraph(
+        f"{user.name}, {user_profile.rank} , {user_profile.department}, Beirut Arab University"
+    )
+    document.add_paragraph(
         "Education: Degrees, discipline, institution, and date:", style="List Number"
     )
+    for i in user_profile.education.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Academic experience:", style="List Number")
+    for i in user_profile.education.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Non-academic experience:", style="List Number")
+    for i in user_profile.non_academic_experience.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph(
         "Certification or professional Registration:", style="List Number"
     )
+    for i in user_profile.certifications.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph(
         "Current membership in professional organizations", style="List Number"
     )
+    for i in user_profile.memberships.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Honors and Awards:", style="List Number")
+    for i in user_profile.honors.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Service activities:", style="List Number")
+    for i in user_profile.service_activities.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph(
         "Experience Courses (Graduate and Undergraduate)", style="List Number"
     )
+    for i in user_profile.courses.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Research	Interests:", style="List Number")
     document.add_paragraph("References:", style="List Number")
+    for i in user_profile.references.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.add_paragraph("Rank Link: Assistant Professor", style="List Number")
     document.add_paragraph("Publications:", style="List Number")
     for publication in publications:
@@ -43,6 +69,8 @@ def generate_cv(publications: list[str], buffer: BytesIO):
     document.add_paragraph(
         "Professional development activities in the last years:", style="List Number"
     )
+    for i in user_profile.development_activities.split("•"):
+        document.add_paragraph(i, style="List Bullet 2")
     document.save(buffer)
 
 
