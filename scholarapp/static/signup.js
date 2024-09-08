@@ -8,10 +8,8 @@ function submit_form(form) {
       return;
     }
     let cardJson = JSON.parse(selectedCard.dataset.profile);
-    let inputNames = ["skills", "profile_url", "avatar"];
-    let attrs = ["Skills", "profile_page", "thumbnail"].map(
-      (attr) => cardJson[attr]
-    );
+    let inputNames = ["profile_url", "avatar"];
+    let attrs = ["profile_page", "thumbnail"].map((attr) => cardJson[attr]);
     // fuck you cloudflare, eat a dick
     try {
       if (typeof attrs[0] === "object") attrs[0] = attrs[0].join(",");

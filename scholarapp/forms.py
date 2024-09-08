@@ -19,7 +19,6 @@ class SignUpForm(UserCreationForm):
         widgets = {
             "avatar": forms.HiddenInput(),
             "profile_url": forms.HiddenInput(),
-            "skills": forms.HiddenInput(),
         }
 
 

@@ -72,6 +72,7 @@
     text-align: center;
   }
   </style>
+  {% include "update_info.html" %}
   <div class="modal fade"
        id="exampleModal"
        data-bs-backdrop="static"
@@ -111,7 +112,10 @@
             <div class="d-flex">
               <strong>Tags</strong>
               {% if is_current_user %}
-                <button class="edit-button" onclick="toggleEdit()">
+                <button class="edit-button"
+                        type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#personalInfoForm">
                   <svg xmlns="http://www.w3.org/2000/svg"
                        width="16"
                        height="16"
@@ -124,31 +128,20 @@
               {% endif %}
             </div>
             <div class="d-flex flex-wrap gap-1 form-hidden ">
-              {% with user.tags|split:"," as tags %}
-                {% for tag in tags %}<span class="badge rounded-pill bg-secondary">{{ tag }}</span>{% endfor %}
-              {% endwith %}
-            </div>
-            <div class="form-group form-hidden d-none">
-              <input type="text"
-                     name="tags"
-                     class="form-control"
-                     id="tags"
-                     placeholder="AI,Machine Learning, Biology, etc... ( must be separated by commas )">
+              {% if user_profile.tags %}
+                {% with user_profile.tags|split:"," as tags %}
+                  {% for tag in tags %}<span class="badge rounded-pill bg-secondary">{{ tag }}</span>{% endfor %}
+                {% endwith %}
+              {% endif %}
             </div>
             <strong>Skills</strong>
             <ul class="form-hidden">
-              {% with user.skills|split:"," as skills %}
-                {% for skill in skills %}<li>{{ skill }}</li>{% endfor %}
-              {% endwith %}
+              {% if user_profile.skills %}
+                {% with user_profile.skills|split:"," as skills %}
+                  {% for skill in skills %}<li>{{ skill }}</li>{% endfor %}
+                {% endwith %}
+              {% endif %}
             </ul>
-            <div class="form-group form-hidden d-none">
-              <input type="text"
-                     class="form-control"
-                     id="skills"
-                     name="skills"
-                     placeholder="Python,MATLAB,C++,C, etc... ( must be separated by commas )">
-            </div>
-            <button type="submit" class="form-hidden btn btn-primary d-none">Submit</button>
           </div>
         </form>
       </div>

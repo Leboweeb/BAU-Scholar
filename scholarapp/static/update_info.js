@@ -1,16 +1,3 @@
-const second_text = document.querySelector(".second-text");
-const headingContainer = document.querySelector("#heading-container");
-const postSignUpForm = document.querySelector("#form-container");
-const topContainer = document.getElementById("top-container");
-function showForm() {
-  topContainer.classList.remove("vh-100");
-  topContainer.classList.add("vh-75");
-  if (headingContainer) {
-    headingContainer.classList.add("d-none");
-  }
-  postSignUpForm.classList.remove("d-none");
-}
-
 function removeParent(elem) {
   elem.parentElement.remove();
 }
@@ -61,9 +48,3 @@ document.querySelectorAll(".row-remove").forEach((elem) => {
     removeParent(elem);
   });
 });
-
-if (second_text) {
-  second_text.addEventListener("animationend", showForm);
-} else {
-  showForm();
-}

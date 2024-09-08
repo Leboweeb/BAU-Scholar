@@ -29,6 +29,8 @@ from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 
 load_dotenv()
 
+current_year = datetime.now().year
+
 
 # Create your views here.
 @register.filter(name="split")
@@ -46,7 +48,6 @@ def as_id(value: str):
 
 @login_required
 def index(request):
-    current_year = datetime.now().year
     followed_users = [follow.following for follow in request.user.from_user.all()]
     categories = [
         Publication.objects.order_by("-date_created")[:5],
@@ -65,55 +66,47 @@ def index(request):
 
 
 @login_required
-def update_info(request):
+def profile(request, user_id: str):
     labels = [
         {"label": "Rank", "required": True, "single": True},
         {"label": "Department", "required": True, "single": True},
         {"label": "Program", "required": True, "single": True},
         {"label": "Research Interests", "required": False, "single": True},
         {"label": "Rank Link", "required": False, "single": True},
-        {"label": "Education", "required": False},
-        {"label": "Academic Experience", "required": False},
-        {"label": "Non Academic Experience", "required": False},
-        {"label": "Certifications", "required": False},
+        {"label": "Tags", "required": False, "single": False},
+        {"label": "Skills", "required": False, "single": False},
+        {"label": "Education", "required": False, "single": False},
+        {"label": "Academic Experience", "required": False, "single": False},
+        {"label": "Non Academic Experience", "required": False, "single": False},
+        {"label": "Certifications", "required": False, "single": False},
+        {"label": "Organization Membership", "required": False, "single": False},
+        {"label": "Honors and Awards", "required": False, "single": False},
+        {"label": "Service Activities", "required": False, "single": False},
+        {"label": "Experience Courses", "required": False, "single": False},
+        {"label": "References", "required": False, "single": False},
         {
-            "label": "Membership in Professional Organizations",
+            "label": "Professional Development Activities",
             "required": False,
+            "single": False,
         },
-        {"label": "Honors and Awards", "required": False},
-        {"label": "Service Activities", "required": False},
-        {"label": "Experience Courses", "required": False},
-        {"label": "References", "required": False},
-        {"label": "Professional Development Activities", "required": False},
     ]
-    if request.method == "GET":
-        context = {
-            "form": PostSignUpForm(),
-            "skip_intro": True,
-            "labels": labels,
-        }
-        return render(request, "update_info.html", context=context)
-    else:
-        user_profile = create_user_profile(
-            request.POST, [l["label"] for l in labels], request.user.pk
-        )
-        Profile.objects.update_or_create(defaults=user_profile)
-        return redirect("/")
-
-
-@login_required
-def profile(request, user_id: str):
     user = CustomUser.objects.get(pk=user_id)
+    user_profile: Profile | None = user.profile  # type: ignore
+    user_profile_fields = [
+        getattr(user_profile, attr.attname).split("•")  # type: ignore
+        for attr in Profile._meta.get_fields()[2:-1]
+    ]
     is_current_user = request.user == user
     is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
     # process tags first
-    if not user.tags:
-        gemini_model = genai.GenerativeModel("gemini-1.5-flash")
-        user.tags = gemini_model.generate_content(
-            f"Given these skills : {user.skills} \n Generate tags that are as inclusive and brief as possible ( use only alphabetic characters and spaces for each tag) and as a comma separated string."
-        ).text
-        user.tags = re.sub("\n", "", user.tags).strip()
-        user.save()
+    # if user_profile:
+    #     if not user_profile.tags:
+    #         gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+    #         user_profile.tags = gemini_model.generate_content(
+    #             f"Given these skills : {user_profile.skills} \n Generate tags that are as inclusive and brief as possible ( use only alphabetic characters and spaces for each tag) and as a comma separated string."
+    #         ).text
+    #         user_profile.tags = re.sub("\n", "", user_profile.tags).strip()
+    #         user_profile.save()
     # then publications
     user_publications = Publication.objects.filter(authors=user)
     if not user_publications.exists():
@@ -135,7 +128,15 @@ def profile(request, user_id: str):
         "is_current_user": is_current_user,
         "is_following": is_following_user,
         "form": CreateEventForm(),
+        "records": zip(labels, user_profile_fields),
+        "current_year": current_year,
     }
+    if request.method == "POST":
+        Profile.objects.update_or_create(
+            defaults=create_user_profile(
+                request.POST, [l["label"] for l in labels], request.user.pk
+            )
+        )
     return render(request, "profile.html", context=context)
 
 
@@ -184,13 +185,7 @@ def generate_user_document(request):
 
 
 def update_profile(request):
-    skills, tags = (
-        request.POST.get("skills") or request.user.skills,
-        request.POST.get("tags") or request.user.tags,
-    )
     user = CustomUser.objects.get(id=request.user.pk)
-    user.skills, user.tags = skills, tags
-    user.save()
     is_current_user = request.user == user
     response = render(
         request,

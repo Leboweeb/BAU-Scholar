@@ -39,8 +39,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     avatar = models.URLField(default="")
     profile_url = models.URLField(default="")
-    skills = models.CharField(max_length=256, default="")
-    tags = models.CharField(max_length=256, default="")
     USERNAME_FIELD = "email"
     objects = CustomUserManager()  # type: ignore
     REQUIRED_FIELDS = ["name"]
@@ -91,6 +89,8 @@ class Profile(models.Model):
     program = models.CharField(max_length=256, default="")
     research_interests = models.CharField(max_length=256, default="")
     rank_link = models.URLField()
+    skills = models.CharField(max_length=256, default="")
+    tags = models.CharField(max_length=256, default="")
     education = models.TextField(default="")
     academic_experience = models.TextField(default="")
     non_academic_experience = models.TextField(default="")
