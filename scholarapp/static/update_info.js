@@ -2,6 +2,10 @@ function removeParent(elem) {
   elem.parentElement.remove();
 }
 
+function closePersonalInfoModal() {
+  document.querySelector("#personalInfoModalClose").click();
+}
+
 function addInput(parentId) {
   let parent = document.querySelector(`#div_id_${parentId} > .row`);
   let input_group = document.createElement("div");

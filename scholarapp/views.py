@@ -1,13 +1,12 @@
 import base64
 from datetime import datetime
+from http import HTTPStatus
 from io import BytesIO
 import json
 import os
-from typing import Callable
 from dateutil.parser import parse
-import re
 from django.db.models.query import QuerySet
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -18,14 +17,13 @@ from django.utils.text import slugify
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from scholarapp.forms import CreateEventForm, PostSignUpForm, SignUpForm
+from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import Conversation, CustomUser, Followers, Profile, Publication
 from scholarapp.serializers import ImportUserSerializer
-import google.generativeai as genai
 from dotenv import load_dotenv
 from scholarapp.utils.generate_cv import generate_cv, generate_staff_achievements
-from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
+from scholarapp.utils.profile_info import create_user_profile
 
 load_dotenv()
 
@@ -131,12 +129,12 @@ def profile(request, user_id: str):
         "records": zip(labels, user_profile_fields),
         "current_year": current_year,
     }
-    if request.method == "POST":
-        Profile.objects.update_or_create(
-            defaults=create_user_profile(
-                request.POST, [l["label"] for l in labels], request.user.pk
-            )
-        )
+    # if request.method == "POST":
+    #     Profile.objects.update_or_create(
+    #         defaults=create_user_profile(
+    #             request.POST, [l["label"] for l in labels], request.user.pk
+    #         )
+    #     )
     return render(request, "profile.html", context=context)
 
 
@@ -186,13 +184,19 @@ def generate_user_document(request):
 
 def update_profile(request):
     user = CustomUser.objects.get(id=request.user.pk)
-    is_current_user = request.user == user
+    personal_info_labels = list(request.POST.keys())[1:]
+    Profile.objects.update_or_create(
+        defaults=create_user_profile(
+            request.POST, personal_info_labels, request.user.pk
+        )
+    )
+    # fetch user profile after update
+    user_profile = user.profile  # type: ignore
     response = render(
         request,
-        "components/profile_update_fragment.html",
-        context={"user": user, "is_current_user": is_current_user},
+        "components/profile/profile_tags_skills_fragment.html",
+        context={"user_profile": user_profile, "is_current_user": True},
     )
-    response["HX-Refresh"] = "true"
     return response
 
 

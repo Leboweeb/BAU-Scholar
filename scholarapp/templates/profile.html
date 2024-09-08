@@ -99,53 +99,8 @@
   </div>
   <div class="container">
     <div class="container"></div>
-    {% include "components/profile_update_fragment.html" %}
-    <div class="row mt-4">
-      <div class="container">
-        <form method="post"
-              enctype="multipart/form-data"
-              hx-post="/update_profile"
-              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-              hx-target="#profile-info"
-              hx-swap="innerHTML">
-          <div class="card w-100 p-3 gap-3">
-            <div class="d-flex">
-              <strong>Tags</strong>
-              {% if is_current_user %}
-                <button class="edit-button"
-                        type="button"
-                        data-bs-toggle="modal"
-                        data-bs-target="#personalInfoForm">
-                  <svg xmlns="http://www.w3.org/2000/svg"
-                       width="16"
-                       height="16"
-                       fill="currentColor"
-                       class="bi bi-pencil-fill"
-                       viewBox="0 0 16 16">
-                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
-            <div class="d-flex flex-wrap gap-1 form-hidden ">
-              {% if user_profile.tags %}
-                {% with user_profile.tags|split:"," as tags %}
-                  {% for tag in tags %}<span class="badge rounded-pill bg-secondary">{{ tag }}</span>{% endfor %}
-                {% endwith %}
-              {% endif %}
-            </div>
-            <strong>Skills</strong>
-            <ul class="form-hidden">
-              {% if user_profile.skills %}
-                {% with user_profile.skills|split:"," as skills %}
-                  {% for skill in skills %}<li>{{ skill }}</li>{% endfor %}
-                {% endwith %}
-              {% endif %}
-            </ul>
-          </div>
-        </form>
-      </div>
-    </div>
+    {% include "components/profile/profile_picture_fragment.html" %}
+    {% include "components/profile/profile_tags_skills_fragment.html" %}
     <div class="row mt-4">
       <div class="container">
         <div class="card w-100 p-3">

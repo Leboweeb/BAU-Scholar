@@ -13,14 +13,19 @@
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="staticBackdropLabel">Personal Information Form</h1>
         <button type="button"
+                id="personalInfoModalClose"
                 class="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="">
+        <form method="post"
+              hx-post="/update_profile"
+              hx-target="#tags-skills-fragment"
+              hx-on::after-request="closePersonalInfoModal()">
+          {% csrf_token %}
           <div id="top-container"
-               class="container w-100 h-100 d-flex justify-items-center align-items-center m-auto">
+               class="w-100 h-100 d-flex justify-items-center align-items-center m-auto">
             <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
               {# djlint:off #}
             {% for record,data in records %}
