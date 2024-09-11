@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.forms.renderers import BaseRenderer
 from django.forms.utils import ErrorList
-from scholarapp.models import CustomUser, Publication
+from scholarapp.models import CustomUser, Event
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 
@@ -25,9 +25,8 @@ class SignUpForm(UserCreationForm):
 class CreateEventForm(forms.ModelForm):
 
     class Meta:
-        model = Publication
-        fields = ("title", "description")
-        authors = forms.TextInput()
+        model = Event
+        fields = ("title", "description", "event_type")
 
 
 class PostSignUpForm(forms.Form):

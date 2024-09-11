@@ -81,12 +81,14 @@ def scrape_publications(link: str):
             publication_link = publication.css(
                 ".nova-legacy-v-publication-item__title > a"
             )
+            research_type = publication.css(".nova-legacy-e-badge--luminosity-high")[0]
             publication_list.append(
                 {
                     "title": get_tag_text(title),
                     "description": get_tag_text(description) if description else "",
                     "authors": ",".join([get_tag_text(text) for text in authors]),
                     "date_created": get_tag_text(date_created),
+                    "research_type": get_tag_text(research_type),
                     "link": publication_link,
                 }
             )

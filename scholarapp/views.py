@@ -19,7 +19,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from scholarapp.forms import CreateEventForm, SignUpForm
-from scholarapp.models import Conversation, CustomUser, Followers, Profile, Publication
+from scholarapp.models import (
+    Conversation,
+    CustomUser,
+    EventTypes,
+    Followers,
+    Profile,
+    Event,
+)
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
 from scholarapp.utils.common import join_with_dot, split_at_dot, zip_if_equal
@@ -100,9 +107,9 @@ def as_id(value: str):
 def index(request):
     followed_users = [follow.following for follow in request.user.from_user.all()]
     categories = [
-        Publication.objects.order_by("-date_created")[:5],
-        Publication.objects.order_by("-date_created")[:5],
-        Publication.objects.filter(authors__in=followed_users)[:5],
+        Event.objects.order_by("-date_created")[:5],
+        Event.objects.order_by("-date_created")[:5],
+        Event.objects.filter(authors__in=followed_users)[:5],
     ]
     return render(
         request,
@@ -130,15 +137,17 @@ def profile(request, user_id: str):
     #         user_profile.tags = re.sub("\n", "", user_profile.tags).strip()
     #         user_profile.save()
     # then publications
-    user_publications = Publication.objects.filter(authors=user)
+    user_publications = Event.objects.filter(authors=user)
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
+        event_types = {choice.label: choice for choice in EventTypes}
         publication_pairs = [
-            Publication.objects.get_or_create(
+            Event.objects.get_or_create(
                 title=publication["title"],
                 description=publication["description"],
                 author_str=publication["authors"],
                 date_created=parse(publication["date_created"]),
+                event_type=event_types[publication["research_type"]],
             )
             for publication in scraped_publications
         ]
@@ -158,6 +167,12 @@ def profile(request, user_id: str):
         ),
         "current_year": current_year,
     }
+    if request.method == "POST":
+        eventForm = CreateEventForm(request.POST)
+        if eventForm.is_valid():
+            event = Event.objects.create(**eventForm.cleaned_data)
+            event.authors.add(user)
+            event.save()
     return render(request, "profile.html", context=context)
 
 
@@ -194,7 +209,7 @@ def generate_user_document(request):
     user = CustomUser.objects.get(pk=int(request.data["user_id"]))
     user_publications = [
         (f"{publication.author_str} : {publication.title}\n\n")
-        for publication in Publication.objects.filter(authors=user)
+        for publication in Event.objects.filter(authors=user)
     ]
     buffer = BytesIO()
     # docx is saved to buffer now

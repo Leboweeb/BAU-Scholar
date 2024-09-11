@@ -108,12 +108,16 @@
                   data-bs-dismiss="modal"
                   aria-label="Close"></button>
         </div>
-        <div class="modal-body"></div>
-        <div class="container">{{ form | crispy }}</div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
-        </div>
+        <form method="post" action={% url 'profile' user.id %}>
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="container">{{ form | crispy }}</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -127,13 +131,15 @@
           <img src="" alt="">
           <div class="d-flex align-items-center">
             <strong>Research</strong>
-            <a style="float: right;
-                      margin: auto;
-                      margin-right : 0rem"
-               href=""
-               class="btn btn-primary"
-               data-bs-toggle="modal"
-               data-bs-target="#exampleModal">+ Add Event</a>
+            {% if is_current_user %}
+              <a style="float: right;
+                        margin: auto;
+                        margin-right : 0rem"
+                 href=""
+                 class="btn btn-primary"
+                 data-bs-toggle="modal"
+                 data-bs-target="#exampleModal">+ Add Event</a>
+            {% endif %}
           </div>
           <div class="container d-flex flex-column mt-3 gap-4">
             {% for i in publications %}
