@@ -74,8 +74,26 @@ def generate_cv(user: CustomUser, publications: list[str], buffer: BytesIO):
     document.save(buffer)
 
 
-def generate_staff_achievements(publications: list[str], buffer: BytesIO):
+def generate_staff_achievements(
+    user: CustomUser, publications: list[str], buffer: BytesIO
+):
     doc = Document()
+
+    def get_profile_field_or_blank(attr: str | None = None, index: int | None = None):
+        """
+        Use this function to access an attribute in the user profile object or a field
+        in the staff achievements list but not both. Returns `""` otherwise
+        """
+        if hasattr(user, "profile"):
+            user_profile: Profile = user.profile  # type: ignore
+
+            if index != None and attr == None:
+                return split_at_dot(user_profile.staff_member_achievements)[index]
+            elif attr != None and index == None:
+                return getattr(user_profile, attr, "")
+            return ""
+        return ""
+
     # Add title and heading
     current_year = datetime.now().year
     doc.add_heading("Staff Member Achievements", 0)
@@ -83,49 +101,80 @@ def generate_staff_achievements(publications: list[str], buffer: BytesIO):
 
     # Add fields for Name, Position, and Faculty
     doc.add_paragraph("Name:")
+    doc.add_paragraph(f"{user.name}")
     doc.add_paragraph("Position:")
+    doc.add_paragraph(f"{get_profile_field_or_blank('rank')}")
     doc.add_paragraph("Faculty:")
+    doc.add_paragraph(f"{get_profile_field_or_blank('department')}")
 
     # Add section heading
+
     doc.add_heading("I. Teaching and Students", 1)
 
-    # Add sub-items with bullet points
+    # # Add sub-items with bullet points
     doc.add_paragraph(
-        "a) Contribute effectively to developing the faculty's curriculum at both program and departmental levels"
+        "a) Contribute effectively to developing the faculty’s curriculum at both program and departmental levels"
     )
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=0)}")
     doc.add_paragraph(
-        "b) Use a variety of advanced innovative learning methods - effective teaching (Please, give examples)"
+        "b) Use a variety of advanced innovative learning methods- effective teaching"
     )
-    doc.add_paragraph(
-        "c) Use of students self learning methods in teaching (Please, give examples)"
-    )
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=1)}")
+    doc.add_paragraph("c) Use of students self learning methods in teaching")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=2)}")
     doc.add_paragraph(
         "d) Support students effectively through academic advising and office hours."
     )
-    doc.add_paragraph("e) Teaching load ( weekly )")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=3)}")
+    doc.add_paragraph("e) Teaching load ( weekly ) ")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=4)}")
     doc.add_paragraph(
         "f) Quality Assurance Activities ( courses specification ,course report, ….     )"
     )
-    doc.add_paragraph(
-        "g) Contribute to students’ activities and communicate with them scientifically and academically "
-    )
-    doc.add_paragraph("h) Others")
 
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=5)}")
+    doc.add_paragraph(
+        "g) Contribute to students’ activities and communicate with them scientifically and academically"
+    )
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=6)}")
+    doc.add_paragraph("h) Others ( First Section )")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=7)}")
     doc.add_heading("II. Scientific Research", 1)
-    doc.add_paragraph("a) Scientific Publication")
+    doc.add_paragraph("a) Scientific publication")
     for publication in publications:
         doc.add_paragraph(publication, style="List Number 2")
     doc.add_paragraph("b) Conferences")
     doc.add_paragraph("c) Workshops")
-    doc.add_paragraph("d) Supervision of Theses")
-    doc.add_paragraph("e) Others")
+    doc.add_paragraph("d) Supervision of theses")
+    doc.add_paragraph("e) Others ( Second Section )")
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=8)}")
     doc.add_heading("III. University and Community Services", 1)
-    doc.add_paragraph("a) Participation in different committees (faculty- university)")
+    doc.add_paragraph(
+        "a) Participation in different committees ( faculty - university )"
+    )
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=9)}")
     doc.add_paragraph("b) Participation in community and cultural activities")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=10)}")
     doc.add_paragraph("c) Participation in conferences and workshops organization")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=11)}")
     doc.add_paragraph("d) Other services to the Lebanese society")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=12)}")
     doc.add_paragraph("e) Training and consultation")
-    doc.add_paragraph("f) Others")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=13)}")
+    doc.add_paragraph("f) Others ( Third Section )")
+
+    doc.add_paragraph(f"{get_profile_field_or_blank(index=14)}")
     # Save the document
     doc.save(buffer)
 
