@@ -1,11 +1,9 @@
 from datetime import datetime
 from io import BytesIO
-from xml.etree.ElementTree import Element
+import re
 from docx import Document
-from docx.shared import Inches
-from docx.enum.style import WD_STYLE_TYPE
-
 from scholarapp.models import CustomUser, Profile
+from django.db import models
 
 
 # document = Document("Staff Member Achievements Template.docx")
@@ -128,3 +126,73 @@ def generate_staff_achievements(publications: list[str], buffer: BytesIO):
     doc.add_paragraph("f) Others")
     # Save the document
     doc.save(buffer)
+
+
+def generate_cv_json(file: BytesIO):
+    document = Document(file)
+    labels = [
+        "Name and Academic rank:",
+        "Education: Degrees, discipline, institution, and date:",
+        "Academic experience",
+        "Non-academic experience",
+        "Certification or professional Registration",
+        "Current membership in professional organizations",
+        "Honors and Awards:",
+        "Service activities",
+        "Experience Courses (Graduate and Undergraduate)",
+        "Research	Interests",
+        "References:",
+        "Rank Link:",
+        "Publications",
+        "Professional development activities in the last years",
+    ]
+    document_dict = {label: [] for label in labels}
+    current_label = labels[0]
+    for p in document.paragraphs:
+        processed_text = re.sub(r"(\w+\.)", "", p.text).strip()
+        # we don't care about line breaks
+        if not processed_text:
+            continue
+        if processed_text in labels:
+            current_label = processed_text
+        else:
+            document_dict[current_label].append(p.text)
+
+    del document_dict["Publications"]
+    return document_dict
+
+
+def cv_json_to_profile(input_dict: dict[str, list]):
+    # handle text fields first
+    required_multi_value_labels = [
+        "Education: Degrees, discipline, institution, and date:",
+        "Academic experience",
+        "Non-academic experience",
+        "Certification or professional Registration",
+        "Current membership in professional organizations",
+        "Honors and Awards:",
+        "Service activities",
+        "Experience Courses (Graduate and Undergraduate)",
+        "References:",
+        "Professional development activities in the last years",
+    ]
+    multi_values_fields = [
+        input_dict[key] for key in input_dict if key in required_multi_value_labels
+    ]
+    update_dict = {}
+    text_fields = [
+        field
+        for field in Profile._meta.get_fields()
+        if isinstance(field, models.TextField)
+    ][:-1]
+
+    for field, value in zip(text_fields, multi_values_fields):
+        update_dict[field.attname] = "•".join(value)
+
+    # then handle special cases
+    update_dict["rank_link"] = input_dict["Rank Link:"][0]
+    update_dict["research_interests"] = input_dict["Research\tInterests"][0]
+    _, rank, department, _ = input_dict["Name and Academic rank:"][0].split(",")
+    update_dict["rank"] = rank
+    update_dict["department"] = department
+    return update_dict

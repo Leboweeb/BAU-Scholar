@@ -1,9 +1,66 @@
+const update_profile_form = document.querySelector("#import-document");
+
+// see https://stackoverflow.com/questions/15361189/how-to-select-all-other-values-in-an-array-except-the-ith-element
+function exceptIndex(list, exceptIndex) {
+  // ensure list is array
+  return [...list].filter((value, index) => exceptIndex !== index);
+}
+
 function removeParent(elem) {
   elem.parentElement.remove();
 }
 
 function closePersonalInfoModal() {
   document.querySelector("#personalInfoModalClose").click();
+}
+
+function highlightDropArea(event) {
+  event.preventDefault();
+  dropArea.classList.add("drop-area-active");
+}
+function unhighlightDropArea(event) {
+  event.preventDefault();
+  dropArea.classList.remove("drop-area-active");
+}
+
+// see https://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript/12900504#12900504
+function getExtension(fname) {
+  return fname.slice(((fname.lastIndexOf(".") - 1) >>> 0) + 2);
+}
+
+function submitDocument(event) {
+  // event.preventDefault();
+  // event.dataTransfer.effectAllowed = "all";
+  // event.dataTransfer.dropEffect = "copy";
+  let fileInput = document.querySelector("#imported_document").files[0];
+  if (getExtension(fileInput.name) !== "docx")
+    alert("Please upload a valid docx file.");
+  let formData = new FormData();
+  formData.append("imported_document", fileInput);
+  fetch("/update_profile", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrf_token,
+    },
+    body: formData,
+  })
+    .then((response) => response.text())
+    .then((text) => {
+      htmx.swap(
+        "#tags-skills-fragment",
+        text,
+        { swapStyle: "innerHTML" },
+        {
+          afterSwapCallback: () => {
+            closePersonalInfoModal();
+            unhighlightDropArea(event);
+          },
+        }
+      );
+    });
+  // let formData = new FormData()
+  // formData.append("")
+  // update_profile_form.submit();
 }
 
 function addInput(parentId) {
@@ -52,3 +109,39 @@ document.querySelectorAll(".row-remove").forEach((elem) => {
     removeParent(elem);
   });
 });
+
+let dropArea = document.querySelector(".drop-area");
+
+// dropArea
+//   .addEventListener(
+//     "dragstart",
+//     (event) => {
+//       event.dataTransfer.effectAllowed = "all";
+//       event.dataTransfer.dropEffect = "move";
+//     },
+//     false
+//   )
+
+[("dragenter", "dragover")].forEach((eventName) => {
+  dropArea.addEventListener(eventName, highlightDropArea, false);
+});
+["dragleave"].forEach((eventName) => {
+  dropArea.addEventListener(eventName, unhighlightDropArea, false);
+});
+
+dropArea.addEventListener("drop", submitDocument, { capture: true });
+
+let tabs = document.querySelectorAll(".nav.nav-underline button");
+let contentDivs = document.querySelectorAll("#top-container >div");
+
+function switchTabs(currentTabIndex) {
+  let otherContent = exceptIndex(contentDivs, currentTabIndex);
+  let otherButtons = exceptIndex(tabs, currentTabIndex);
+
+  for (let index = 0; index < tabs.length; index++) {
+    tabs[currentTabIndex].classList.add("active");
+    contentDivs[currentTabIndex].classList.remove("d-none");
+    otherContent.forEach((value) => value.classList.add("d-none"));
+    otherButtons.forEach((value) => value.classList.remove("active"));
+  }
+}

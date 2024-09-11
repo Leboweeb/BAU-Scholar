@@ -71,6 +71,26 @@
     width: 50%;
     text-align: center;
   }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .drop-area{
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  padding: 20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:1.5rem;
+
+  }
+
+  .drop-area-active {
+    border : 2px dashed #191970;
+  }
   </style>
   {% include "update_info.html" %}
   <div class="modal fade"
@@ -100,7 +120,7 @@
   <div class="container">
     <div class="container"></div>
     {% include "components/profile/profile_picture_fragment.html" %}
-    {% include "components/profile/profile_tags_skills_fragment.html" %}
+    {% include "components/profile/profile_tags_skills_fragment.html" with user_profile=user.profile %}
     <div class="row mt-4">
       <div class="container">
         <div class="card w-100 p-3">

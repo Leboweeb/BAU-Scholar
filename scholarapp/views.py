@@ -2,6 +2,7 @@ import base64
 from datetime import datetime
 from http import HTTPStatus
 from io import BytesIO
+import itertools
 import json
 import os
 from dateutil.parser import parse
@@ -21,7 +22,12 @@ from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import Conversation, CustomUser, Followers, Profile, Publication
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
-from scholarapp.utils.generate_cv import generate_cv, generate_staff_achievements
+from scholarapp.utils.document_utils import (
+    cv_json_to_profile,
+    generate_cv,
+    generate_cv_json,
+    generate_staff_achievements,
+)
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 from scholarapp.utils.profile_info import create_user_profile
 
@@ -65,7 +71,25 @@ def index(request):
 
 @login_required
 def profile(request, user_id: str):
-    labels = [
+    staff_achievement_labels = [
+        "Contribute effectively to developing the faculty’s curriculum at both program and departmental levels",
+        "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
+        "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
+        "Support students effectively through academic advising and office hours.",
+        "Teaching load ( weekly )",
+        "Quality Assurance Activities ( courses specification ,course report, ….     )",
+        "Contribute to students’ activities and communicate with them scientifically and academically ",
+        "Others",
+        "Supervision of theses",
+        "Others",
+        "Participation in different committees (faculty- university)",
+        "Participation in community and cultural activities",
+        "Participation in conferences and workshops organization",
+        "Other services to the Lebanese society",
+        "Training and consultation",
+        "Others",
+    ]
+    cv_labels = [
         {"label": "Rank", "required": True, "single": True},
         {"label": "Department", "required": True, "single": True},
         {"label": "Program", "required": True, "single": True},
@@ -89,11 +113,14 @@ def profile(request, user_id: str):
         },
     ]
     user = CustomUser.objects.get(pk=user_id)
-    user_profile: Profile | None = user.profile  # type: ignore
-    user_profile_fields = [
-        getattr(user_profile, attr.attname).split("•")  # type: ignore
-        for attr in Profile._meta.get_fields()[2:-1]
-    ]
+    if hasattr(user, "profile"):
+        user_profile: Profile = user.profile  # type: ignore
+        user_profile_fields = [
+            getattr(user_profile, attr.attname).split("•")  # type: ignore
+            for attr in Profile._meta.get_fields()[2:-1]
+        ]
+    else:
+        user_profile_fields = []
     is_current_user = request.user == user
     is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
     # process tags first
@@ -126,7 +153,12 @@ def profile(request, user_id: str):
         "is_current_user": is_current_user,
         "is_following": is_following_user,
         "form": CreateEventForm(),
-        "records": zip(labels, user_profile_fields),
+        "records": (
+            zip(cv_labels, user_profile_fields)
+            if user_profile_fields
+            else zip(cv_labels, itertools.repeat("", len(cv_labels)))
+        ),
+        "staff_achievement_records": staff_achievement_labels,
         "current_year": current_year,
     }
     # if request.method == "POST":
@@ -184,13 +216,21 @@ def generate_user_document(request):
 
 def update_profile(request):
     user = CustomUser.objects.get(id=request.user.pk)
-    personal_info_labels = list(request.POST.keys())[1:]
-    Profile.objects.update_or_create(
-        defaults=create_user_profile(
-            request.POST, personal_info_labels, request.user.pk
+    if request.POST:
+        personal_info_labels = list(request.POST.keys())[1:]
+        Profile.objects.update_or_create(
+            defaults=create_user_profile(
+                request.POST, personal_info_labels, request.user.pk
+            )
         )
-    )
-    # fetch user profile after update
+    elif request.FILES:
+        file = request.FILES.get("imported_document")
+        cv_json = generate_cv_json(file)
+        Profile.objects.update_or_create(
+            defaults={**cv_json_to_profile(cv_json), "user_id": request.user.pk}
+        )
+        # refresh on import to make sure fields are populated.
+    # fetch user profile after update@
     user_profile = user.profile  # type: ignore
     response = render(
         request,
