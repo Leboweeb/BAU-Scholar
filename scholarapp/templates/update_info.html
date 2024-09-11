@@ -20,7 +20,7 @@
               hx-enconding="multipart/form-data"
               id="import-document"
               hx-post="/update_profile"
-              hx-target="#tags-skills-fragment"
+              hx-swap="outerHTML"
               hx-on::after-request="closePersonalInfoModal()">
           {% csrf_token %}
           <ul class="nav nav-underline">
@@ -47,20 +47,16 @@
                class="w-100 h-100 d-flex justify-items-center align-items-center m-auto">
             <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
               {# djlint:off #}
-              {% for record,data in records %}
-              {% if data %}
-              {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data %}
-              {% else %}
-              {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single %}
-              {% endif %}
+              {% for record,data in cv_records %}
+                {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data %}
               {% endfor %}
               {# djlint:on#}
               <button class="btn btn-primary" type="submit">Submit</button>
             </div>
             <div id="staff-achievements-container"
                  class="row card mt-3 p-2 w-100 m-auto d-none">
-              {% for record in staff_achievement_records %}
-                {% include "components/dynamic_form_textarea.html" with top_label=record element_id=record|as_id %}
+              {% for record,data in staff_achievement_records %}
+                {% include "components/dynamic_form_textarea.html" with top_label=record element_id=record|as_id data=data %}
               {% endfor %}
             </div>
             <div id="import-document-container" class="mt-3 p-2 w-100 m-auto d-none">

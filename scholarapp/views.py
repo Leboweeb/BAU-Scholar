@@ -22,10 +22,12 @@ from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import Conversation, CustomUser, Followers, Profile, Publication
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
+from scholarapp.utils.common import join_with_dot, split_at_dot, zip_if_equal
 from scholarapp.utils.document_utils import (
-    cv_json_to_profile,
+    cv_json_to_cv_profile,
     generate_cv,
-    generate_cv_json,
+    generate_document_json,
+    generate_form_fields,
     generate_staff_achievements,
 )
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
@@ -34,6 +36,47 @@ from scholarapp.utils.profile_info import create_user_profile
 load_dotenv()
 
 current_year = datetime.now().year
+staff_achievement_labels = [
+    "Contribute effectively to developing the faculty’s curriculum at both program and departmental levels",
+    "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
+    "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
+    "Support students effectively through academic advising and office hours.",
+    "Teaching load ( weekly )",
+    "Quality Assurance Activities ( courses specification ,course report, ….     )",
+    "Contribute to students’ activities and communicate with them scientifically and academically ",
+    "Others",
+    "Supervision of theses",
+    "Others",
+    "Participation in different committees (faculty- university)",
+    "Participation in community and cultural activities",
+    "Participation in conferences and workshops organization",
+    "Other services to the Lebanese society",
+    "Training and consultation",
+    "Others",
+]
+cv_labels = [
+    {"label": "Rank", "required": True, "single": True},
+    {"label": "Department", "required": True, "single": True},
+    {"label": "Program", "required": True, "single": True},
+    {"label": "Research Interests", "required": False, "single": True},
+    {"label": "Rank Link", "required": False, "single": True},
+    {"label": "Tags", "required": False, "single": False},
+    {"label": "Skills", "required": False, "single": False},
+    {"label": "Education", "required": False, "single": False},
+    {"label": "Academic Experience", "required": False, "single": False},
+    {"label": "Non Academic Experience", "required": False, "single": False},
+    {"label": "Certifications", "required": False, "single": False},
+    {"label": "Organization Membership", "required": False, "single": False},
+    {"label": "Honors and Awards", "required": False, "single": False},
+    {"label": "Service Activities", "required": False, "single": False},
+    {"label": "Experience Courses", "required": False, "single": False},
+    {"label": "References", "required": False, "single": False},
+    {
+        "label": "Professional Development Activities",
+        "required": False,
+        "single": False,
+    },
+]
 
 
 # Create your views here.
@@ -71,56 +114,7 @@ def index(request):
 
 @login_required
 def profile(request, user_id: str):
-    staff_achievement_labels = [
-        "Contribute effectively to developing the faculty’s curriculum at both program and departmental levels",
-        "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
-        "Use a variety of advanced innovative learning methods- effective teaching ( Please, give examples)",
-        "Support students effectively through academic advising and office hours.",
-        "Teaching load ( weekly )",
-        "Quality Assurance Activities ( courses specification ,course report, ….     )",
-        "Contribute to students’ activities and communicate with them scientifically and academically ",
-        "Others",
-        "Supervision of theses",
-        "Others",
-        "Participation in different committees (faculty- university)",
-        "Participation in community and cultural activities",
-        "Participation in conferences and workshops organization",
-        "Other services to the Lebanese society",
-        "Training and consultation",
-        "Others",
-    ]
-    cv_labels = [
-        {"label": "Rank", "required": True, "single": True},
-        {"label": "Department", "required": True, "single": True},
-        {"label": "Program", "required": True, "single": True},
-        {"label": "Research Interests", "required": False, "single": True},
-        {"label": "Rank Link", "required": False, "single": True},
-        {"label": "Tags", "required": False, "single": False},
-        {"label": "Skills", "required": False, "single": False},
-        {"label": "Education", "required": False, "single": False},
-        {"label": "Academic Experience", "required": False, "single": False},
-        {"label": "Non Academic Experience", "required": False, "single": False},
-        {"label": "Certifications", "required": False, "single": False},
-        {"label": "Organization Membership", "required": False, "single": False},
-        {"label": "Honors and Awards", "required": False, "single": False},
-        {"label": "Service Activities", "required": False, "single": False},
-        {"label": "Experience Courses", "required": False, "single": False},
-        {"label": "References", "required": False, "single": False},
-        {
-            "label": "Professional Development Activities",
-            "required": False,
-            "single": False,
-        },
-    ]
     user = CustomUser.objects.get(pk=user_id)
-    if hasattr(user, "profile"):
-        user_profile: Profile = user.profile  # type: ignore
-        user_profile_fields = [
-            getattr(user_profile, attr.attname).split("•")  # type: ignore
-            for attr in Profile._meta.get_fields()[2:-1]
-        ]
-    else:
-        user_profile_fields = []
     is_current_user = request.user == user
     is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
     # process tags first
@@ -147,26 +141,20 @@ def profile(request, user_id: str):
         ]
         for publication, _ in publication_pairs:
             publication.authors.add(user)
+
+    user_profile_fields, staff_achievement_values = generate_form_fields(user_id)
     context = {
         "user": user,
         "publications": user_publications.all(),
         "is_current_user": is_current_user,
         "is_following": is_following_user,
         "form": CreateEventForm(),
-        "records": (
-            zip(cv_labels, user_profile_fields)
-            if user_profile_fields
-            else zip(cv_labels, itertools.repeat("", len(cv_labels)))
+        "cv_records": zip_if_equal(cv_labels, user_profile_fields),
+        "staff_achievement_records": zip_if_equal(
+            staff_achievement_labels, staff_achievement_values
         ),
-        "staff_achievement_records": staff_achievement_labels,
         "current_year": current_year,
     }
-    # if request.method == "POST":
-    #     Profile.objects.update_or_create(
-    #         defaults=create_user_profile(
-    #             request.POST, [l["label"] for l in labels], request.user.pk
-    #         )
-    #     )
     return render(request, "profile.html", context=context)
 
 
@@ -223,20 +211,88 @@ def update_profile(request):
                 request.POST, personal_info_labels, request.user.pk
             )
         )
+        response = render(
+            request,
+            "components/profile/profile_tags_skills_fragment.html",
+            context={"user_profile": user.profile, "is_current_user": True},  # type: ignore
+        )
+        response["HX-Retarget"] = "#tags-skills-fragment"
+        return response
     elif request.FILES:
         file = request.FILES.get("imported_document")
-        cv_json = generate_cv_json(file)
+        file_name = file.name.lower()
+        if file_name.find("achievements") > -1:
+            cv_json = generate_document_json(
+                [
+                    "Contribute effectively to developing the faculty’s curriculum at both program and departmental levels",
+                    "Use a variety of advanced innovative learning methods- effective teaching",
+                    "Use of students self learning methods in teaching",
+                    "Support students effectively through academic advising and office hours.",
+                    "Teaching load ( weekly )",
+                    "Quality Assurance Activities ( courses specification ,course report, ….     )",
+                    "Contribute to students’ activities and communicate with them scientifically and academically",
+                    "Others ( First Section )",
+                    "Scientific publication",
+                    "Conferences",
+                    "Workshops",
+                    "Supervision of theses",
+                    "Others ( Second Section )",
+                    "Participation in different committees ( faculty - university )",
+                    "Participation in community and cultural activities",
+                    "Participation in conferences and workshops organization",
+                    "Other services to the Lebanese society",
+                    "Training and consultation",
+                    "Others ( Third Section )",
+                ],
+                file,
+                ["Scientific publication", "Conferences", "Workshops"],
+            )
+            generated_profile = {
+                "staff_member_achievements": join_with_dot(
+                    [cv_json[key][0] for key in cv_json]
+                )
+            }
+        else:
+            cv_json = generate_document_json(
+                [
+                    "Name and Academic rank:",
+                    "Education: Degrees, discipline, institution, and date:",
+                    "Academic experience",
+                    "Non-academic experience",
+                    "Certification or professional Registration",
+                    "Current membership in professional organizations",
+                    "Honors and Awards:",
+                    "Service activities",
+                    "Experience Courses (Graduate and Undergraduate)",
+                    "Research	Interests",
+                    "References:",
+                    "Rank Link:",
+                    "Publications",
+                    "Professional development activities in the last years",
+                ],
+                file,
+                ["Publications"],
+            )
+            generated_profile = cv_json_to_cv_profile(cv_json)
+
         Profile.objects.update_or_create(
-            defaults={**cv_json_to_profile(cv_json), "user_id": request.user.pk}
+            defaults={**generated_profile, "user_id": request.user.pk}
         )
-        # refresh on import to make sure fields are populated.
-    # fetch user profile after update@
-    user_profile = user.profile  # type: ignore
+    # fetch user profile after update
+    user_profile_fields, staff_achievement_values = generate_form_fields(
+        request.user.pk
+    )
     response = render(
         request,
-        "components/profile/profile_tags_skills_fragment.html",
-        context={"user_profile": user_profile, "is_current_user": True},
+        "update_info.html",
+        context={
+            "cv_records": zip_if_equal(cv_labels, user_profile_fields),
+            "staff_achievement_records": zip_if_equal(
+                staff_achievement_labels, staff_achievement_values
+            ),
+        },
     )
+    response["HX-Retarget"] = "#personalInfoForm"
     return response
 
 

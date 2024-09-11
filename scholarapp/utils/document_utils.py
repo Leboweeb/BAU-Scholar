@@ -5,6 +5,8 @@ from docx import Document
 from scholarapp.models import CustomUser, Profile
 from django.db import models
 
+from scholarapp.utils.common import split_at_dot
+
 
 # document = Document("Staff Member Achievements Template.docx")
 document = Document()
@@ -128,41 +130,45 @@ def generate_staff_achievements(publications: list[str], buffer: BytesIO):
     doc.save(buffer)
 
 
-def generate_cv_json(file: BytesIO):
-    document = Document(file)
-    labels = [
-        "Name and Academic rank:",
-        "Education: Degrees, discipline, institution, and date:",
-        "Academic experience",
-        "Non-academic experience",
-        "Certification or professional Registration",
-        "Current membership in professional organizations",
-        "Honors and Awards:",
-        "Service activities",
-        "Experience Courses (Graduate and Undergraduate)",
-        "Research	Interests",
-        "References:",
-        "Rank Link:",
-        "Publications",
-        "Professional development activities in the last years",
+def generate_document_json(
+    labels: list[str], file: BytesIO, labels_to_remove: list[str]
+):
+    roman_numerals = [
+        "I.",
+        "II.",
+        "III.",
+        "IV.",
+        "V.",
+        "VI.",
+        "VII.",
+        "VIII.",
+        "IX.",
+        "X.",
     ]
+    document = Document(file)
     document_dict = {label: [] for label in labels}
-    current_label = labels[0]
+    document_dict["_meta"] = []
+    current_label = "_meta"
     for p in document.paragraphs:
-        processed_text = re.sub(r"(\w+\.)", "", p.text).strip()
+        processed_text = re.sub(r"(\d+\.|\w+\))", "", p.text).strip()
+        # we don't care about headings
+        if any(processed_text.startswith(numeral) for numeral in roman_numerals):
+            document_dict["_meta"].append(p.text)
+            continue
         # we don't care about line breaks
         if not processed_text:
             continue
         if processed_text in labels:
             current_label = processed_text
         else:
-            document_dict[current_label].append(p.text)
+            document_dict[current_label].append(p.text.strip())
 
-    del document_dict["Publications"]
+    for label in labels_to_remove + ["_meta"]:
+        del document_dict[label]
     return document_dict
 
 
-def cv_json_to_profile(input_dict: dict[str, list]):
+def cv_json_to_cv_profile(input_dict: dict[str, list]):
     # handle text fields first
     required_multi_value_labels = [
         "Education: Degrees, discipline, institution, and date:",
@@ -196,3 +202,19 @@ def cv_json_to_profile(input_dict: dict[str, list]):
     update_dict["rank"] = rank
     update_dict["department"] = department
     return update_dict
+
+
+def generate_form_fields(user_id: int | str):
+    user = CustomUser.objects.get(pk=user_id)
+    if hasattr(user, "profile"):
+        user_profile: Profile = user.profile  # type: ignore
+        user_profile_fields = [
+            getattr(user_profile, attr.attname).split("•")  # type: ignore
+            for attr in Profile._meta.get_fields()[2:-1]
+        ]
+        staff_achievement_values = split_at_dot(user_profile.staff_member_achievements)
+    else:
+        user_profile_fields = []
+        staff_achievement_values = []
+
+    return user_profile_fields, staff_achievement_values

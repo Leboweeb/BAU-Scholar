@@ -101,4 +101,4 @@ class Profile(models.Model):
     courses = models.TextField(default="")
     references = models.TextField(default="")
     development_activities = models.TextField(default="")
-    staff_member_achievements = models.TextField(null=True)
+    staff_member_achievements = models.TextField(default="")

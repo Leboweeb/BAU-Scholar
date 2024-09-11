@@ -1,4 +1,5 @@
 const update_profile_form = document.querySelector("#import-document");
+const pathSeperators = /[\\/]/;
 
 // see https://stackoverflow.com/questions/15361189/how-to-select-all-other-values-in-an-array-except-the-ith-element
 function exceptIndex(list, exceptIndex) {

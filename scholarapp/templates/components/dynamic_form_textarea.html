@@ -3,7 +3,5 @@
     <textarea type="text"
               name="{{ element_id }}"
               id="{{ element_id }}"
-              class="textinput form-control w-100"
-              {% if required %}required=""{% endif %}
-              {% if data %}value="{{ data }}"{% endif %}></textarea>
+              class="textinput form-control w-100">{% if data %}{{ data }}{% endif %}</textarea>
 </div>
