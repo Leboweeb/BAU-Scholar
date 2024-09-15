@@ -7,11 +7,14 @@ function exceptIndex(list, exceptIndex) {
   return [...list].filter((value, index) => exceptIndex !== index);
 }
 
-function removeParent(elem) {
-  elem.parentElement.remove();
+function removeParent(event) {
+  event.currentTarget.parentElement.remove();
 }
 
 function closePersonalInfoModal() {
+  document.body.classList.remove("modal-open");
+  document.body.style = "";
+  document.querySelector(".modal-backdrop").remove();
   document.querySelector("#personalInfoModalClose").click();
 }
 
@@ -30,13 +33,15 @@ function getExtension(fname) {
 }
 
 function submitDocument(event) {
-  // event.preventDefault();
+  event.preventDefault();
   // event.dataTransfer.effectAllowed = "all";
   // event.dataTransfer.dropEffect = "copy";
   let fileInput = document.querySelector("#imported_document").files[0];
   if (getExtension(fileInput.name) !== "docx")
     alert("Please upload a valid docx file.");
   let formData = new FormData();
+  let target = "#personalInfoForm";
+  let swapStyle = "outerHTML";
   formData.append("imported_document", fileInput);
   fetch("/update_profile", {
     method: "POST",
@@ -48,9 +53,9 @@ function submitDocument(event) {
     .then((response) => response.text())
     .then((text) => {
       htmx.swap(
-        "#tags-skills-fragment",
+        target,
         text,
-        { swapStyle: "innerHTML" },
+        { swapStyle: swapStyle },
         {
           afterSwapCallback: () => {
             closePersonalInfoModal();
@@ -85,8 +90,8 @@ function addInput(parentId) {
   input_group.className = "input-group mb-3";
   remove_button.className = "btn btn-secondary row-remove";
   remove_button.type = "button";
-  remove_button.onclick = () => {
-    removeParent(remove_button);
+  remove_button.onclick = (event) => {
+    removeParent(event);
   };
   remove_button.appendChild(remove_svg);
   let newField = document.createElement("input");
@@ -98,30 +103,7 @@ function addInput(parentId) {
   parent.appendChild(input_group);
 }
 
-document.querySelectorAll(".dynamic-form").forEach((elem) => {
-  let parendId = elem.parentElement.parentElement.id.replace("div_id_", "");
-  elem.addEventListener("click", () => {
-    addInput(parendId);
-  });
-});
-
-document.querySelectorAll(".row-remove").forEach((elem) => {
-  elem.addEventListener("click", () => {
-    removeParent(elem);
-  });
-});
-
 let dropArea = document.querySelector(".drop-area");
-
-// dropArea
-//   .addEventListener(
-//     "dragstart",
-//     (event) => {
-//       event.dataTransfer.effectAllowed = "all";
-//       event.dataTransfer.dropEffect = "move";
-//     },
-//     false
-//   )
 
 [("dragenter", "dragover")].forEach((eventName) => {
   dropArea.addEventListener(eventName, highlightDropArea, false);
@@ -132,10 +114,9 @@ let dropArea = document.querySelector(".drop-area");
 
 dropArea.addEventListener("drop", submitDocument, { capture: true });
 
-let tabs = document.querySelectorAll(".nav.nav-underline button");
-let contentDivs = document.querySelectorAll("#top-container >div");
-
-function switchTabs(currentTabIndex) {
+function switchTabs(tabsSelector, contentDivsSelector, currentTabIndex) {
+  let tabs = document.querySelectorAll(tabsSelector);
+  let contentDivs = document.querySelectorAll(contentDivsSelector);
   let otherContent = exceptIndex(contentDivs, currentTabIndex);
   let otherButtons = exceptIndex(tabs, currentTabIndex);
 

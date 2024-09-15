@@ -52,10 +52,6 @@ staff_achievement_labels = [
     "Quality Assurance Activities ( courses specification ,course report, ….     )",
     "Contribute to students’ activities and communicate with them scientifically and academically",
     "Others ( First Section )",
-    "Scientific publication",
-    "Conferences",
-    "Workshops",
-    "Supervision of theses",
     "Others ( Second Section )",
     "Participation in different committees ( faculty - university )",
     "Participation in community and cultural activities",
@@ -64,6 +60,8 @@ staff_achievement_labels = [
     "Training and consultation",
     "Others ( Third Section )",
 ]
+
+internal_staff_achievement_labels = []
 cv_labels = [
     {"label": "Rank", "required": True, "single": True},
     {"label": "Department", "required": True, "single": True},
@@ -163,7 +161,8 @@ def profile(request, user_id: str):
         "form": CreateEventForm(),
         "cv_records": zip_if_equal(cv_labels, user_profile_fields),
         "staff_achievement_records": zip_if_equal(
-            staff_achievement_labels, staff_achievement_values
+            staff_achievement_labels,
+            staff_achievement_values,
         ),
         "current_year": current_year,
     }
@@ -263,7 +262,12 @@ def update_profile(request):
                     "Others ( Third Section )",
                 ],
                 file,
-                ["Scientific publication", "Conferences", "Workshops"],
+                [
+                    "Scientific publication",
+                    "Conferences",
+                    "Workshops",
+                    "Supervision of theses",
+                ],
             )
             generated_profile = {
                 "staff_member_achievements": join_with_dot(
@@ -296,31 +300,43 @@ def update_profile(request):
         Profile.objects.update_or_create(
             defaults={**generated_profile, "user_id": request.user.pk}
         )
-    # fetch user profile after update
-    user_profile_fields, staff_achievement_values = generate_form_fields(
-        request.user.pk
-    )
-    response = render(
-        request,
-        "update_info.html",
-        context={
-            "cv_records": zip_if_equal(cv_labels, user_profile_fields),
-            "staff_achievement_records": zip_if_equal(
-                staff_achievement_labels, staff_achievement_values
-            ),
-        },
-    )
-    response["HX-Retarget"] = "#personalInfoForm"
-    return response
+        # fetch user profile after update
+        user_profile_fields, staff_achievement_values = generate_form_fields(
+            request.user.pk
+        )
+        response = render(
+            request,
+            "update_info.html",
+            context={
+                "cv_records": zip_if_equal(cv_labels, user_profile_fields),
+                "staff_achievement_records": zip_if_equal(
+                    staff_achievement_labels, staff_achievement_values
+                ),
+            },
+        )
+        return response
 
 
 @api_view(["POST"])
 def get_contacts(request):
-    user = CustomUser.objects.get(pk=int(request.data["user_id"]))
-    query = Conversation.objects.filter(users=user)[:5]
-    contacts = [
-        conversation.users.all().exclude(id=user.pk)[0] for conversation in query
-    ]
+    if request.POST.get("chat_search"):
+        name_to_search = request.POST.get("chat_search")
+        try:
+            user = CustomUser.objects.get(name__icontains=name_to_search)
+        except CustomUser.DoesNotExist:
+            return HttpResponse(status=HTTPStatus.NO_CONTENT.value)
+        query = Conversation.objects.filter(users=user)
+        contacts = [
+            conversation.users.all().exclude(id=request.user.pk)[0]
+            for conversation in query
+        ]
+    else:
+        user = CustomUser.objects.get(pk=int(request.user.pk))
+        query = Conversation.objects.filter(users=user)[:5]
+        contacts = [
+            conversation.users.all().exclude(id=user.pk)[0] for conversation in query
+        ]
+
     conversations = [c.room_slug for c in query]
     contacts = zip(contacts, conversations)
     return render(

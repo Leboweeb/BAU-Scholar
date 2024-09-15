@@ -62,7 +62,8 @@ def generate_cv(user: CustomUser, publications: list[str], buffer: BytesIO):
     document.add_paragraph("References:", style="List Number")
     for i in user_profile.references.split("•"):
         document.add_paragraph(i, style="List Bullet 2")
-    document.add_paragraph("Rank Link: Assistant Professor", style="List Number")
+    document.add_paragraph("Rank Link:", style="List Number")
+    document.add_paragraph(user_profile.rank_link, style="List Bullet 2")
     document.add_paragraph("Publications:", style="List Number")
     for publication in publications:
         document.add_paragraph(publication, style="List Number 2")

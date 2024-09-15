@@ -18,6 +18,6 @@ def zip_if_equal(labels: list, values: list):
     """
     return (
         zip(labels, values)
-        if values
+        if (values and len(values) == len(labels))
         else zip(labels, itertools.repeat("", len(labels)))
     )

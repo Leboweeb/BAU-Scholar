@@ -7,7 +7,11 @@
         {% else %}
             <label class="form-label m-0  mb-1 align-content-center">{{ top_label }}</label>
         {% endif %}
-        {% if not single %}<button class="btn btn-secondary btn-sm dynamic-form" type="button">+ Add Row</button>{% endif %}
+        {% if not single %}
+            <button class="btn btn-secondary btn-sm dynamic-form"
+                    type="button"
+                    onclick="addInput('{{ element_id }}')">+ Add Row</button>
+        {% endif %}
     </div>
     <div class="row g-2">
         {% if not existing_data %}
@@ -18,7 +22,9 @@
                        {% if required %}required=""{% endif %}
                        {% if data %}value="{{ data }}"{% endif %}>
                 {% if not single %}
-                    <button class="btn btn-secondary row-remove" type="button">
+                    <button class="btn btn-secondary row-remove"
+                            type="button"
+                            onclick="removeParent(event)">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="16"
                              height="16"
@@ -40,7 +46,9 @@
                        {% if required %}required=""{% endif %}
                        {% if data %}value="{{ data }}"{% endif %}>
                 {% if not single %}
-                    <button class="btn btn-secondary row-remove" type="button">
+                    <button class="btn btn-secondary row-remove"
+                            onclick="removeParent(event)"
+                            type="button">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="16"
                              height="16"

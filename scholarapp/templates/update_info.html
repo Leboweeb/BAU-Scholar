@@ -17,9 +17,9 @@
       </div>
       <div class="modal-body">
         <form method="post"
-              hx-enconding="multipart/form-data"
               id="import-document"
               hx-post="/update_profile"
+              hx-target="#personalInfoForm"
               hx-swap="outerHTML"
               hx-on::after-request="closePersonalInfoModal()">
           {% csrf_token %}
@@ -28,19 +28,23 @@
               <button type="button"
                       id="nav-fill-form"
                       class="nav-link active"
-                      onclick="switchTabs(0)">Fill Form</button>
+                      onclick="switchTabs('.nav.nav-underline button','#top-container >div',0)">Fill Form</button>
             </li>
             <li class="nav-item">
               <button type="button"
                       id="nav-fill-staff-achievements"
                       class="nav-link"
-                      onclick="switchTabs(1)">Fill Staff Achievements Form</button>
+                      onclick="switchTabs('.nav.nav-underline button','#top-container >div',1)">
+                Fill Staff Achievements Form
+              </button>
             </li>
             <li class="nav-item">
               <button type="button"
                       id="nav-import-document"
                       class="nav-link"
-                      onclick="switchTabs(2)">Import Document</button>
+                      onclick="switchTabs('.nav.nav-underline button','#top-container >div',2)">
+                Import Document
+              </button>
             </li>
           </ul>
           <div id="top-container"

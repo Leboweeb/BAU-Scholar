@@ -114,7 +114,14 @@
     <div class="card col p-0 no-border">
       <div class="card-header">
         <div class="form-outline">
-          <input type="search" id="form1" class="form-control " placeholder="Search" />
+          <input hx-post="/get_contacts"
+                 hx-trigger="input changed delay:500ms, search"
+                 hx-target="#contacts"
+                 type="search"
+                 name="chat_search"
+                 id="chat_search"
+                 class="form-control "
+                 placeholder="Search" />
         </div>
         <a class="btn btn-sm p-0 hide-chat"
            onclick="document.querySelector('#chat-box').classList.add('d-none')"
@@ -130,8 +137,6 @@
         </a>
       </div>
       <ul hx-post="/get_contacts"
-          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-          hx-vals='{"user_id" : "{{ request.user.pk }}" }'
           hx-trigger="load"
           hx-swap="innerHTML"
           id="contacts"

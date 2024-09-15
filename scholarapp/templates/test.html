@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+    {% include "update_info.html" %}
+    {% include "components/profile/profile_tags_skills_fragment.html" with user_profile=user.profile %}
+    <button data-bs-toggle="modal" data-bs-target="#personalInfoForm">Show Modal</button>
+{% endblock content %}
