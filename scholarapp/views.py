@@ -95,6 +95,23 @@ def split(value: str, key):
     return value.split(key)
 
 
+@register.filter(name="can_participate")
+def can_participate_in_event(value: EventTypes):
+    events_with_participants = [
+        EventTypes.WORKSHOP,
+        EventTypes.CONFERENCE_EVENT,
+        EventTypes.THESIS_SUPERVISION,
+    ]
+    if value in events_with_participants:
+        return True
+    return False
+
+
+@register.filter(name="user_has_participated")
+def has_participated(user: CustomUser, event_id: int):
+    return Event.objects.filter(id=event_id, attendees=user)
+
+
 @register.filter(name="as_id")
 def as_id(value: str):
     pattern = re.compile(r"[\W+_]")
@@ -217,6 +234,16 @@ def generate_user_document(request):
     return JsonResponse({"data": b64_data.decode()})
     # except CustomUser.DoesNotExist:
     #     return HttpResponseForbidden()
+
+
+@api_view(["POST"])
+def participate_in_event(request):
+    event_id = request.data["event_id"]
+    user = CustomUser.objects.get(pk=request.user.pk)
+    event = Event.objects.get(pk=event_id)
+    event.attendees.add(user)
+    # Same as 200, but client doesn't expect HTML or JSON as response.
+    return HttpResponse(status=HTTPStatus.NO_CONTENT.value)
 
 
 def update_profile(request):

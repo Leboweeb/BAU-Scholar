@@ -65,6 +65,7 @@ class Event(models.Model):
     title = models.CharField(max_length=350)
     description = models.CharField(max_length=512)
     authors = models.ManyToManyField(CustomUser, blank=True)
+    attendees = models.ManyToManyField(CustomUser, blank=True, related_name="attendees")
     author_str = models.CharField(max_length=256)
     external_link = models.URLField(null=True)
     date_created = models.DateTimeField(default=now)

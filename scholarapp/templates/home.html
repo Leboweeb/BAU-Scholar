@@ -12,15 +12,15 @@
                     </div>
                 </div>
             </div>
-            <div class="container p-3 pre-scrollable">
+            <div class="container p-3">
                 <div class="container d-flex flex-column gap-3">
                     {% for i in categories.0 %}
-                        {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display %}
+                        {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display can_participate=i.event_type|can_participate event_id=i.pk has_participated=request.user|user_has_participated:i.pk %}
                     {% endfor %}
                 </div>
             </div>
         </div>
-        <div class="row mt-5">
+        {% comment %} <div class="row mt-5">
             <div class="container mb-2">
                 <div class="row">
                     <div class="col">
@@ -58,5 +58,5 @@
                 </div>
             </div>
         </div>
-    </div>
-{% endblock content %}
+        </div> {% endcomment %}
+    {% endblock content %}

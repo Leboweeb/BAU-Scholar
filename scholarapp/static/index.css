@@ -1,11 +1,28 @@
-body {
-  font-family: "Courier New", Courier, monospace;
+/* body {
+  font-family: Arial, Helvetica, sans-serif;
+} */
+
+#navbar-top {
+  background-color: #0a1a31;
 }
 
 #logo {
   object-fit: scale-down;
   width: 30px;
   height: 24px;
+}
+
+.btn-secondary {
+  background-color: rgb(109, 143, 193) !important;
+}
+.bg-secondary {
+  background-color: rgb(109, 143, 193) !important;
+}
+
+.btn-participate {
+  position: absolute;
+  right: 25px;
+  top: 25px;
 }
 
 .pre-scrollable {
@@ -104,4 +121,8 @@ input[type="file"] {
 
 .drop-area-active {
   border: 2px dashed #191970;
+}
+
+#tags-skills-fragment {
+  margin-inline: 0;
 }
