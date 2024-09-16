@@ -2,9 +2,9 @@ import base64
 from datetime import datetime
 from http import HTTPStatus
 from io import BytesIO
-import itertools
 import json
 import os
+import re
 from dateutil.parser import parse
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
@@ -29,7 +29,7 @@ from scholarapp.models import (
 )
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
-from scholarapp.utils.common import join_with_dot, split_at_dot, zip_if_equal
+from scholarapp.utils.common import join_with_dot, zip_if_equal
 from scholarapp.utils.document_utils import (
     cv_json_to_cv_profile,
     generate_cv,
@@ -61,7 +61,6 @@ staff_achievement_labels = [
     "Others ( Third Section )",
 ]
 
-internal_staff_achievement_labels = []
 cv_labels = [
     {"label": "Rank", "required": True, "single": True},
     {"label": "Department", "required": True, "single": True},
@@ -89,7 +88,7 @@ cv_labels = [
 
 # Create your views here.
 @register.filter(name="split")
-def split(value, key):
+def split(value: str, key):
     """
     Returns the value turned into a list.
     """
@@ -98,7 +97,8 @@ def split(value, key):
 
 @register.filter(name="as_id")
 def as_id(value: str):
-    return value.lower().replace(" ", "_")
+    pattern = re.compile(r"[\W+_]")
+    return pattern.sub("", value.lower())
 
 
 @login_required
