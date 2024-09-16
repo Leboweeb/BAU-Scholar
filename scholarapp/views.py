@@ -239,9 +239,13 @@ def generate_user_document(request):
 @api_view(["POST"])
 def participate_in_event(request):
     event_id = request.data["event_id"]
+    _has_participated = request.data["has_participated"]
     user = CustomUser.objects.get(pk=request.user.pk)
     event = Event.objects.get(pk=event_id)
-    event.attendees.add(user)
+    if not _has_participated:
+        event.attendees.add(user)
+    else:
+        event.attendees.remove(user)
     # Same as 200, but client doesn't expect HTML or JSON as response.
     return HttpResponse(status=HTTPStatus.NO_CONTENT.value)
 
