@@ -2,7 +2,7 @@ from datetime import datetime
 from io import BytesIO
 import re
 from docx import Document
-from scholarapp.models import CustomUser, Profile
+from scholarapp.models import CustomUser, Event, EventTypes, Profile
 from django.db import models
 
 from scholarapp.utils.common import split_at_dot
@@ -80,6 +80,17 @@ def generate_staff_achievements(
 ):
     doc = Document()
 
+    def add_user_events_of_type(event_type: str):
+        events: list[str] = [
+            f"Attended {event_type.capitalize()} {ev.title} : {ev.description}"
+            for ev in Event.objects.filter(
+                attendees=user, event_type=getattr(EventTypes, event_type)
+            )
+        ]
+        if events:
+            for ev in events:
+                doc.add_paragraph(ev, style="List Number 2")
+
     def get_profile_field_or_blank(attr: str | None = None, index: int | None = None):
         """
         Use this function to access an attribute in the user profile object or a field
@@ -87,7 +98,8 @@ def generate_staff_achievements(
         """
         if hasattr(user, "profile"):
             user_profile: Profile = user.profile  # type: ignore
-
+            if not user_profile.staff_member_achievements:
+                return ""
             if index != None and attr == None:
                 return split_at_dot(user_profile.staff_member_achievements)[index]
             elif attr != None and index == None:
@@ -151,8 +163,11 @@ def generate_staff_achievements(
     for publication in publications:
         doc.add_paragraph(publication, style="List Number 2")
     doc.add_paragraph("b) Conferences")
+    add_user_events_of_type("CONFERENCE_EVENT")
     doc.add_paragraph("c) Workshops")
+    add_user_events_of_type("WORKSHOP")
     doc.add_paragraph("d) Supervision of theses")
+    add_user_events_of_type("THESIS_SUPERVISION")
     doc.add_paragraph("e) Others ( Second Section )")
     doc.add_paragraph(f"{get_profile_field_or_blank(index=8)}")
     doc.add_heading("III. University and Community Services", 1)

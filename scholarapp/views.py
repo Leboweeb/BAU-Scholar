@@ -188,6 +188,9 @@ def profile(request, user_id: str):
         if eventForm.is_valid():
             event = Event.objects.create(**eventForm.cleaned_data)
             event.authors.add(user)
+            # I'm assuming the user who made a workshop is not the actual author, but it needs to be under
+            # their name for the cv to be generated properly
+            event.attendees.add(user)
             event.save()
     return render(request, "profile.html", context=context)
 
@@ -207,7 +210,6 @@ def follow_status(request, to_user_id: int, status: str):
 def get_chat_history(request):
     slug = request.data["conversation_slug"]
     conversation = Conversation.objects.get(room_slug=slug)
-    messages: QuerySet = conversation.message_set.all()  # type: ignore
     return render(
         request,
         "components/message_history.html",
@@ -217,7 +219,6 @@ def get_chat_history(request):
 
 @api_view(["POST"])
 def generate_user_document(request):
-    # try:
     document_generator = [
         generate_cv,
         generate_staff_achievements,
@@ -225,15 +226,19 @@ def generate_user_document(request):
     user = CustomUser.objects.get(pk=int(request.data["user_id"]))
     user_publications = [
         (f"{publication.author_str} : {publication.title}\n\n")
-        for publication in Event.objects.filter(authors=user)
+        for publication in Event.objects.filter(authors=user).exclude(
+            event_type__in=(
+                EventTypes.WORKSHOP,
+                EventTypes.CONFERENCE_EVENT,
+                EventTypes.THESIS_SUPERVISION,
+            ),
+        )
     ]
     buffer = BytesIO()
     # docx is saved to buffer now
     document_generator(request.user, user_publications, buffer)
     b64_data = base64.b64encode(buffer.getvalue())
     return JsonResponse({"data": b64_data.decode()})
-    # except CustomUser.DoesNotExist:
-    #     return HttpResponseForbidden()
 
 
 @api_view(["POST"])

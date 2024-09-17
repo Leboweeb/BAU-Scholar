@@ -1,6 +1,6 @@
-/* body {
-  font-family: Arial, Helvetica, sans-serif;
-} */
+body {
+  background-color: #f6f6f6 !important;
+}
 
 #navbar-top {
   background-color: #0a1a31;
@@ -25,6 +25,9 @@
   top: 25px;
 }
 
+.event_type {
+  margin-left: -0.5rem;
+}
 .pre-scrollable {
   max-height: 300px;
   overflow-y: scroll;

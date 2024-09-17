@@ -62,6 +62,7 @@
               {% for record,data in staff_achievement_records %}
                 {% include "components/dynamic_form_input.html" with top_label=record element_id=record|as_id data=data single=False %}
               {% endfor %}
+              <button class="btn btn-primary" type="submit">Submit</button>
             </div>
             <div id="import-document-container" class="mt-3 p-2 w-100 m-auto d-none">
               <label for="imported_document" class="drop-area" draggable="true">
