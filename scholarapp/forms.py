@@ -27,6 +27,7 @@ class CreateEventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = ("title", "description", "event_type")
+        participated = forms.BooleanField(initial=False)
 
 
 class PostSignUpForm(forms.Form):

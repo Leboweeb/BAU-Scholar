@@ -5,8 +5,8 @@ from io import BytesIO
 import json
 import os
 import re
+from typing import Iterable
 from dateutil.parser import parse
-from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
@@ -29,7 +29,13 @@ from scholarapp.models import (
 )
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
-from scholarapp.utils.common import join_with_dot, zip_if_equal
+from scholarapp.utils.common import (
+    create_event_dicts,
+    get_home_feed,
+    join_with_dot,
+    return_with_code,
+    zip_if_equal,
+)
 from scholarapp.utils.document_utils import (
     cv_json_to_cv_profile,
     generate_cv,
@@ -118,14 +124,16 @@ def as_id(value: str):
     return pattern.sub("", value.lower())
 
 
+@register.filter(name="get_event_category")
+def get_event_category(event: Event, user_id: int):
+    user = CustomUser.objects.get(pk=user_id)
+    followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
+    return
+
+
 @login_required
 def index(request):
-    followed_users = [follow.following for follow in request.user.from_user.all()]
-    categories = [
-        Event.objects.order_by("-date_created")[:5],
-        Event.objects.order_by("-date_created")[:5],
-        Event.objects.filter(authors__in=followed_users)[:5],
-    ]
+    categories = get_home_feed(request.user)
     return render(
         request,
         "home.html",
@@ -142,16 +150,6 @@ def profile(request, user_id: str):
     user = CustomUser.objects.get(pk=user_id)
     is_current_user = request.user == user
     is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
-    # process tags first
-    # if user_profile:
-    #     if not user_profile.tags:
-    #         gemini_model = genai.GenerativeModel("gemini-1.5-flash")
-    #         user_profile.tags = gemini_model.generate_content(
-    #             f"Given these skills : {user_profile.skills} \n Generate tags that are as inclusive and brief as possible ( use only alphabetic characters and spaces for each tag) and as a comma separated string."
-    #         ).text
-    #         user_profile.tags = re.sub("\n", "", user_profile.tags).strip()
-    #         user_profile.save()
-    # then publications
     user_publications = Event.objects.filter(authors=user)
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
@@ -213,7 +211,7 @@ def get_chat_history(request):
     return render(
         request,
         "components/message_history.html",
-        context={"messages": messages, "user_id": request.user.pk},
+        context={"messages": conversation.message_set.all(), "user_id": request.user.pk},  # type: ignore
     )
 
 
@@ -252,7 +250,7 @@ def participate_in_event(request):
     else:
         event.attendees.remove(user)
     # Same as 200, but client doesn't expect HTML or JSON as response.
-    return HttpResponse(status=HTTPStatus.NO_CONTENT.value)
+    return return_with_code(HTTPStatus.NO_CONTENT)
 
 
 def update_profile(request):
@@ -351,6 +349,20 @@ def update_profile(request):
             },
         )
         return response
+    else:
+        return return_with_code(HTTPStatus.NO_CONTENT)
+
+
+@api_view(["POST"])
+def get_events(request):
+    categories = get_home_feed(request.user)
+    if query := request.POST.get("event_search"):
+        categories = create_event_dicts(Event.objects.filter(title__icontains=query))
+    return render(
+        request,
+        "components/render_events.html",
+        context={"categories": categories},
+    )
 
 
 @api_view(["POST"])
@@ -360,7 +372,7 @@ def get_contacts(request):
         try:
             user = CustomUser.objects.get(name__icontains=name_to_search)
         except CustomUser.DoesNotExist:
-            return HttpResponse(status=HTTPStatus.NO_CONTENT.value)
+            return return_with_code(HTTPStatus.NO_CONTENT)
         query = Conversation.objects.filter(users=user)
         contacts = [
             conversation.users.all().exclude(id=request.user.pk)[0]

@@ -27,4 +27,5 @@ urlpatterns = [
     path(
         "participate_in_event", views.participate_in_event, name="participate_in_event"
     ),
+    path("get_events", views.get_events, name="get_events"),
 ]

@@ -82,14 +82,14 @@ def generate_staff_achievements(
 
     def add_user_events_of_type(event_type: str):
         events: list[str] = [
-            f"Attended {event_type.capitalize()} {ev.title} : {ev.description}"
+            f"Attended {event_type.capitalize()},  {ev.title} : {ev.description}"
             for ev in Event.objects.filter(
                 attendees=user, event_type=getattr(EventTypes, event_type)
             )
         ]
         if events:
             for ev in events:
-                doc.add_paragraph(ev, style="List Number 2")
+                doc.add_paragraph(ev, style="Bullet Number 2")
 
     def get_profile_field_or_blank(attr: str | None = None, index: int | None = None):
         """

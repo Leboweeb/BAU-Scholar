@@ -1,65 +1,113 @@
 <div id="profile-info">
-    <div class="row mt-4">
-        <div class="container">
-            <div class="card w-100 p-3 ">
-                <div class="d-flex flex-column align-item-center justify-content-center text-center">
-                    {% if not is_current_user %}
-                    <button onclick="add_conversation_ajax('{{ user.name }}','{{ user.avatar }}','{{ user.id }}')"
-                        class="btn btn-primary" style="position:relative;
-                                       width : max-content;
-                                       margin:auto;
-                                       top:15px;
-                                       left:45px;
-                                       border-radius:35px">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-chat-left-text" viewBox="0 0 16 16">
-                            <path
-                                d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
-                            <path
-                                d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5" />
-                        </svg>
-                    </button>
-                    {% endif %}
-                    <form id="profilePictureForm" method="post" enctype="multipart/form-data" hx-post="/update_profile"
-                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-target="#profile-info" hx-swap="innerHTML">
-                        <input class="d-none" type="file" name="profilePicture" id="profilePicture">
-                        <div class="profilepic mb-2" onclick="uploadPicture();">
-                            <img class="profilepic__image" src="{{ user.avatar }}" width="64" height="64"
-                                alt="Profibild" />
-                            <div class="profilepic__content">
-                                <span class="profilepic__icon">
-                                    <svg class="fas" width="24" height="24" xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 512 512">
-                                        <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-                                        <path
-                                            d="M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
-                                        <script xmlns="" />
-                                    </svg>
-                                </span>
-                                <span class="profilepic__text">Edit</span>
-                            </div>
-                        </div>
-                        <h4>
-                            <b>{{ user.name }}</b>
-                        </h4>
-                        {% if not is_current_user %}
-                        {% if not is_following %}
-                        <a href="{% url 'follow_status' user.id 'follow' %}" class="btn btn-primary m-auto">Follow</a>
-                        {% else %}
-                        <a href="{% url 'follow_status' user.id 'unfollow' %}"
-                            class="btn btn-primary m-auto">Unfollow</a>
-                        {% endif %}
-                        {% else %}
-                        <select id="documentSelector" style="width: 250px;margin: auto;" class="form-select"
-                            aria-label="Default select example" onchange='downloadDocument("{{ user.name }}")'>
-                            <option selected>Select Personal Document to Download</option>
-                            <option value="0">Generate CV</option>
-                            <option value="1">Generate Staff Achievements</option>
-                        </select>
-                        {% endif %}
-                    </form>
-                </div>
+  <div class="row mt-4">
+    <div class="container">
+      <div class="card w-100 p-3">
+        <div
+          class="d-flex flex-column align-item-center justify-content-center text-center"
+        >
+          {% if not is_current_user %}
+          <button
+            onclick="add_conversation_ajax('{{ user.name }}','{{ user.avatar }}','{{ user.id }}')"
+            class="btn btn-primary"
+            style="
+              position: relative;
+              width: max-content;
+              margin: auto;
+              top: 15px;
+              left: 45px;
+              border-radius: 35px;
+            "
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-chat-left-text"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"
+              />
+              <path
+                d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"
+              />
+            </svg>
+          </button>
+          {% endif %}
+          <form
+            id="profilePictureForm"
+            method="post"
+            enctype="multipart/form-data"
+            hx-post="/update_profile"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            hx-target="#profile-info"
+            hx-swap="innerHTML"
+          >
+            <input
+              class="d-none"
+              type="file"
+              name="profilePicture"
+              id="profilePicture"
+            />
+            <div class="profilepic mb-2" onclick="uploadPicture();">
+              <img
+                class="profilepic__image"
+                src="{{ user.avatar }}"
+                width="64"
+                height="64"
+                alt="Profibild"
+              />
+              <div class="profilepic__content">
+                <span class="profilepic__icon">
+                  <svg
+                    class="fas"
+                    width="24"
+                    height="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                  >
+                    <!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                    <path
+                      d="M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"
+                    />
+                    <script xmlns="" />
+                  </svg>
+                </span>
+                <span class="profilepic__text">Edit</span>
+              </div>
             </div>
+            <h4>
+              <b>{{ user.name }}</b>
+            </h4>
+            {% if not is_current_user %} {% if not is_following %}
+            <a
+              href="{% url 'follow_status' user.id 'follow' %}"
+              class="btn btn-primary m-auto"
+              >Follow</a
+            >
+            {% else %}
+            <a
+              href="{% url 'follow_status' user.id 'unfollow' %}"
+              class="btn btn-primary m-auto"
+              >Unfollow</a
+            >
+            {% endif %} {% else %}
+            <select
+              id="documentSelector"
+              style="width: 250px; margin: auto"
+              class="form-select"
+              aria-label="Select document to download"
+              onchange='downloadDocument("{{ user.name }}")'
+            >
+              <option selected>Select Personal Document to Download</option>
+              <option value="0">Generate CV</option>
+              <option value="1">Generate Staff Achievements</option>
+            </select>
+            {% endif %}
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 </div>
