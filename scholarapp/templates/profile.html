@@ -38,7 +38,23 @@
         <div class="card w-100 p-3">
           <img src="" alt="">
           <div class="d-flex align-items-center">
-            <strong>Research</strong>
+            <ul class="nav nav-underline">
+              <li class="nav-item">
+                <button type="button"
+                        class="nav-link active"
+                        onclick="switchTabs('.nav.nav-underline:nth-child(1) button','.container.flex-column.mt-3',0)">
+                  Research
+                </button>
+              </li>
+              <li class="nav-item">
+                <button type="button"
+                        class="nav-link"
+                        onclick="switchTabs('.nav.nav-underline:nth-child(1) button','.container.flex-column.mt-3',1)">
+                  Events
+                </button>
+              </li>
+            </ul>
+            {% comment %} <strong>Research</strong> {% endcomment %}
             {% if is_current_user %}
               <a style="float: right;
                         margin: auto;
@@ -51,12 +67,12 @@
           </div>
           <div class="container d-flex flex-column mt-3 gap-4">
             {% for i in publications %}
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">{{ i.title }}</h5>
-                  <p class="card-text">{{ i.description }}</p>
-                </div>
-              </div>
+              {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all %}
+            {% endfor %}
+          </div>
+          <div class="container d-flex flex-column mt-3 gap-4 d-none">
+            {% for i in user_events %}
+              {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all %}
             {% endfor %}
           </div>
         </div>

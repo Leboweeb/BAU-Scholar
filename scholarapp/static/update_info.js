@@ -1,12 +1,6 @@
 const update_profile_form = document.querySelector("#import-document");
 const pathSeperators = /[\\/]/;
 
-// see https://stackoverflow.com/questions/15361189/how-to-select-all-other-values-in-an-array-except-the-ith-element
-function exceptIndex(list, exceptIndex) {
-  // ensure list is array
-  return [...list].filter((value, index) => exceptIndex !== index);
-}
-
 function removeParent(event) {
   event.currentTarget.parentElement.remove();
 }
@@ -25,11 +19,6 @@ function highlightDropArea(event) {
 function unhighlightDropArea(event) {
   event.preventDefault();
   dropArea.classList.remove("drop-area-active");
-}
-
-// see https://stackoverflow.com/questions/190852/how-can-i-get-file-extensions-with-javascript/12900504#12900504
-function getExtension(fname) {
-  return fname.slice(((fname.lastIndexOf(".") - 1) >>> 0) + 2);
 }
 
 function submitDocument(event) {
@@ -113,17 +102,3 @@ let dropArea = document.querySelector(".drop-area");
 });
 
 dropArea.addEventListener("drop", submitDocument, { capture: true });
-
-function switchTabs(tabsSelector, contentDivsSelector, currentTabIndex) {
-  let tabs = document.querySelectorAll(tabsSelector);
-  let contentDivs = document.querySelectorAll(contentDivsSelector);
-  let otherContent = exceptIndex(contentDivs, currentTabIndex);
-  let otherButtons = exceptIndex(tabs, currentTabIndex);
-
-  for (let index = 0; index < tabs.length; index++) {
-    tabs[currentTabIndex].classList.add("active");
-    contentDivs[currentTabIndex].classList.remove("d-none");
-    otherContent.forEach((value) => value.classList.add("d-none"));
-    otherButtons.forEach((value) => value.classList.remove("active"));
-  }
-}

@@ -92,6 +92,13 @@ cv_labels = [
 ]
 
 
+events_with_participants = [
+    EventTypes.WORKSHOP,
+    EventTypes.CONFERENCE_EVENT,
+    EventTypes.THESIS_SUPERVISION,
+]
+
+
 # Create your views here.
 @register.filter(name="split")
 def split(value: str, key):
@@ -103,11 +110,6 @@ def split(value: str, key):
 
 @register.filter(name="can_participate")
 def can_participate_in_event(value: EventTypes):
-    events_with_participants = [
-        EventTypes.WORKSHOP,
-        EventTypes.CONFERENCE_EVENT,
-        EventTypes.THESIS_SUPERVISION,
-    ]
     if value in events_with_participants:
         return True
     return False
@@ -122,13 +124,6 @@ def has_participated(user: CustomUser, event_id: int):
 def as_id(value: str):
     pattern = re.compile(r"[\W+_]")
     return pattern.sub("", value.lower())
-
-
-@register.filter(name="get_event_category")
-def get_event_category(event: Event, user_id: int):
-    user = CustomUser.objects.get(pk=user_id)
-    followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
-    return
 
 
 @login_required
@@ -150,7 +145,10 @@ def profile(request, user_id: str):
     user = CustomUser.objects.get(pk=user_id)
     is_current_user = request.user == user
     is_following_user = request.user.from_user.filter(following_id=user.pk).exists()
-    user_publications = Event.objects.filter(authors=user)
+    user_publications = Event.objects.filter(authors=user).exclude(
+        event_type__in=events_with_participants
+    )
+    user_events = Event.objects.filter(event_type__in=events_with_participants)
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
         event_types = {choice.label: choice for choice in EventTypes}
@@ -171,6 +169,7 @@ def profile(request, user_id: str):
     context = {
         "user": user,
         "publications": user_publications.all(),
+        "user_events": user_events.all(),
         "is_current_user": is_current_user,
         "is_following": is_following_user,
         "form": CreateEventForm(),
@@ -355,9 +354,10 @@ def update_profile(request):
 
 @api_view(["POST"])
 def get_events(request):
-    categories = get_home_feed(request.user)
     if query := request.POST.get("event_search"):
         categories = create_event_dicts(Event.objects.filter(title__icontains=query))
+    else:
+        categories = get_home_feed(request.user)
     return render(
         request,
         "components/render_events.html",

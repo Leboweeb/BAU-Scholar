@@ -9,6 +9,7 @@
                        name="event_search"
                        hx-post="/get_events"
                        hx-trigger="input changed delay:500ms, search"
+                       hx-vals="js:{search_in:getSearchParams()}"
                        hx-target="#eventSection"
                        hx-swap="innerHTML"
                        id="event_search">
@@ -23,19 +24,25 @@
             </div>
             <div class="flex-center-row">
                 {% for tab in "People,Research,Events,Tags"|split:"," %}
-                    <button type="button" class="custom-tab d-none d-md-inline ">{{ tab }}</button>
+                    {# djlint:off #}
+                    <button type="button"
+                            class="custom-tab d-none d-md-inline" 
+                            onclick="toggleCustomTab(event)">{{ tab }}</button>
+                    {# djlint:on #}
                 {% endfor %}
-                <select name="search_in" id="search_in" class="form-select d-md-none ">
-                    <option selected value="Search In...">Search In...</option>
+                <select id="search_in"
+                        class="form-select d-md-none "
+                        onchange="toggleCustomTab(event)">
+                    <option selected value="">Search In...</option>
                     <option value="people">People</option>
                     <option value="research">Research</option>
                     <option value="events">Events</option>
                     <option value="tags">Tags</option>
                 </select>
                 <select name="sort_by" id="sort_by" class="form-select">
+                    <option selected value="">Sort By...</option>
                     <option selected value="most_recent">Most Recent</option>
-                    <option value="most_relevant">Most Relevant</option>
-                    <option value="most_common">Most In Common With You</option>
+                    <option value="least_recent">Least Recent</option>
                 </select>
                 {% comment %} </ul> {% endcomment %}
             </div>
@@ -46,11 +53,11 @@
             <div class="container p-3">
                 <div id="eventSection" class="container d-flex flex-column gap-3">
                     {% comment %} {# djlint : off #}
-                                                                                                    {% for ev in categories %}
-                                                                                                        {% with ev.event as i %}
-                                                                                                            {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display can_participate=i.event_type|can_participate event_id=i.pk has_participated=request.user|user_has_participated:i.pk category=ev.category %}
-                                                                                                        {% endwith %}
-                                                                                                    {% endfor %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {% for ev in categories %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {% with ev.event as i %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display can_participate=i.event_type|can_participate event_id=i.pk has_participated=request.user|user_has_participated:i.pk category=ev.category %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {% endwith %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {% endfor %}
                     {# djlint : on #} {% endcomment %}
                     {% include "components/render_events.html" with categories=categories %}
                 </div>

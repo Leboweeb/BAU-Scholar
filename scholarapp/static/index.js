@@ -46,3 +46,32 @@ function participateInEvent(event) {
     currentTarget.children[0].replaceWith(element_to_swap);
   });
 }
+
+let toggleCustomTab = (event) => {
+  let currentTarget = event.currentTarget;
+  let tabs = document.querySelectorAll(".custom-tab");
+  let searchOptions = "People,Research,Events,Tags"
+    .split(",")
+    .map((val) => val.toLowerCase());
+  let index;
+  if (currentTarget.tagName === "BUTTON") {
+    index = indexFromSelector(".custom-tab", currentTarget);
+  } else {
+    index = searchOptions.indexOf(currentTarget.value);
+    if (index === -1) {
+      tabs.forEach((elem) => elem.classList.remove("custom-tab-active"));
+    }
+  }
+  let searchDropDown = document.querySelector("#search_in");
+  tabs[index].classList.add("custom-tab-active");
+  exceptIndex(tabs, index).forEach((elem) =>
+    elem.classList.remove("custom-tab-active")
+  );
+  searchDropDown.value = searchOptions[index];
+};
+
+function getSearchParams() {
+  // the search dropdown will always mirror the selected tab, no need to check tabs as well.
+  let searchDropDown = document.querySelector("#search_in").value;
+  return searchDropDown;
+}
