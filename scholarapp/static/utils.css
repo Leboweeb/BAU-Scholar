@@ -1,0 +1,63 @@
+.h-fit-content {
+  height: fit-content;
+}
+
+.scroll {
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.no-border {
+  border-radius: 0 !important;
+}
+
+.fit-text {
+  width: max-content;
+  margin: auto;
+  flex: 1;
+}
+
+m-inline-0 {
+  margin-inline: 0px;
+}
+
+.flex-center-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.flex-center-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 1.5rem;
+}
+
+.flex-row {
+  display: flex;
+  gap: 1.5rem;
+}
+.card-rect {
+  background: white;
+  width: 100%;
+}
+
+.w-60 {
+  width: 60%;
+}
+
+.w-70 {
+  width: 70%;
+}
+
+.w-fit-content {
+  width: fit-content;
+}
+.pre-scrollable {
+  max-height: 300px;
+  overflow-y: scroll;
+}

@@ -128,6 +128,10 @@ def as_id(value: str):
     return pattern.sub("", value.lower())
 
 
+def test(request):
+    return render(request, "test.html")
+
+
 @login_required
 def index(request):
     categories = get_home_feed(request.user)
@@ -181,6 +185,7 @@ def profile(request, user_id: str):
             staff_achievement_values,
         ),
         "current_year": current_year,
+        "options": CustomUser.objects.all(),
     }
     if request.method == "POST":
         eventForm = CreateEventForm(request.POST)

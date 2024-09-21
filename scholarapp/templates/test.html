@@ -1,6 +1,72 @@
 {% extends "base.html" %}
 {% block content %}
-    {% include "update_info.html" %}
-    {% include "components/profile/profile_tags_skills_fragment.html" with user_profile=user.profile %}
-    <button data-bs-toggle="modal" data-bs-target="#personalInfoForm">Show Modal</button>
+    <div class="container">
+        <div class="row">
+            <label class="form-label requiredField" for="authors">Authors</label>
+        </div>
+        <div class="row d-table position-relative">
+            <input hx-post="/get_authors"
+                   hx-trigger="input changed delay:500ms, search"
+                   hx-target="#author_container"
+                   hx-swap="innerHTML"
+                   type="search"
+                   onkeydown="hideDropDown(event)"
+                   onclick="showDropDown()"
+                   name="author_search"
+                   id="author_search"
+                   class="form-control w-100"
+                   placeholder="Search People...">
+            <div class="row">
+                <div id="badges" class="my-2 row" style="display: flex; gap: 0.175rem"></div>
+            </div>
+            <div class=" row card p-2 w-100 d-none"
+                 id="customDropdown"
+                 style="position: absolute;
+                        top: 40px;
+                        left: 12px;
+                        right: 0px;
+                        z-index: 2">
+                <ul class="list-group list-group-flush scroll h-fit-content">
+                    <li class="list-group-item">
+                        <button type="button" onclick="addPill()" class="btn btn-secondary">Test</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-secondary">Test</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-secondary">Test</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-secondary">Test</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button type="button" class="btn btn-secondary">Test</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        let dropDown = document.querySelector("#customDropdown")
+        let badges = document.querySelector("#badges")
+
+        function showDropDown() {
+            dropDown.classList.remove("d-none");
+        }
+
+        function hideDropDown(event) {
+            if(event.key === "Escape") {
+                dropDown.classList.add("d-none");
+            }
+        }
+
+        function addPill() {
+            let pill = document.createElement("span")
+            pill.className = "badge rounded-pill bg-secondary w-fit-content"
+            pill.textContent = "Longer Name To Test"
+            badges.appendChild(
+               pill 
+            )
+        }
+    </script>
 {% endblock content %}
