@@ -32,6 +32,8 @@ from dotenv import load_dotenv
 from scholarapp.utils.common import (
     create_event_dicts,
     get_home_feed,
+    get_user_events,
+    get_user_research,
     join_with_dot,
     return_with_code,
     zip_if_equal,
@@ -355,7 +357,39 @@ def update_profile(request):
 @api_view(["POST"])
 def get_events(request):
     if query := request.POST.get("event_search"):
-        categories = create_event_dicts(Event.objects.filter(title__icontains=query))
+        search_method = request.POST.get("search_in") or "title"
+        sort_by = request.POST.get("sort_by") or "most_recent"
+        sort_by = "-date_created" if sort_by == "most_recent" else "date_created"
+        event_objects = Event.objects
+        match search_method:
+
+            case "title":
+                event_objects = event_objects.filter(title__icontains=query)
+
+            case "people":
+                authors = CustomUser.objects.filter(name__icontains=query)
+                event_objects = event_objects.filter(authors__in=authors)
+
+            case "research":
+                event_objects = get_user_research(request.user).filter(
+                    title__icontains=query
+                )
+
+            case "events":
+                event_objects = get_user_events(request.user).filter(
+                    title__icontains=query
+                )
+
+            case "tags":
+                # leave to same as title for now
+                event_objects = event_objects.filter(title__icontains=query)
+
+        event_objects = event_objects.order_by(sort_by)
+
+        categories = create_event_dicts(
+            event_objects
+            # Event.objects.filter(title__icontains=query).order_by(sort_by)
+        )
     else:
         categories = get_home_feed(request.user)
     return render(

@@ -4,7 +4,7 @@ from typing import Iterable
 
 from django.http import HttpResponse
 
-from scholarapp.models import CustomUser, Event
+from scholarapp.models import CustomUser, Event, EventTypes
 
 
 DOT = "•"
@@ -49,3 +49,24 @@ def get_home_feed(user: CustomUser):
         *create_event_dicts(Event.objects.order_by("-date_created")[:15]),
     ]
     return categories
+
+
+def get_user_research(user: CustomUser):
+    return Event.objects.filter(authors=user).exclude(
+        event_type__in=(
+            EventTypes.WORKSHOP,
+            EventTypes.CONFERENCE_EVENT,
+            EventTypes.THESIS_SUPERVISION,
+        ),
+    )
+
+
+def get_user_events(user: CustomUser):
+    return Event.objects.filter(
+        authors=user,
+        event_type__in=(
+            EventTypes.WORKSHOP,
+            EventTypes.CONFERENCE_EVENT,
+            EventTypes.THESIS_SUPERVISION,
+        ),
+    )
