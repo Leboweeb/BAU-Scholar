@@ -70,3 +70,7 @@ def get_user_events(user: CustomUser):
             EventTypes.THESIS_SUPERVISION,
         ),
     )
+
+
+def exclude_keys(dictionary: dict, *keys):
+    return {k: dictionary[k] for k in dictionary.keys() if k not in keys}

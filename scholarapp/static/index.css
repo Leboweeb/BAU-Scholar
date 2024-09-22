@@ -142,6 +142,7 @@ input[type="file"] {
 
 .contact {
   background-color: #f8f8f8;
+  cursor: pointer;
 }
 
 .contact:hover {

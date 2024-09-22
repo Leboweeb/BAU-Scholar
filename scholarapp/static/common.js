@@ -35,3 +35,31 @@ function toggleActive(contentSelector, activeClassName, index) {
     elem.classList.remove(activeClassName);
   });
 }
+
+function ListStringOperation(listString, element, callback) {
+  if (!listString) {
+    return element;
+  }
+  let list = listString.split(",");
+  let numberSet = new Set(list);
+  callback(numberSet, element);
+  return [...numberSet].join(",");
+}
+
+let appendToListString = (listString, element) => {
+  return ListStringOperation(listString, element, (set, _) => {
+    set.add(element);
+  });
+};
+
+let removeFromListString = (listString, element) => {
+  return ListStringOperation(listString, element, (set, _) => {
+    set.delete(element);
+  });
+};
+
+function submitForm(preSubmitCallback, formSelector) {
+  preSubmitCallback();
+  let form = document.querySelector(formSelector);
+  form.submit();
+}

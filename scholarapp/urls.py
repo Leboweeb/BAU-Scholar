@@ -29,4 +29,5 @@ urlpatterns = [
     ),
     path("get_events", views.get_events, name="get_events"),
     path("test", views.test, name="test"),
+    path("search_users", views.search_users, name="search_users"),
 ]

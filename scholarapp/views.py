@@ -31,6 +31,7 @@ from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
 from scholarapp.utils.common import (
     create_event_dicts,
+    exclude_keys,
     get_home_feed,
     get_user_events,
     get_user_research,
@@ -190,11 +191,17 @@ def profile(request, user_id: str):
     if request.method == "POST":
         eventForm = CreateEventForm(request.POST)
         if eventForm.is_valid():
-            event = Event.objects.create(**eventForm.cleaned_data)
-            event.authors.add(user)
-            # I'm assuming the user who made a workshop is not the actual author, but it needs to be under
-            # their name for the cv to be generated properly
-            event.attendees.add(user)
+            event_keys = exclude_keys(eventForm.cleaned_data, "authors")
+            event = Event.objects.create(**event_keys)
+            authors = request.POST.get("authors_field")
+            if not authors:
+                # the event creator is assumed to be the author
+                # in case someone tries to be funny
+                event.authors.add(request.user)
+            else:
+                # javascript validation saved us, we don't have any shennanigans
+                for author_id in map(int, authors.split(",")):
+                    event.authors.add(CustomUser.objects.get(id=author_id))
             event.save()
     return render(request, "profile.html", context=context)
 
@@ -401,6 +408,17 @@ def get_events(request):
         request,
         "components/render_events.html",
         context={"categories": categories},
+    )
+
+
+@api_view(["POST"])
+def search_users(request):
+    author = request.POST.get("author_search") or ""
+    if not author:
+        return return_with_code(code=HTTPStatus.NO_CONTENT)
+    authors = CustomUser.objects.filter(name__icontains=author)[:5]
+    return render(
+        request, "components/search_contacts.html", context={"contacts": authors}
     )
 
 

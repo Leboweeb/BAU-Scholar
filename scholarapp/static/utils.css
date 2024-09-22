@@ -61,3 +61,6 @@ m-inline-0 {
   max-height: 300px;
   overflow-y: scroll;
 }
+.cursor-pointer {
+  cursor: pointer;
+}
