@@ -39,6 +39,10 @@ def return_with_code(code: HTTPStatus):
     return HttpResponse(status=code.value)
 
 
+def return_with_no_content():
+    return return_with_code(HTTPStatus.NO_CONTENT)
+
+
 def get_home_feed(user: CustomUser):
     followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
     categories = [

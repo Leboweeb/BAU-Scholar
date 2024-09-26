@@ -47,6 +47,7 @@ function submitDocument(event) {
         { swapStyle: swapStyle },
         {
           afterSwapCallback: () => {
+            add_event_listeners();
             closePersonalInfoModal();
             unhighlightDropArea(event);
           },
@@ -102,3 +103,29 @@ let dropArea = document.querySelector(".drop-area");
 });
 
 dropArea.addEventListener("drop", submitDocument, { capture: true });
+
+function add_event_listeners() {
+  let department_select = document.querySelector("#div_id_department select");
+  let tags = document.querySelector("#div_id_tags input");
+  tags.setAttribute("hx-vals", `js:{...getTagParams()}`);
+  htmx.process(tags);
+  department_select.onclick = swapProgramSelect;
+}
+
+add_event_listeners();
+
+function getTagParams() {
+  let department_select = document.querySelector("#div_id_department select");
+  let department = department_select.value;
+  let program = document.querySelector("#div_id_program select").value;
+  return { department, program };
+}
+
+function swapProgramSelect(event) {
+  let department = event.currentTarget.value;
+  htmx.ajax("POST", "/swap_program", {
+    target: 'select[name="program "]',
+    swap: "outerHTML",
+    values: { department: department },
+  });
+}

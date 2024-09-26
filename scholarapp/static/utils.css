@@ -37,8 +37,15 @@ m-inline-0 {
   gap: 1.5rem;
 }
 
-.flex-row {
+.flex-start-row {
   display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+}
+
+.flex-start-column {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 .card-rect {
@@ -63,4 +70,7 @@ m-inline-0 {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+.gap-small {
+  gap: 0.175rem;
 }

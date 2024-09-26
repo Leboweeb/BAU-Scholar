@@ -58,8 +58,62 @@ let removeFromListString = (listString, element) => {
   });
 };
 
-function submitForm(preSubmitCallback, formSelector) {
-  preSubmitCallback();
+function submitForm(validatorCallback, formSelector) {
+  let result = validatorCallback();
+  if (!result) {
+    return;
+  }
   let form = document.querySelector(formSelector);
   form.submit();
+}
+
+function showDropDown(selector) {
+  let dropDown = document.querySelector(selector);
+  dropDown.classList.remove("d-none");
+}
+
+function hideDropDown(selector) {
+  let dropDown = document.querySelector(selector);
+  let search = document
+    .querySelector(selector)
+    .parentElement.querySelector("input");
+  search.value = "";
+  dropDown.classList.add("d-none");
+}
+
+function appendSVG(node, svg, hidden_input_node, data_attr) {
+  let svgNode = new DOMParser().parseFromString(svg, "text/html").body
+    .firstElementChild;
+  svgNode.onclick = (event) => {
+    let parentElement = event.currentTarget.parentElement;
+    hidden_input_node.value = removeFromListString(
+      hidden_input_node.value,
+      parentElement.dataset[data_attr]
+    );
+    parentElement.remove();
+  };
+  node.appendChild(svgNode);
+}
+
+function addPill(event, name, hidden_input, attribute, value) {
+  let hidden_input_node = document.querySelector(hidden_input);
+  // prevent dupes
+  if (document.querySelector(`span[ data-${attribute}="${value}" ]`)) return;
+  event.currentTarget.classList.add("selected");
+  let pill = document.createElement("span");
+  pill.className = "badge rounded-pill bg-secondary w-fit-content";
+  pill.dataset[attribute] = value;
+  pill.textContent = name;
+  appendSVG(
+    pill,
+    `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x cursor-pointer" viewBox="0 0 16 16">
+  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+</svg>
+    `,
+    hidden_input_node,
+    attribute
+  );
+  hidden_input_node.value = appendToListString(hidden_input_node.value, value);
+  badges.appendChild(pill);
 }

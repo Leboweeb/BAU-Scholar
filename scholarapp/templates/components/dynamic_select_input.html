@@ -1,0 +1,4 @@
+<select class="select form-select" name="{{ label | as_id }} ">
+    <option value="" selected="">---------</option>
+    {% for choice in choices %}<option value="{{ choice }}">{{ choice | title }}</option>{% endfor %}
+</select>

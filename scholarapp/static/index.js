@@ -75,3 +75,7 @@ function getSearchParams() {
   let searchDropDown = document.querySelector("#search_in").value;
   return searchDropDown;
 }
+
+function paramChangedEvent() {
+  htmx.trigger('input[name="event_search"]', "paramsChanged");
+}

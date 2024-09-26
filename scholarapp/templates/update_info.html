@@ -20,8 +20,7 @@
               id="import-document"
               hx-post="/update_profile"
               hx-target="#personalInfoForm"
-              hx-swap="outerHTML"
-              hx-on::after-request="closePersonalInfoModal()">
+              hx-swap="outerHTML">
           {% csrf_token %}
           <ul class="nav nav-underline">
             <li class="nav-item">
@@ -54,7 +53,7 @@
             <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
               {# djlint:off #}
               {% for record,data in cv_records %}
-                {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data %}
+                {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data autocomplete=record.autocomplete top=record.top endpoint=record.endpoint choices=record.choices select=record.select %}
               {% endfor %}
               {# djlint:on#}
               <button class="btn btn-primary" type="submit">Submit</button>

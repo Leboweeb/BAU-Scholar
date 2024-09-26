@@ -5,9 +5,8 @@ from io import BytesIO
 import json
 import os
 import re
-from typing import Iterable
 from dateutil.parser import parse
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -36,7 +35,7 @@ from scholarapp.utils.common import (
     get_user_events,
     get_user_research,
     join_with_dot,
-    return_with_code,
+    return_with_no_content,
     zip_if_equal,
 )
 from scholarapp.utils.document_utils import (
@@ -48,6 +47,11 @@ from scholarapp.utils.document_utils import (
 )
 from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 from scholarapp.utils.profile_info import create_user_profile
+from scholarapp.utils.tags import (
+    get_faculties,
+    get_programs_for_departments,
+    get_tags_for_program,
+)
 
 load_dotenv()
 
@@ -72,11 +76,24 @@ staff_achievement_labels = [
 
 cv_labels = [
     {"label": "Rank", "required": True, "single": True},
-    {"label": "Department", "required": True, "single": True},
-    {"label": "Program", "required": True, "single": True},
+    {
+        "label": "Department",
+        "required": True,
+        "single": True,
+        "select": True,
+        "choices": get_faculties(),
+    },
+    {"label": "Program", "required": True, "single": True, "select": True},
     {"label": "Research Interests", "required": False, "single": True},
     {"label": "Rank Link", "required": False, "single": True},
-    {"label": "Tags", "required": False, "single": False},
+    {
+        "label": "Tags",
+        "required": False,
+        "single": True,
+        "autocomplete": True,
+        "endpoint": "/search_tags",
+        "top": "42px",
+    },
     {"label": "Skills", "required": False, "single": False},
     {"label": "Education", "required": False, "single": False},
     {"label": "Academic Experience", "required": False, "single": False},
@@ -263,7 +280,7 @@ def participate_in_event(request):
     else:
         event.attendees.remove(user)
     # Same as 200, but client doesn't expect HTML or JSON as response.
-    return return_with_code(HTTPStatus.NO_CONTENT)
+    return return_with_no_content()
 
 
 def update_profile(request):
@@ -363,7 +380,7 @@ def update_profile(request):
         )
         return response
     else:
-        return return_with_code(HTTPStatus.NO_CONTENT)
+        return return_with_no_content()
 
 
 @api_view(["POST"])
@@ -412,10 +429,28 @@ def get_events(request):
 
 
 @api_view(["POST"])
+def search_tags(request):
+    if not (department := request.POST.get("department")) or not (
+        program := request.POST.get("program")
+    ):
+        return return_with_no_content()
+    query = request.POST.get("tags") or ""
+    if not query:
+        tags = []
+    else:
+        tags = [
+            tag
+            for tag in get_tags_for_program(department, program)
+            if query.lower() in tag.lower()
+        ]
+    return render(request, "components/search_tags.html", context={"tags": tags})
+
+
+@api_view(["POST"])
 def search_users(request):
     author = request.POST.get("author_search") or ""
     if not author:
-        return return_with_code(code=HTTPStatus.NO_CONTENT)
+        return return_with_no_content()
     authors = CustomUser.objects.filter(name__icontains=author)[:5]
     return render(
         request, "components/search_contacts.html", context={"contacts": authors}
@@ -429,7 +464,7 @@ def get_contacts(request):
         try:
             user = CustomUser.objects.get(name__icontains=name_to_search)
         except CustomUser.DoesNotExist:
-            return return_with_code(HTTPStatus.NO_CONTENT)
+            return return_with_no_content()
         query = Conversation.objects.filter(users=user)
         contacts = [
             conversation.users.all().exclude(id=request.user.pk)[0]
@@ -464,6 +499,24 @@ def create_conversation_room(request):
     )
     conversation.save()
     return Response({"conversation_room": conversation.room_slug})
+
+
+@api_view(["POST"])
+def swap_program(request):
+
+    if department := request.POST.get("department"):
+        choices = get_programs_for_departments(department)
+    else:
+        choices = []
+
+    return render(
+        request,
+        "components/dynamic_select_input.html",
+        context={
+            "label": "Program",
+            "choices": choices,
+        },
+    )
 
 
 @api_view(["POST"])
