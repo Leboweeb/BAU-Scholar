@@ -3,9 +3,7 @@
         <li class="list-group-item">
             <button class="btn btn-secondary btn-sm"
                     type="button"
-                    onclick="addPill(event, '{{ tag }}','#div_id_tags .badges', 'user','{{ tag.pk }}')">
-                {{ tag }}
-            </button>
+                    onclick="addPill('{{ tag | title }}','#div_id_tags input', 'tag','{{ tag }}')">{{ tag }}</button>
         </li>
     {% endfor %}
 </div>

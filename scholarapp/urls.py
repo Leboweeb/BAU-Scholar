@@ -31,5 +31,4 @@ urlpatterns = [
     path("test", views.test, name="test"),
     path("search_users", views.search_users, name="search_users"),
     path("search_tags", views.search_tags, name="search_tags"),
-    path("swap_program", views.swap_program, name="swap_program"),
 ]

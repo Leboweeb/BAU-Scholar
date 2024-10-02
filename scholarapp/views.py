@@ -1,6 +1,5 @@
 import base64
 from datetime import datetime
-from http import HTTPStatus
 from io import BytesIO
 import json
 import os
@@ -499,24 +498,6 @@ def create_conversation_room(request):
     )
     conversation.save()
     return Response({"conversation_room": conversation.room_slug})
-
-
-@api_view(["POST"])
-def swap_program(request):
-
-    if department := request.POST.get("department"):
-        choices = get_programs_for_departments(department)
-    else:
-        choices = []
-
-    return render(
-        request,
-        "components/dynamic_select_input.html",
-        context={
-            "label": "Program",
-            "choices": choices,
-        },
-    )
 
 
 @api_view(["POST"])

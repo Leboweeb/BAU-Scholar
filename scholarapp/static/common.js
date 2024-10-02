@@ -95,11 +95,10 @@ function appendSVG(node, svg, hidden_input_node, data_attr) {
   node.appendChild(svgNode);
 }
 
-function addPill(event, name, hidden_input, attribute, value) {
+function addPill(name, hidden_input, attribute, value) {
   let hidden_input_node = document.querySelector(hidden_input);
   // prevent dupes
   if (document.querySelector(`span[ data-${attribute}="${value}" ]`)) return;
-  event.currentTarget.classList.add("selected");
   let pill = document.createElement("span");
   pill.className = "badge rounded-pill bg-secondary w-fit-content";
   pill.dataset[attribute] = value;
@@ -115,5 +114,14 @@ function addPill(event, name, hidden_input, attribute, value) {
     attribute
   );
   hidden_input_node.value = appendToListString(hidden_input_node.value, value);
-  badges.appendChild(pill);
+  let badges_section = hidden_input_node.parentElement.querySelector(".badges");
+  badges_section.appendChild(pill);
+}
+
+// see https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+function toTitleCase(str) {
+  return str.replace(
+    /\w\S*/g,
+    (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+  );
 }
