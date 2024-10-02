@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime
+from http import HTTPStatus
 from io import BytesIO
 import json
 import os
@@ -34,6 +35,7 @@ from scholarapp.utils.common import (
     get_user_events,
     get_user_research,
     join_with_dot,
+    return_with_code,
     return_with_no_content,
     zip_if_equal,
 )
@@ -432,7 +434,7 @@ def search_tags(request):
     if not (department := request.POST.get("department")) or not (
         program := request.POST.get("program")
     ):
-        return return_with_no_content()
+        return return_with_code(HTTPStatus.BAD_REQUEST)
     query = request.POST.get("tags") or ""
     if not query:
         tags = []

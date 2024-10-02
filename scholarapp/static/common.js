@@ -76,7 +76,7 @@ function hideDropDown(selector) {
   let dropDown = document.querySelector(selector);
   let search = document
     .querySelector(selector)
-    .parentElement.querySelector("input");
+    .parentElement.querySelector("input:nth-child(2)");
   search.value = "";
   dropDown.classList.add("d-none");
 }

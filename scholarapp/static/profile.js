@@ -689,6 +689,7 @@ function add_event_listeners() {
   let department_select = document.querySelector("#div_id_department select");
   let tags = document.querySelector("#div_id_tags input[type='search']");
   tags.setAttribute("hx-vals", `js:{...getTagParams()}`);
+  tags.setAttribute("hx-on:htmx:response-error", "checkProgramSelected()");
   htmx.process(tags);
   department_select.onclick = swapProgramSelect;
 }
@@ -704,12 +705,23 @@ function getTagParams() {
 
 function swapProgramSelect(event) {
   let department = event.currentTarget.value;
+  if (!department) {
+    return;
+  }
   let options = Object.keys(tags[department]);
   let template = `
     <option value="" selected="">---------</option>
   `;
   for (const option of options) {
-    template += `<option value=${option}>${toTitleCase(option)}</option>`;
+    template += `<option value="${option}">${option}</option>`;
   }
   htmx.swap('select[name="program "]', template, { swapStyle: "innerHTML" });
+}
+
+function checkProgramSelected() {
+  if (!document.querySelector("#div_id_program > select:nth-child(2)").value) {
+    alert(
+      "Please select a program from the dropdown before searching for tags."
+    );
+  }
 }
