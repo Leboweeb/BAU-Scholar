@@ -287,7 +287,25 @@ def participate_in_event(request):
 def update_profile(request):
     user = CustomUser.objects.get(id=request.user.pk)
     if request.POST:
-        personal_info_labels = list(request.POST.keys())[1:]
+        personal_info_labels = [
+            "rank",
+            "department ",
+            "program ",
+            "researchinterests",
+            "ranklink",
+            "hidden_tags",
+            "skills",
+            "education",
+            "academicexperience",
+            "nonacademicexperience",
+            "certifications",
+            "organizationmembership",
+            "honorsandawards",
+            "serviceactivities",
+            "experiencecourses",
+            "references",
+            "professionaldevelopmentactivities",
+        ]
         Profile.objects.update_or_create(
             defaults=create_user_profile(
                 request.POST, personal_info_labels, request.user.pk

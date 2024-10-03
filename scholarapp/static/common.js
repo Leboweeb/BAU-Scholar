@@ -40,10 +40,10 @@ function ListStringOperation(listString, element, callback) {
   if (!listString) {
     return element;
   }
-  let list = listString.split(",");
+  let list = listString.split("•");
   let numberSet = new Set(list);
   callback(numberSet, element);
-  return [...numberSet].join(",");
+  return [...numberSet].join("•");
 }
 
 let appendToListString = (listString, element) => {
