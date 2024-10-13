@@ -306,10 +306,8 @@ def update_profile(request):
             "references",
             "professionaldevelopmentactivities",
         ]
-        Profile.objects.update_or_create(
-            defaults=create_user_profile(
-                request.POST, personal_info_labels, request.user.pk
-            )
+        Profile.objects.filter(pk=user.profile.pk).update(  # type: ignore
+            **create_user_profile(request.POST, personal_info_labels, request.user.pk)
         )
         response = render(
             request,
@@ -380,8 +378,8 @@ def update_profile(request):
             )
             generated_profile = cv_json_to_cv_profile(cv_json)
 
-        Profile.objects.update_or_create(
-            defaults={**generated_profile, "user_id": request.user.pk}
+        Profile.objects.filter(pk=user.profile.pk).update(  # type: ignore
+            **generated_profile
         )
         # fetch user profile after update
         user_profile_fields, staff_achievement_values = generate_form_fields(
@@ -545,6 +543,9 @@ def sign_in(request):
         if form.is_valid():
             model = form.save(commit=False)
             attrs = ("avatar", "profile_url", "skills")
+            profile_temp = Profile(user_id=model.pk)
+            profile_temp.save()
+            model.profile = profile_temp
             for attr in attrs:
                 setattr(model, attr, request.POST.get(attr))
             model.save()

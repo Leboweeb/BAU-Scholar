@@ -13,7 +13,6 @@ def create_user_profile(
         for l in labels
     ]
     profile = {}
-    profile["user"] = CustomUser.objects.filter(id=user_id).get()
     profile_fields = Profile._meta.get_fields()[2:-1]
     for index, field in enumerate(profile_fields):
         profile[field.attname] = form_values[index]  # type: ignore
