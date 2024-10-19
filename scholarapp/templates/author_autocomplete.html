@@ -1,0 +1,6 @@
+<div class="mb-3">
+    <label class="form-label requiredField m-0 mb-1 align-content-center">
+        {{ top_label }}<span class="asteriskField">*</span>
+    </label>
+    {% include "components/dynamic_autocomplete_input.html" with label=label endpoint="/search_users" top="42px" %}
+</div>

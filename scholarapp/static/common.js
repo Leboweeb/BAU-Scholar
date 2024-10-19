@@ -14,6 +14,10 @@ function getExtension(fname) {
   return fname.slice(((fname.lastIndexOf(".") - 1) >>> 0) + 2);
 }
 
+function splitAtDot(string) {
+  return string.split("•");
+}
+
 function switchTabs(tabsSelector, contentDivsSelector, currentTabIndex) {
   let tabs = document.querySelectorAll(tabsSelector);
   let contentDivs = document.querySelectorAll(contentDivsSelector);
@@ -95,10 +99,19 @@ function appendSVG(node, svg, hidden_input_node, data_attr) {
   node.appendChild(svgNode);
 }
 
-function addPill(name, hidden_input, attribute, value) {
-  let hidden_input_node = document.querySelector(hidden_input);
+/*
+  Adds a pill representing the choice the user selected. Note that the badges section must have the class .badges
+  @param {string} name - The choice the user selected.
+  @param {string} hidden_input - The selector for the hidden input.
+  @param {string} attribute - A unique attribute name for the hidden input to use.
+  @param {string} hidden_input - The value for this attribute at this specific pill.
+*/
+function addPill(event, name, attribute, value) {
+  let top_element =
+    event.currentTarget.parentElement.parentElement.parentElement;
+  let hidden_input_node = top_element.querySelector("input[type='hidden']");
   // prevent dupes
-  if (document.querySelector(`span[ data-${attribute}="${value}" ]`)) return;
+  if (top_element.querySelector(`span[ data-${attribute}="${value}" ]`)) return;
   let pill = document.createElement("span");
   pill.className = "badge rounded-pill bg-secondary w-fit-content";
   pill.dataset[attribute] = value;

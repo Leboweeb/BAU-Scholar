@@ -1,9 +1,19 @@
 let socket;
 const user_id = document.querySelector("#user_id").dataset.user;
 const csrf_token = document.querySelector("#user_id").dataset.csrf;
+const contacts = document.querySelector("#contacts");
+
+function add_group(event) {
+  event.preventDefault();
+  let form = event.currentTarget;
+  let temp_data = new FormData(form);
+  let processed_user_ids = splitAtDot(temp_data.get("user_ids")).map((elem) =>
+    Number(elem)
+  );
+  temp_data.set("user_ids", JSON.stringify(processed_user_ids));
+}
 
 function add_profile(name, avatar, contact_id) {
-  const contacts = document.querySelector("#contacts");
   if (!document.querySelector(`.contact[data-name="${name}"]`)) {
     let node = new DOMParser().parseFromString(
       `

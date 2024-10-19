@@ -27,89 +27,160 @@
     <script defer src="https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js"></script>
   </head>
   <body>
-    <nav id="navbar-top" class="navbar navbar-expand-md navbar-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'index' %}">
-          {% load static %}
-          <img id="logo"
-               width="32"
-               height="32"
-               src="{% static 'bau.png' %}"
-               alt="Bau Logo"
-               class="d-inline-block align-text-top" />
-          BAU Scholar
-        </a>
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarCollapse"
-                aria-controls="navbarCollapse"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-          <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="{% url 'index' %}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'profile' request.user.pk %}">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Groups</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            {% if not user.is_authenticated %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Log In</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'signup' %}">Create Account</a>
-              </li>
-            {% else %}
-              <form action="{% url 'logout' %}" method="post">
+    <div class="modal fade" id="newGroupModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Create a New Group</h5>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="container">
+              <form onsubmit="add_group(event)"
+                    method="post"
+                    action="/create_conversation_room">
                 {% csrf_token %}
-                <li class="nav-item">
-                  <button class="nav-link" type="submit">Log Out</button>
-                </li>
-              </form>
-            {% endif %}
-          </ul>
-        </div>
+                {% include "components/dynamic_form_input.html" with top_label="Group Title" single=True element_id="Group Title"|as_id  required=True %}
+                <div class="mb-3">
+                  <label class="form-label m-0 mb-3 align-content-center">Group Members ( Max 8 )</label>
+                  <div class="d-table position-relative">
+                    <input name="user_ids" type="hidden">
+                  </input>
+                  <input hx-post="/search_users"
+                         hx-trigger="input changed delay:500ms, search"
+                         hx-target=".members_container"
+                         hx-swap="innerHTML"
+                         type="search"
+                         onclick="showDropDown('.members_container')"
+                         name="author_search"
+                         class="form-control"
+                         style="max-width: 215px"
+                         placeholder="Search For Users...">
+                  <svg xmlns="http://www.w3.org/2000/svg"
+                       width="16"
+                       height="16"
+                       style="position: relative;
+                              left: 195px;
+                              bottom: 31px"
+                       onclick="hideDropDown('.members_container')"
+                       fill="currentColor"
+                       class="bi bi-x cursor-pointer"
+                       viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                  </svg>
+                  <div class="my-3 row badges"
+                       style="display: flex;
+                              gap: 0.175rem;
+                              margin-left:0.05rem"></div>
+                  <div class="card p-2 w-100 d-none members_container"
+                       style="position: absolute;
+                              top: 42px;
+                              left: 0px;
+                              right: 0px;
+                              z-index: 3">
+                    <ul class="list-group list-group-flush scroll h-fit-content">
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              {% include "components/dynamic_form_input.html" with top_label="Group Description" element_id="Group Description"|as_id  single=True required=True %}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Create Group</button>
+          </div>
+        </form>
       </div>
-    </nav>
-    {% include "chat.html" %}
-    {% block content %}
-    {% endblock content %}
-    <div class="container">
-      <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-        <p class="col-md-4 mb-0 text-muted">© {{ current_year }} BAU</p>
-        <a href=""
-           class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-        </a>
-        <ul class="nav col-md-4 justify-content-end">
+    </div>
+  </div>
+  <nav id="navbar-top" class="navbar navbar-expand-md navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        {% load static %}
+        <img id="logo"
+             width="32"
+             height="32"
+             src="{% static 'bau.png' %}"
+             alt="Bau Logo"
+             class="d-inline-block align-text-top" />
+        BAU Scholar
+      </a>
+      <button class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarCollapse"
+              aria-controls="navbarCollapse"
+              aria-expanded="false"
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-muted">Home</a>
+            <a class="nav-link" aria-current="page" href="{% url 'index' %}">Home</a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-muted">Features</a>
+            <a class="nav-link" href="{% url 'profile' request.user.pk %}">Profile</a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-muted">FAQs</a>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-muted">About</a>
+            <button class="nav-link"
+                    data-bs-toggle="modal"
+                    data-bs-target="#newGroupModal">New Group</button>
           </li>
         </ul>
-      </footer>
+        <ul class="navbar-nav ms-auto">
+          {% if not user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Log In</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'signup' %}">Create Account</a>
+            </li>
+          {% else %}
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <li class="nav-item">
+                <button class="nav-link" type="submit">Log Out</button>
+              </li>
+            </form>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-  </body>
-  <script>
+  </nav>
+  {% include "chat.html" %}
+  {% block content %}
+  {% endblock content %}
+  <div class="container">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+      <p class="col-md-4 mb-0 text-muted">© {{ current_year }} BAU</p>
+      <a href=""
+         class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+      </a>
+      <ul class="nav col-md-4 justify-content-end">
+        <li class="nav-item">
+          <a href="#" class="nav-link px-2 text-muted">Home</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link px-2 text-muted">Features</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link px-2 text-muted">FAQs</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link px-2 text-muted">About</a>
+        </li>
+      </ul>
+    </footer>
+  </div>
+</body>
+<script>
     document.body.addEventListener(
     'htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
   })
-  </script>
+</script>
 </html>

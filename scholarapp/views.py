@@ -6,7 +6,7 @@ import json
 import os
 import re
 from dateutil.parser import parse
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
@@ -413,8 +413,12 @@ def get_events(request):
                 event_objects = event_objects.filter(title__icontains=query)
 
             case "people":
-                authors = CustomUser.objects.filter(name__icontains=query)
-                event_objects = event_objects.filter(authors__in=authors)
+                authors = CustomUser.objects.filter(name__icontains=query)[:10]
+                return render(
+                    request,
+                    "search_authors_home.html",
+                    context={"authors": authors},
+                )
 
             case "research":
                 event_objects = get_user_research(request.user).filter(
@@ -508,7 +512,26 @@ def get_contacts(request):
 @api_view(["POST"])
 def create_conversation_room(request):
     user_ids = [int(_id) for _id in request.data["user_ids"]]
+    if len(user_ids) > 8:
+        return HttpResponse(
+            {"error_reason": "Too many group members !"},
+            status=HTTPStatus.BAD_REQUEST.value,
+        )
+    extra_fields = [
+        request.POST.get(as_id(title)) for title in ("Group Title", "Group Description")
+    ]
+    # if we have an empty title or description, return error.
+    if any(not field for field in extra_fields):
+        return HttpResponse(
+            {"error_reason": "Title or description for conversation is empty!"},
+            status=HTTPStatus.BAD_REQUEST.value,
+        )
+
+    # otherwise proceed normally
     conversation = Conversation.objects.create()
+    if len(user_ids) > 3:
+        conversation.title = extra_fields[0]
+        conversation.description = extra_fields[1]
     for user in [CustomUser.objects.get(id=_id) for _id in user_ids]:
         conversation.users.add(user)
     conversation.room_slug = slugify(

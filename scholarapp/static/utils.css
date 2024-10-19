@@ -74,3 +74,7 @@ m-inline-0 {
 .gap-small {
   gap: 0.175rem;
 }
+
+.card-hover {
+  box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.1);
+}

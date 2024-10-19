@@ -1,9 +1,8 @@
 <div class="flex-start-column gap-small">
     {% for tag in tags %}
-        <li class="list-group-item">
-            <button class="btn btn-secondary btn-sm"
-                    type="button"
-                    onclick="addPill('{{ tag | title }}','#div_id_tags input', 'tag','{{ tag }}')">{{ tag }}</button>
+        <li class="list-group-item"
+            onclick="addPill(event,'{{ tag | title }}', 'tag','{{ tag }}')">
+            <button class="btn btn-secondary btn-sm" type="button">{{ tag }}</button>
         </li>
     {% endfor %}
 </div>

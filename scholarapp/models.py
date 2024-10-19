@@ -83,6 +83,8 @@ class Followers(models.Model):
 
 class Conversation(models.Model):
     users = models.ManyToManyField(CustomUser)
+    title = models.CharField(max_length=120)
+    description = models.CharField(max_length=512)
     room_slug = models.SlugField(max_length=240, unique=True, null=False)
 
 

@@ -243,3 +243,7 @@ input[type="file"] {
 .linebreak-underline {
   border-bottom: var(--underline-thickness) solid var(--linebreak-color);
 }
+
+#eventSection .card:hover {
+  box-shadow: 0 5px 25px -5px rgba(0, 0, 0, 0.1);
+}
