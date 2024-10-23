@@ -1,10 +1,11 @@
 from http import HTTPStatus
 import itertools
+import re
 from typing import Iterable
-
+from django.template.defaulttags import register
 from django.http import HttpResponse
 
-from scholarapp.models import CustomUser, Event, EventTypes
+from scholarapp.models import Event
 
 
 DOT = "•"
@@ -14,6 +15,7 @@ def join_with_dot(l: list):
     return DOT.join(l)
 
 
+@register.filter(name="split_at_dot")
 def split_at_dot(s: str):
     return s.split(DOT)
 
@@ -43,38 +45,11 @@ def return_with_no_content():
     return return_with_code(HTTPStatus.NO_CONTENT)
 
 
-def get_home_feed(user: CustomUser):
-    followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
-    categories = [
-        *create_event_dicts(
-            Event.objects.filter(authors__in=followed_users)[:3],
-            "From People you Follow",
-        ),
-        *create_event_dicts(Event.objects.order_by("-date_created")[:15]),
-    ]
-    return categories
-
-
-def get_user_research(user: CustomUser):
-    return Event.objects.filter(authors=user).exclude(
-        event_type__in=(
-            EventTypes.WORKSHOP,
-            EventTypes.CONFERENCE_EVENT,
-            EventTypes.THESIS_SUPERVISION,
-        ),
-    )
-
-
-def get_user_events(user: CustomUser):
-    return Event.objects.filter(
-        authors=user,
-        event_type__in=(
-            EventTypes.WORKSHOP,
-            EventTypes.CONFERENCE_EVENT,
-            EventTypes.THESIS_SUPERVISION,
-        ),
-    )
-
-
 def exclude_keys(dictionary: dict, *keys):
     return {k: dictionary[k] for k in dictionary.keys() if k not in keys}
+
+
+@register.filter(name="as_id")
+def as_id(value: str):
+    pattern = re.compile(r"[\W+_]")
+    return pattern.sub("", value.lower())

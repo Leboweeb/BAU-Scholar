@@ -1,10 +1,13 @@
 import base64
 from datetime import datetime
+from functools import reduce
 from http import HTTPStatus
 from io import BytesIO
+from itertools import chain
 import json
 import os
-import re
+import operator
+from django.db.models import Q
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,8 +15,8 @@ from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.template.defaulttags import register
 from django.utils.text import slugify
+from django.template.defaulttags import register
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -29,14 +32,13 @@ from scholarapp.models import (
 from scholarapp.serializers import ImportUserSerializer
 from dotenv import load_dotenv
 from scholarapp.utils.common import (
+    as_id,
     create_event_dicts,
     exclude_keys,
-    get_home_feed,
-    get_user_events,
-    get_user_research,
     join_with_dot,
     return_with_code,
     return_with_no_content,
+    split_at_dot,
     zip_if_equal,
 )
 from scholarapp.utils.document_utils import (
@@ -50,7 +52,6 @@ from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.tags import (
     get_faculties,
-    get_programs_for_departments,
     get_tags_for_program,
 )
 
@@ -120,6 +121,61 @@ events_with_participants = [
 ]
 
 
+def get_home_feed(user: CustomUser):
+    followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
+    followed_events = Event.objects.filter(authors__in=followed_users)[:3]
+    user_tags = split_at_dot(user.profile.tags)  # type: ignore
+    recommended_events_queries = reduce(
+        operator.or_, (Q(tags__icontains=tag) for tag in user_tags)
+    )
+    recommended_events = Event.objects.filter(recommended_events_queries)[:3]
+    exclude_event_ids = [i.pk for i in list(chain(followed_events, recommended_events))]
+    categories = [
+        *create_event_dicts(
+            followed_events,
+            "From People you Follow",
+        ),
+        *create_event_dicts(recommended_events, "Recommended Events"),
+        *create_event_dicts(Event.objects.exclude(id__in=exclude_event_ids)[:15]),
+    ]
+    return categories
+
+
+def modular_tag_search(request, query, department, program):
+    if not department or not program:
+        return return_with_code(HTTPStatus.BAD_REQUEST)
+    if not query:
+        tags = []
+    else:
+        tags = [
+            tag
+            for tag in get_tags_for_program(department, program)
+            if query.lower() in tag.lower()
+        ]
+    return render(request, "components/search_tags.html", context={"tags": tags})
+
+
+def get_user_research(user: CustomUser):
+    return Event.objects.filter(authors=user).exclude(
+        event_type__in=(
+            EventTypes.WORKSHOP,
+            EventTypes.CONFERENCE_EVENT,
+            EventTypes.THESIS_SUPERVISION,
+        ),
+    )
+
+
+def get_user_events(user: CustomUser):
+    return Event.objects.filter(
+        authors=user,
+        event_type__in=(
+            EventTypes.WORKSHOP,
+            EventTypes.CONFERENCE_EVENT,
+            EventTypes.THESIS_SUPERVISION,
+        ),
+    )
+
+
 # Create your views here.
 @register.filter(name="split")
 def split(value: str, key):
@@ -139,12 +195,6 @@ def can_participate_in_event(value: EventTypes):
 @register.filter(name="user_has_participated")
 def has_participated(user: CustomUser, event_id: int):
     return Event.objects.filter(id=event_id, attendees=user)
-
-
-@register.filter(name="as_id")
-def as_id(value: str):
-    pattern = re.compile(r"[\W+_]")
-    return pattern.sub("", value.lower())
 
 
 def test(request):
@@ -211,7 +261,9 @@ def profile(request, user_id: str):
         if eventForm.is_valid():
             event_keys = exclude_keys(eventForm.cleaned_data, "authors")
             event = Event.objects.create(**event_keys)
-            authors = request.POST.get("authors_field")
+            if tags := request.POST.get("hidden_eventtags"):
+                event.tags = tags
+            authors = request.POST.get("hidden_authors")
             if not authors:
                 # the event creator is assumed to be the author
                 # in case someone tries to be funny
@@ -432,7 +484,7 @@ def get_events(request):
 
             case "tags":
                 # leave to same as title for now
-                event_objects = event_objects.filter(title__icontains=query)
+                event_objects = event_objects.filter(tags__icontains=query)
 
         event_objects = event_objects.order_by(sort_by)
 
@@ -451,25 +503,44 @@ def get_events(request):
 
 @api_view(["POST"])
 def search_tags(request):
-    if not (department := request.POST.get("department")) or not (
-        program := request.POST.get("program")
-    ):
-        return return_with_code(HTTPStatus.BAD_REQUEST)
-    query = request.POST.get("tags") or ""
-    if not query:
-        tags = []
-    else:
-        tags = [
-            tag
-            for tag in get_tags_for_program(department, program)
-            if query.lower() in tag.lower()
-        ]
-    return render(request, "components/search_tags.html", context={"tags": tags})
+    department, program = (
+        getattr(request.user.profile, string) for string in ("department", "program")
+    )
+
+    query = request.POST.get("eventtags") or ""
+
+    return modular_tag_search(request, query, department, program)
+    # if not (department := request.POST.get("department")) or not (
+    #     program := request.POST.get("program")
+    # ):
+    #     return return_with_code(HTTPStatus.BAD_REQUEST)
+    # query = request.POST.get("tags") or ""
+    # if not query:
+    #     tags = []
+    # else:
+    #     tags = [
+    #         tag
+    #         for tag in get_tags_for_program(department, program)
+    #         if query.lower() in tag.lower()
+    #     ]
+    # return render(request, "components/search_tags.html", context={"tags": tags})
+
+
+@api_view(["POST"])
+def search_tags_for_user(request):
+    user_profile = request.user.profile
+    department = user_profile.department
+    program = user_profile.program
+    query = request.POST.get("eventtags") or ""
+    return modular_tag_search(request, query, department, program)
 
 
 @api_view(["POST"])
 def search_users(request):
-    author = request.POST.get("author_search") or ""
+    author = ""
+    for key in request.POST:
+        if "author" in key and "hidden" not in key:
+            author = request.POST.get(key)
     if not author:
         return return_with_no_content()
     authors = CustomUser.objects.filter(name__icontains=author)[:5]

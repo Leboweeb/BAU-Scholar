@@ -3,8 +3,11 @@
         {% if category %}
             <span class="text-muted d-block">{{ category }}</span>
             <div class="linebreak-underline my-3"></div>
-            <span class="badge rounded-pill bg-secondary event_type mb-3">{{ event_type }}</span>
         {% endif %}
+        <div class="d-flex gap-1">
+            <span class="badge rounded-pill bg-secondary event_type mb-3">{{ event_type }}</span>
+            {% for tag in tags %}<span class="badge rounded-pill bg-secondary event_type mb-3">{{ tag }}</span>{% endfor %}
+        </div>
         {% if can_participate %}
             <button class="btn btn-secondary btn-sm btn-participate"
                     title="Participate in Event"

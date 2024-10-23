@@ -3,6 +3,7 @@ const user_id = document.querySelector("#user_id").dataset.user;
 const csrf_token = document.querySelector("#user_id").dataset.csrf;
 const contacts = document.querySelector("#contacts");
 
+// yes I could do this in a better way. Too bad.
 function add_group(event) {
   event.preventDefault();
   let form = event.currentTarget;
@@ -11,6 +12,44 @@ function add_group(event) {
     Number(elem)
   );
   temp_data.set("user_ids", JSON.stringify(processed_user_ids));
+  if (!document.querySelector(`.contact[data-name="${name}"]`)) {
+    let node = new DOMParser().parseFromString(
+      `
+            <li class="list-group-item contact" data-name="${name}" data-avatar="${avatar}" data-user="${contact_id}">
+                <div class="d-flex flex-row gap-2">
+                    <a href="javascript:void(0)">
+                        <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
+                                src="${avatar}"
+                                alt="User Image">
+                    </a>
+                    <p  style="line-height: 300%;">${name}</p>
+                </div>
+            </li>
+    `,
+      "text/html"
+    ).body.firstElementChild;
+    fetch("/create_conversation_room", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf_token,
+      },
+      body: JSON.stringify({
+        user_ids: [user_id, contact_id],
+      }),
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        let room_slug = JSON.parse(json)["conversation_room"];
+        node.dataset.conversation = room_slug;
+      });
+    node.onclick = function () {
+      select_chat(node);
+    };
+    contacts.appendChild(node);
+  }
+  set_current_chat(name, avatar);
 }
 
 function add_profile(name, avatar, contact_id) {

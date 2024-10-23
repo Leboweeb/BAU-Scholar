@@ -70,6 +70,7 @@ class Event(models.Model):
     external_link = models.URLField(null=True)
     date_created = models.DateTimeField(default=now)
     event_type = models.CharField(max_length=3, choices=EventTypes)
+    tags = models.CharField(max_length=256)
 
 
 class Followers(models.Model):

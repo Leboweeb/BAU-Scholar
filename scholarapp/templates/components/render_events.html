@@ -1,7 +1,7 @@
 {# djlint : off #}
 {% for ev in categories %}
     {% with ev.event as i %}
-        {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display can_participate=i.event_type|can_participate event_id=i.pk has_participated=request.user|user_has_participated:i.pk category=ev.category %}
+        {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all event_type=i.get_event_type_display can_participate=i.event_type|can_participate event_id=i.pk has_participated=request.user|user_has_participated:i.pk category=ev.category tags=i.tags|split_at_dot %}
     {% endwith %}
 {% endfor %}
 {# djlint : on #}

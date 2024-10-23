@@ -569,9 +569,11 @@ function downloadDocument(filename) {
 
 let dropDown = document.querySelector("#customDropdown");
 let badges = document.querySelector("#badges");
-let hidden_author_field = document.querySelector("#authors_field");
 
 function checkAuthorSelected() {
+  let hidden_author_field = document.querySelector(
+    "input[name='hidden_authors']"
+  );
   if (!hidden_author_field.value) {
     alert("Please Select at least one author for this event.");
     return false;
@@ -611,6 +613,9 @@ function submitDocument(event) {
     alert("Please upload a valid docx file.");
   let formData = new FormData();
   let target = "#personalInfoForm";
+  if (!fileInput) {
+    target = "#tags-skills-fragment";
+  }
   let swapStyle = "outerHTML";
   formData.append("imported_document", fileInput);
   fetch("/update_profile", {

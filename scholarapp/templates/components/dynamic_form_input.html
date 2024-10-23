@@ -15,7 +15,7 @@
         {% endif %}
     </div>
     {% if autocomplete %}
-        {% include "components/dynamic_autocomplete_input.html" with label=element_id endpoint=endpoint required=required top=top %}
+        {% include "components/dynamic_autocomplete_input.html" with label=top_label endpoint=endpoint required=required top=top %}
     {% elif select %}
         {% include "components/dynamic_select_input.html" with label=element_id choices=choices %}
     {% else %}
