@@ -1,0 +1,7 @@
+{% for message in messages %}
+    {% if message.user_from.id == request.user.id %}
+        {% include "components/chat_message.html" with message=message.message user_id=message.user_from.id is_user_message=True %}
+    {% else %}
+        {% include "components/chat_message.html" with message=message.message user_id=message.user_from.id is_user_message=False %}
+    {% endif %}
+{% endfor %}

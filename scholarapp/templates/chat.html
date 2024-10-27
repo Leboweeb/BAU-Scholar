@@ -22,7 +22,7 @@
     <div class="card col p-0 no-border">
       <div class="card-header">
         <div class="form-outline">
-          <input hx-post="/get_contacts"
+          <input hx-post="/get_groups"
                  hx-trigger="input changed delay:500ms, search"
                  hx-target="#contacts"
                  type="search"
@@ -44,7 +44,7 @@
           </svg>
         </a>
       </div>
-      <ul hx-post="/get_contacts"
+      <ul hx-post="/get_groups"
           hx-trigger="load"
           hx-swap="innerHTML"
           id="contacts"
@@ -53,7 +53,7 @@
     </div>
     <div class="card col-6 p-0 no-border">
       <div id="current_chat"
-           class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1"
+           class="card-header d-flex flex-row justify-items-start align items-start gap-2 p-1 overflow-hidden"
            style="line-height: 235%"></div>
       <div class="wrapper">
         <div id="messages" class="container p-3 d-flex flex-column scroll"></div>

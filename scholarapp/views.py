@@ -7,7 +7,7 @@ from itertools import chain
 import json
 import os
 import operator
-from django.db.models import Q
+from django.db.models import Q, Count
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -128,14 +128,16 @@ def get_home_feed(user: CustomUser):
     recommended_events_queries = reduce(
         operator.or_, (Q(tags__icontains=tag) for tag in user_tags)
     )
-    recommended_events = Event.objects.filter(recommended_events_queries)[:3]
+    recommended_events = Event.objects.filter(recommended_events_queries).exclude(
+        authors=user
+    )[:3]
     exclude_event_ids = [i.pk for i in list(chain(followed_events, recommended_events))]
     categories = [
         *create_event_dicts(
             followed_events,
             "From People you Follow",
         ),
-        *create_event_dicts(recommended_events, "Recommended Events"),
+        *create_event_dicts(recommended_events, "Recommended For You"),
         *create_event_dicts(Event.objects.exclude(id__in=exclude_event_ids)[:15]),
     ]
     return categories
@@ -195,6 +197,14 @@ def can_participate_in_event(value: EventTypes):
 @register.filter(name="user_has_participated")
 def has_participated(user: CustomUser, event_id: int):
     return Event.objects.filter(id=event_id, attendees=user)
+
+
+@register.simple_tag
+def get_group_or_proxy(group: Conversation, user_id: int, group_attr, attr):
+    if len(group.users.all()) >= 3:
+        return getattr(group, group_attr) or ""
+    else:
+        return getattr(group.users.exclude(id=user_id)[0], attr)
 
 
 def test(request):
@@ -293,7 +303,7 @@ def get_chat_history(request):
     conversation = Conversation.objects.get(room_slug=slug)
     return render(
         request,
-        "components/message_history.html",
+        "message_history.html",
         context={"messages": conversation.message_set.all(), "user_id": request.user.pk},  # type: ignore
     )
 
@@ -504,26 +514,10 @@ def get_events(request):
 @api_view(["POST"])
 def search_tags(request):
     department, program = (
-        getattr(request.user.profile, string) for string in ("department", "program")
+        request.POST.get(string) or "" for string in ("department", "program")
     )
-
-    query = request.POST.get("eventtags") or ""
-
+    query = request.POST.get("tags") or ""
     return modular_tag_search(request, query, department, program)
-    # if not (department := request.POST.get("department")) or not (
-    #     program := request.POST.get("program")
-    # ):
-    #     return return_with_code(HTTPStatus.BAD_REQUEST)
-    # query = request.POST.get("tags") or ""
-    # if not query:
-    #     tags = []
-    # else:
-    #     tags = [
-    #         tag
-    #         for tag in get_tags_for_program(department, program)
-    #         if query.lower() in tag.lower()
-    #     ]
-    # return render(request, "components/search_tags.html", context={"tags": tags})
 
 
 @api_view(["POST"])
@@ -550,32 +544,24 @@ def search_users(request):
 
 
 @api_view(["POST"])
-def get_contacts(request):
+def get_groups(request):
+    user = CustomUser.objects.get(pk=int(request.user.pk))
+    user_groups = Conversation.objects.filter(users=user)
     if request.POST.get("chat_search"):
         name_to_search = request.POST.get("chat_search")
-        try:
-            user = CustomUser.objects.get(name__icontains=name_to_search)
-        except CustomUser.DoesNotExist:
-            return return_with_no_content()
-        query = Conversation.objects.filter(users=user)
-        contacts = [
-            conversation.users.all().exclude(id=request.user.pk)[0]
-            for conversation in query
-        ]
+        chat_searches = Conversation.objects.annotate(
+            users_count=Count("users")
+        ).filter(users_count__lt=3, room_slug__icontains=name_to_search)[:3]
+        group_results = Conversation.objects.filter(title__icontains=name_to_search)[:2]
+        groups = list(chain(chat_searches, group_results))
     else:
-        user = CustomUser.objects.get(pk=int(request.user.pk))
-        query = Conversation.objects.filter(users=user)[:5]
-        contacts = [
-            conversation.users.all().exclude(id=user.pk)[0] for conversation in query
-        ]
+        groups = user_groups[:5]
 
-    conversations = [c.room_slug for c in query]
-    contacts = zip(contacts, conversations)
     return render(
         request,
-        "components/contacts.html",
+        "components/groups.html",
         context={
-            "contacts": contacts,
+            "labeled_groups": groups,
         },
     )
 
@@ -589,18 +575,24 @@ def create_conversation_room(request):
             status=HTTPStatus.BAD_REQUEST.value,
         )
     extra_fields = [
-        request.POST.get(as_id(title)) for title in ("Group Title", "Group Description")
+        request.data.get(as_id(title)) for title in ("Group Title", "Group Description")
     ]
     # if we have an empty title or description, return error.
-    if any(not field for field in extra_fields):
-        return HttpResponse(
-            {"error_reason": "Title or description for conversation is empty!"},
-            status=HTTPStatus.BAD_REQUEST.value,
-        )
+    if len(user_ids) >= 3:
+        if any(not field for field in extra_fields):
+            return HttpResponse(
+                {"error_reason": "Title or description for conversation is empty!"},
+                status=HTTPStatus.BAD_REQUEST.value,
+            )
+        elif Conversation.objects.filter(title=extra_fields[0]):
+            return HttpResponse(
+                {"error_reason": " Group already exists !"},
+                status=HTTPStatus.BAD_REQUEST.value,
+            )
 
     # otherwise proceed normally
     conversation = Conversation.objects.create()
-    if len(user_ids) > 3:
+    if len(user_ids) >= 3:
         conversation.title = extra_fields[0]
         conversation.description = extra_fields[1]
     for user in [CustomUser.objects.get(id=_id) for _id in user_ids]:
@@ -609,7 +601,11 @@ def create_conversation_room(request):
         "_".join(user.name for user in conversation.users.all())
     )
     conversation.save()
-    return Response({"conversation_room": conversation.room_slug})
+    user_groups = Conversation.objects.filter(users=user)[:5]
+    response = render(
+        request, "components/groups.html", context={"groups": user_groups}
+    )
+    return response
 
 
 @api_view(["POST"])

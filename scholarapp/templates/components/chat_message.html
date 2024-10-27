@@ -1,0 +1,15 @@
+{% if is_user_message %}
+    <div class="message me">
+        <p>{{ message }}</p>
+    </div>
+{% else %}
+    <div class="d-inline-flex gap-small">
+        <img class="avatar avatar-48 rounded-circle text-white p-1"
+             style=""
+             src="{{ user_id | id_to_src }}"
+             alt="User Image">
+        <div class="message">
+            <p>{{ message }}</p>
+        </div>
+    </div>
+{% endif %}

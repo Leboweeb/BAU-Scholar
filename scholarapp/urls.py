@@ -1,6 +1,5 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from django.views.decorators.csrf import csrf_exempt
 from . import views
 
 urlpatterns = [
@@ -20,7 +19,7 @@ urlpatterns = [
         views.create_conversation_room,
         name="create_conversation_room",
     ),
-    path("get_contacts", views.get_contacts, name="get_contacts"),
+    path("get_groups", views.get_groups, name="get_groups"),
     path("get_chat_history", views.get_chat_history, name="get_chat_history"),
     path("update_profile", views.update_profile, name="update_profile"),
     path("generate_user_cv", views.generate_user_document, name="generate_user_cv"),
@@ -30,5 +29,8 @@ urlpatterns = [
     path("get_events", views.get_events, name="get_events"),
     path("test", views.test, name="test"),
     path("search_users", views.search_users, name="search_users"),
+    path(
+        "search_tags_for_user", views.search_tags_for_user, name="search_tags_for_user"
+    ),
     path("search_tags", views.search_tags, name="search_tags"),
 ]

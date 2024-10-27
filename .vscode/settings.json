@@ -14,5 +14,11 @@
       "database": "bauscholar",
       "username": "mohammad"
     }
-  ]
+  ],
+  "[handlebars]": {
+    "djlint.enableLinting": false
+  },
+  "[jinja]": {
+    "djlint.enableLinting": false
+  }
 }

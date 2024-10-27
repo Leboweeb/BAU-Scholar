@@ -679,16 +679,16 @@ function addInput(parentId) {
   parent.appendChild(input_group);
 }
 
-let dropArea = document.querySelector(".drop-area");
+// let dropArea = document.querySelector(".drop-area");
 
-[("dragenter", "dragover")].forEach((eventName) => {
-  dropArea.addEventListener(eventName, highlightDropArea, false);
-});
-["dragleave"].forEach((eventName) => {
-  dropArea.addEventListener(eventName, unhighlightDropArea, false);
-});
+// [("dragenter", "dragover")].forEach((eventName) => {
+//   dropArea.addEventListener(eventName, highlightDropArea, false);
+// });
+// ["dragleave"].forEach((eventName) => {
+//   dropArea.addEventListener(eventName, unhighlightDropArea, false);
+// });
 
-dropArea.addEventListener("drop", submitDocument, { capture: true });
+// dropArea.addEventListener("drop", submitDocument, { capture: true });
 
 function add_event_listeners() {
   let department_select = document.querySelector("#div_id_department select");

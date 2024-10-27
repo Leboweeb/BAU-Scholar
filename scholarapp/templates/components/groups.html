@@ -1,0 +1,19 @@
+{% for group in groups %}
+    <li class="list-group-item contact"
+        data-conversation="{{ group.room_slug }}"
+        data-name="{% get_group_or_proxy group request.user.id 'title' 'name' %}"
+        {# djlint off #}
+        data-avatar="{% get_group_or_proxy group request.user.id 'group_icon' 'avatar' %}"
+        {# djlint on #}
+        onclick="select_chat(event.currentTarget)">
+        <div class="d-flex flex-row gap-2">
+            <a href="javascript:void(0)">
+                <img class="avatar avatar-48 rounded-circle text-white p-1"
+                     style="background-color: rgb(236, 236, 236)"
+                     src="{% get_group_or_proxy group request.user.id 'group_icon' 'avatar' %}"
+                     alt="User Image">
+            </a>
+            <p style="line-height: 300%;">{% get_group_or_proxy group request.user.id 'title' 'name' %}</p>
+        </div>
+    </li>
+{% endfor %}

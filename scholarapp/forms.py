@@ -43,7 +43,7 @@ class CreateEventForm(forms.ModelForm):
                         context={
                             "autocomplete": True,
                             "single": True,
-                            "endpoint": "/search_tags",
+                            "endpoint": "/search_tags_for_user",
                             "top_label": "Event Tags",
                             "element_id": as_id("Event Tags"),
                             "top": "40px",

@@ -7,90 +7,21 @@ const contacts = document.querySelector("#contacts");
 function add_group(event) {
   event.preventDefault();
   let form = event.currentTarget;
-  let temp_data = new FormData(form);
-  let processed_user_ids = splitAtDot(temp_data.get("user_ids")).map((elem) =>
+  let temp_data = Object.fromEntries(new FormData(form));
+  let processed_user_ids = splitAtDot(temp_data["user_ids"]).map((elem) =>
     Number(elem)
   );
-  temp_data.set("user_ids", JSON.stringify(processed_user_ids));
-  if (!document.querySelector(`.contact[data-name="${name}"]`)) {
-    let node = new DOMParser().parseFromString(
-      `
-            <li class="list-group-item contact" data-name="${name}" data-avatar="${avatar}" data-user="${contact_id}">
-                <div class="d-flex flex-row gap-2">
-                    <a href="javascript:void(0)">
-                        <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                                src="${avatar}"
-                                alt="User Image">
-                    </a>
-                    <p  style="line-height: 300%;">${name}</p>
-                </div>
-            </li>
-    `,
-      "text/html"
-    ).body.firstElementChild;
-    fetch("/create_conversation_room", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrf_token,
-      },
-      body: JSON.stringify({
-        user_ids: [user_id, contact_id],
-      }),
-    })
-      .then((response) => response.json())
-      .then((json) => {
-        let room_slug = JSON.parse(json)["conversation_room"];
-        node.dataset.conversation = room_slug;
-      });
-    node.onclick = function () {
-      select_chat(node);
-    };
-    contacts.appendChild(node);
-  }
-  set_current_chat(name, avatar);
-}
-
-function add_profile(name, avatar, contact_id) {
-  if (!document.querySelector(`.contact[data-name="${name}"]`)) {
-    let node = new DOMParser().parseFromString(
-      `
-            <li class="list-group-item contact" data-name="${name}" data-avatar="${avatar}" data-user="${contact_id}">
-                <div class="d-flex flex-row gap-2">
-                    <a href="javascript:void(0)">
-                        <img class="avatar avatar-48 bg-light rounded-circle text-white p-1"
-                                src="${avatar}"
-                                alt="User Image">
-                    </a>
-                    <p  style="line-height: 300%;">${name}</p>
-                </div>
-            </li>
-    `,
-      "text/html"
-    ).body.firstElementChild;
-    fetch("/create_conversation_room", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrf_token,
-      },
-      body: JSON.stringify({
-        user_ids: [user_id, contact_id],
-      }),
-    })
-      .then((response) => response.json())
-      .then((json) => {
-        let room_slug = JSON.parse(json)["conversation_room"];
-        node.dataset.conversation = room_slug;
-      });
-    node.onclick = function () {
-      select_chat(node);
-    };
-    contacts.appendChild(node);
-  }
-  set_current_chat(name, avatar);
+  temp_data["user_ids"] = processed_user_ids;
+  fetch("/create_conversation_room", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrf_token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(temp_data),
+  })
+    .then((response) => response.json())
+    .then((json) => {});
 }
 
 function show_chatbox() {
@@ -149,16 +80,23 @@ function createSocket() {
   let current_conversation_slug = current_conversation.dataset.conversation;
   const socket = new WebSocket(`/chat/${current_conversation_slug}`);
   socket.onopen = (ev) => {};
-
   socket.onmessage = (ev) => {
     let response = JSON.parse(ev.data);
     let incomingElement = new DOMParser().parseFromString(
       response["message"],
       "text/html"
     ).body.firstElementChild;
-    incomingElement.classList.add("message");
-    if (response["user_id"] === user_id) incomingElement.classList.add("me");
-    messages.appendChild(incomingElement);
+    let incomingElementText = incomingElement.querySelector("p").textContent;
+    let alternative_node = new DOMParser().parseFromString(
+      `
+    <div class="message me">
+        <p>${incomingElementText}</p>
+    </div>
+      `,
+      "text/html"
+    ).body.firstElementChild;
+    if (response["user_id"] === user_id) messages.appendChild(alternative_node);
+    else messages.appendChild(incomingElement);
   };
   return socket;
 }
@@ -192,7 +130,22 @@ function getChatHistory() {
     .then(() => {});
 }
 
-function add_conversation_ajax(name, avatar, id) {
-  show_chatbox();
-  add_profile(name, avatar, id);
+function add_conversation_ajax(other_user_name, other_user_id) {
+  if (!document.querySelector(`li[data-name="${other_user_name}"]`)) {
+    fetch("/create_conversation_room", {
+      method: "POST",
+      body: JSON.stringify({
+        user_ids: [user_id, other_user_id],
+      }),
+      headers: {
+        "X-CSRFToken": `${csrf_token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.text())
+      .then((text) => {
+        htmx.swap("#contacts", text, { swapStyle: "innerHTML" });
+        show_chatbox();
+      });
+  } else show_chatbox();
 }

@@ -5,7 +5,7 @@ from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
 
-from scholarapp.models import Event
+from scholarapp.models import CustomUser, Event
 
 
 DOT = "•"
@@ -53,3 +53,9 @@ def exclude_keys(dictionary: dict, *keys):
 def as_id(value: str):
     pattern = re.compile(r"[\W+_]")
     return pattern.sub("", value.lower())
+
+
+@register.filter(name="id_to_src")
+def id_to_src(user_id: str):
+    user = CustomUser.objects.get(id=user_id)
+    return user.avatar
