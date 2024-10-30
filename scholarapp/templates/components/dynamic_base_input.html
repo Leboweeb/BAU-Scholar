@@ -1,0 +1,19 @@
+<div id="div_id_{{ top_label|as_id }}" class="mb-3">
+    <div class="d-flex gap-3 mb-3">
+        {% if required %}
+            <label class="form-label requiredField m-0 mb-1 align-content-center">
+                {{ top_label }}<span class="asteriskField">*</span>
+            </label>
+        {% else %}
+            <label class="form-label m-0  mb-1 align-content-center">{{ top_label }}</label>
+        {% endif %}
+        {# From here we decide what type of input we want #}
+        {% if not single %}
+            <button class="btn btn-secondary btn-sm dynamic-form"
+                    type="button"
+                    onclick="addInput('{{ top_label|as_id }}')">+ Add Row</button>
+        {% endif %}
+    </div>
+    {% block inner_input %}
+    {% endblock inner_input %}
+</div>

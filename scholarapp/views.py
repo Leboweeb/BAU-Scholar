@@ -52,6 +52,7 @@ from scholarapp.utils.scrape_user import scrape_author, scrape_publications
 from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.tags import (
     get_faculties,
+    get_programs_for_user,
     get_tags_for_program,
 )
 
@@ -258,7 +259,10 @@ def profile(request, user_id: str):
         "is_current_user": is_current_user,
         "is_following": is_following_user,
         "form": CreateEventForm(),
-        "cv_records": zip_if_equal(cv_labels, user_profile_fields),
+        "data": user_profile_fields,
+        "get_faculties": get_faculties,
+        "user_programs": get_programs_for_user(request.user),
+        # "cv_records": zip_if_equal(cv_labels, user_profile_fields),
         "staff_achievement_records": zip_if_equal(
             staff_achievement_labels,
             staff_achievement_values,
@@ -351,8 +355,8 @@ def update_profile(request):
     if request.POST:
         personal_info_labels = [
             "rank",
-            "department ",
-            "program ",
+            "department",
+            "program",
             "researchinterests",
             "ranklink",
             "hidden_tags",
@@ -369,14 +373,14 @@ def update_profile(request):
             "professionaldevelopmentactivities",
         ]
         Profile.objects.filter(pk=user.profile.pk).update(  # type: ignore
-            **create_user_profile(request.POST, personal_info_labels, request.user.pk)
+            **create_user_profile(request.POST, personal_info_labels)
         )
+        # user.profile referes to the old user object, use the request.user object to get the most recent version instead
         response = render(
             request,
             "components/profile/profile_tags_skills_fragment.html",
-            context={"user_profile": user.profile, "is_current_user": True},  # type: ignore
+            context={"user_profile": request.user.profile, "is_current_user": True},  # type: ignore
         )
-        response["HX-Retarget"] = "#tags-skills-fragment"
         return response
     elif request.FILES:
         file = request.FILES.get("imported_document")

@@ -1,4 +1,100 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 {% block content %}
-    {% include "components/dynamic_autocomplete_input.html" with label="Tags" endpoint="search_tags" required=True %}
+    {# djlint: off #}
+    {% comment %} <script defer>
+        let modal = document.querySelector("#personalInfoForm");
+        document.body.onload = () => {
+            new bootstrap.Modal(modal).show()
+} {% endcomment %}
+    </script>
+    {# djlint: on #}
+    <div class="modal fade"
+         id="personalInfoForm"
+         data-bs-backdrop="static"
+         data-bs-keyboard="false"
+         tabindex="-1"
+         aria-labelledby="PersonalInfoModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Personal Information Form</h1>
+                    <button type="button"
+                            id="personalInfoModalClose"
+                            class="btn-close"
+                            data-bs-target="#personalInfoForm"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" id="import-document">
+                        {% csrf_token %}
+                        <ul class="nav nav-underline">
+                            <li class="nav-item">
+                                <button type="button"
+                                        id="nav-fill-form"
+                                        class="nav-link active"
+                                        onclick="switchTabs('.nav.nav-underline:nth-child(2) button','#top-container >div',0)">
+                                    Fill Form
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button"
+                                        id="nav-fill-staff-achievements"
+                                        class="nav-link"
+                                        onclick="switchTabs('.nav.nav-underline:nth-child(2) button','#top-container >div',1)">
+                                    Fill Staff Achievements Form
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button"
+                                        id="nav-import-document"
+                                        class="nav-link"
+                                        onclick="switchTabs('.nav.nav-underline button','#top-container >div',2)">
+                                    Import Document
+                                </button>
+                            </li>
+                        </ul>
+                        <div id="top-container"
+                             class="w-100 h-100 d-flex justify-items-center align-items-center m-auto">
+                            <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
+                                {# djlint:off #}
+              {% for record,data in cv_records %}
+                {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data autocomplete=record.autocomplete top=record.top endpoint=record.endpoint choices=record.choices select=record.select %}
+              {% endfor %}
+                                {# djlint:on#}
+                                <button class="btn btn-primary" type="button" onclick="submitDocument(event)">Submit</button>
+                            </div>
+                            <div id="staff-achievements-container"
+                                 class="row card mt-3 p-2 w-100 m-auto d-none">
+                                {% for record,data in staff_achievement_records %}
+                                    {% include "components/dynamic_form_input.html" with top_label=record element_id=record|as_id data=data single=False %}
+                                {% endfor %}
+                                <button class="btn btn-primary" type="submit">Submit</button>
+                            </div>
+                            <div id="import-document-container" class="mt-3 p-2 w-100 m-auto d-none">
+                                <label for="imported_document" class="drop-area" draggable="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         height="256px"
+                                         viewBox="0 -960 960 960"
+                                         width="256px"
+                                         fill="#e8eaed">
+                                        <path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
+                                    </svg>
+                                    <span class="text-muted">Click or drag and drop documents here to upload them.</span>
+                                    <input type="file"
+                                           name="imported_document"
+                                           id="imported_document"
+                                           onchange="submitDocument(event)"
+                                           accept=".docx">
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

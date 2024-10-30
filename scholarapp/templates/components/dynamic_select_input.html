@@ -1,4 +1,10 @@
-<select class="select form-select" name="{{ label | as_id }} ">
-    <option value="" selected="">---------</option>
-    {% for choice in choices %}<option value="{{ choice }}">{{ choice | title }}</option>{% endfor %}
-</select>
+{% extends "components/dynamic_base_input.html" %}
+{% block inner_input %}
+    <select class="select form-select" name="{{ top_label | as_id }} ">
+        <option value="" {% if not existing_data %}selected{% endif %}>---------</option>
+        {% for choice in choices %}
+            <option value="{{ choice }}"
+                    {% if existing_data.0 == choice %}selected{% endif %}>{{ choice | title }}</option>
+        {% endfor %}
+    </select>
+{% endblock inner_input %}

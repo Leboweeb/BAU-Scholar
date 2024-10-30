@@ -85,6 +85,18 @@ function hideDropDown(selector) {
   dropDown.classList.add("d-none");
 }
 
+function removePill(event, data_attr) {
+  let top_element =
+    event.currentTarget.parentElement.parentElement.parentElement;
+  let hidden_input_node = top_element.querySelector("input[type='hidden']");
+  let parentElement = event.currentTarget.parentElement;
+  hidden_input_node.value = removeFromListString(
+    hidden_input_node.value,
+    parentElement.dataset[data_attr]
+  );
+  parentElement.remove();
+}
+
 function appendSVG(node, svg, hidden_input_node, data_attr) {
   let svgNode = new DOMParser().parseFromString(svg, "text/html").body
     .firstElementChild;

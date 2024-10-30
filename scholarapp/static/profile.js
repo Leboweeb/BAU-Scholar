@@ -608,16 +608,20 @@ function submitDocument(event) {
   event.preventDefault();
   // event.dataTransfer.effectAllowed = "all";
   // event.dataTransfer.dropEffect = "copy";
+  let topForm = document.querySelector("#import-document");
   let fileInput = document.querySelector("#imported_document").files[0];
-  if (getExtension(fileInput.name) !== "docx")
-    alert("Please upload a valid docx file.");
-  let formData = new FormData();
+  let formData = new FormData(topForm);
   let target = "#personalInfoForm";
+  let swapStyle = "outerHTML";
   if (!fileInput) {
     target = "#tags-skills-fragment";
+  } else {
+    if (getExtension(fileInput.name) !== "docx") {
+      alert("Please upload a valid docx file.");
+      return;
+    }
+    formData.append("imported_document", fileInput);
   }
-  let swapStyle = "outerHTML";
-  formData.append("imported_document", fileInput);
   fetch("/update_profile", {
     method: "POST",
     headers: {
@@ -635,7 +639,7 @@ function submitDocument(event) {
           afterSwapCallback: () => {
             add_event_listeners();
             closePersonalInfoModal();
-            unhighlightDropArea(event);
+            // unhighlightDropArea(event);
           },
         }
       );

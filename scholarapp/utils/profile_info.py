@@ -1,9 +1,7 @@
-from scholarapp.models import CustomUser, Profile
+from scholarapp.models import Profile
 
 
-def create_user_profile(
-    request_post_obj, labels: list[str], user_id: int
-) -> dict[str, str]:
+def create_user_profile(request_post_obj, labels: list[str]) -> dict[str, str]:
     form_values = [
         (
             "•".join(request_post_obj.getlist(l))
