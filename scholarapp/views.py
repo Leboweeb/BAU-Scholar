@@ -20,6 +20,7 @@ from django.template.defaulttags import register
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import google.generativeai as genai
 from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import (
     Conversation,
@@ -120,6 +121,13 @@ events_with_participants = [
     EventTypes.CONFERENCE_EVENT,
     EventTypes.THESIS_SUPERVISION,
 ]
+
+# env vars to make gemini less noisy
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+os.environ["GLOG_minloglevel"] = "2"
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 def get_home_feed(user: CustomUser):
@@ -238,6 +246,15 @@ def profile(request, user_id: str):
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
         event_types = {choice.label: choice for choice in EventTypes}
+        chat = model.start_chat(history=[])
+        generate_response = lambda title: chat.send_message(
+            """
+                                        {}
+                                        Based on the earlier title, generate only a string that contains the minimum amount of tags associated with it joined by the • character. If there is no text or random text, return an empty string
+                                        """.format(
+                title
+            )
+        ).text
         publication_pairs = [
             Event.objects.get_or_create(
                 title=publication["title"],
@@ -245,6 +262,7 @@ def profile(request, user_id: str):
                 author_str=publication["authors"],
                 date_created=parse(publication["date_created"]),
                 event_type=event_types[publication["research_type"]],
+                tags=generate_response(publication["description"]),
             )
             for publication in scraped_publications
         ]
