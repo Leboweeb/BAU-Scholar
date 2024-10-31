@@ -52,6 +52,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         room = self.room_name
         # Save the message on recieving
         await self.save_message(room, sender, message)
+        # send inactive users emails about chats
+        await self.send_email_to_users(sender, message)
         await self.channel_layer.group_send(  # type: ignore
             self.room_group_name,
             {
@@ -60,8 +62,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "user_id": sender,
             },
         )
-        # send inactive users emails about chats
-        await self.send_email_to_users(sender, message)
 
     @sync_to_async
     def prepare_message(self, message: str, user_id: int):
