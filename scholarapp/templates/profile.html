@@ -27,7 +27,47 @@
         <div class="modal-footer">
           <button type="submit"
                   class="btn btn-primary"
-                  onclick="submitForm(checkAuthorSelected,'#add_form')">Save changes</button>
+                  onclick="submitForm(() => {return checkAuthorSelected('hidden_authors')},'#add_form')">
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade"
+       id="editEventModal"
+       data-bs-backdrop="static"
+       data-bs-keyboard="false"
+       role="dialog"
+       tabindex="-1"
+       aria-labelledby="EditEventModal"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Edit Event</h1>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  data-bs-target="editEventModal"
+                  onclick="closeToggleModal()"
+                  aria-label="Close"></button>
+        </div>
+        <div class="modal-body scroll">
+          <form id="edit_form" method="post" action="/update_event">
+            {% csrf_token %}
+            <input name="hidden_event_id" id="hidden_event_id" type="hidden">
+            <div class="container">
+              {% include "components/dynamic_form_input.html" with top_label="New Title" required=True single=True data="" %}
+              {% include "components/dynamic_textarea_input.html" with top_label="New Description" required=True single=True data="" %}
+              {% include "components/dynamic_select_input.html" with top_label="Edit Event Type" required=True single=True choices=event_types %}
+              {% include "components/dynamic_autocomplete_input.html" with top_label="Edit Event Tags" required=False single=True top="40px" endpoint="/search_tags_for_user" %}
+              {% include "components/dynamic_autocomplete_input.html" with top_label="Edit Authors" required=False single=True top="40px" endpoint="/search_users" %}
+            </div>
+          </div>
+        </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="editEventHandler()">Save changes</button>
         </div>
       </div>
     </div>
@@ -66,16 +106,17 @@
                  data-bs-target="#exampleModal">+ Add Event</a>
             {% endif %}
           </div>
-          <div class="container d-flex flex-column mt-3 gap-4">
+          {% comment %} <div class="container d-flex flex-column mt-3 gap-4">
             {% for i in publications %}
-              {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all %}
+              {% include "components/profile/editable_research_card.html" with title=i.title description=i.description authors=i.authors.all event_id=i.pk event_type=i.get_event_type_display tags=i.tags|split_at_dot %}
             {% endfor %}
           </div>
           <div class="container d-flex flex-column mt-3 gap-4 d-none">
             {% for i in user_events %}
-              {% include "components/research_card.html" with title=i.title description=i.description authors=i.authors.all %}
+              {% include "components/profile/editable_research_card.html" with title=i.title description=i.description authors=i.authors.all event_id=i.pk event_type=i.get_event_type_display tags=i.tags|split_at_dot %}
             {% endfor %}
-          </div>
+          </div> {% endcomment %}
+          {% include "components/profile/profile_events.html" %}
         </div>
       </div>
     </div>

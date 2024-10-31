@@ -570,9 +570,9 @@ function downloadDocument(filename) {
 let dropDown = document.querySelector("#customDropdown");
 let badges = document.querySelector("#badges");
 
-function checkAuthorSelected() {
+function checkAuthorSelected(input_name) {
   let hidden_author_field = document.querySelector(
-    "input[name='hidden_authors']"
+    `input[name='${input_name}']`
   );
   if (!hidden_author_field.value) {
     alert("Please Select at least one author for this event.");
@@ -733,4 +733,48 @@ function checkProgramSelected() {
       "Please select a program from the dropdown before searching for tags."
     );
   }
+}
+
+function populateEventForm(event) {
+  let editModal = new bootstrap.Modal("#editEventModal");
+  editModal.show();
+  let cardBodyJson = JSON.parse(
+    event.currentTarget.parentElement.parentElement.dataset.eventJson
+  );
+  let cardBodyJsonKeys = Object.keys(cardBodyJson);
+  let inputs = document
+    .querySelector("#edit_form .container")
+    .querySelectorAll("input.form-control,select,textarea");
+  for (let i = 0; i < 3; i++) {
+    inputs[i].value = cardBodyJson[cardBodyJsonKeys[i]];
+  }
+  // populate event tags
+  let tags = splitAtDot(cardBodyJson[cardBodyJsonKeys[3]]);
+  if (tags[0]) {
+    populateAutoCompleteInput(inputs[3], "tag", tags);
+  }
+  // then authors
+  for (let author_pair of cardBodyJson.authors) {
+    let author_id = author_pair[0];
+    let author_name = author_pair[1];
+    addPill(event, author_name, "user", author_id, inputs[4].parentElement);
+  }
+  document.querySelector("#hidden_event_id").value = cardBodyJson.event_id;
+}
+
+function editEventHandler() {
+  if (!checkAuthorSelected("hidden_editauthors")) {
+    return;
+  }
+  fetch("/update_event", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrf_token,
+    },
+    body: new FormData(document.querySelector("#edit_form")),
+  })
+    .then((response) => response.text())
+    .then((text) => {
+      htmx.swap("#profile_events", text, { swapStyle: "outerHTML" });
+    });
 }

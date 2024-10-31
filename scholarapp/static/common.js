@@ -118,9 +118,10 @@ function appendSVG(node, svg, hidden_input_node, data_attr) {
   @param {string} attribute - A unique attribute name for the hidden input to use.
   @param {string} hidden_input - The value for this attribute at this specific pill.
 */
-function addPill(event, name, attribute, value) {
-  let top_element =
-    event.currentTarget.parentElement.parentElement.parentElement;
+function addPill(event, name, attribute, value, top_element_node = undefined) {
+  let top_element = top_element_node
+    ? top_element_node
+    : event?.currentTarget?.parentElement?.parentElement?.parentElement;
   let hidden_input_node = top_element.querySelector("input[type='hidden']");
   // prevent dupes
   if (top_element.querySelector(`span[ data-${attribute}="${value}" ]`)) return;
@@ -149,4 +150,23 @@ function toTitleCase(str) {
     /\w\S*/g,
     (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
   );
+}
+
+// see https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function closeToggleModal() {
+  // very ugly hack incoming
+  await sleep(350);
+  document.body.classList.remove("modal-open");
+  document.querySelector(".modal-backdrop").remove();
+  document.body.style = "";
+}
+
+function populateAutoCompleteInput(inputNode, attr, values) {
+  for (let element of values) {
+    addPill(event, element, attr, element, inputNode.parentElement);
+  }
 }

@@ -1,0 +1,9 @@
+{% extends "components/dynamic_base_input.html" %}
+{% block inner_input %}
+    <div class="input-group mb-3 d-flex flex-column gap-2 align-items-start justify-content-center">
+        <textarea type="text"
+                  name="{{ top_label|as_id }}"
+                  id="{{ top_label|as_id }}"
+                  class="textinput form-control w-100">{% if data %}{{ data }}{% endif %}</textarea>
+    </div>
+{% endblock inner_input %}

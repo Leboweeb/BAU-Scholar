@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.forms import Textarea
 from django.template.loader import render_to_string
 from scholarapp.models import CustomUser, Event, EventTypes
 from crispy_forms.helper import FormHelper
@@ -28,6 +29,7 @@ class CreateEventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = ("title", "description", "event_type")
+        widgets = {"description": Textarea()}
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -39,7 +41,7 @@ class CreateEventForm(forms.ModelForm):
             Column(
                 HTML(
                     render_to_string(
-                        "components/dynamic_form_input.html",
+                        "components/dynamic_autocomplete_input.html",
                         context={
                             "autocomplete": True,
                             "single": True,
@@ -55,7 +57,7 @@ class CreateEventForm(forms.ModelForm):
             Column(
                 HTML(
                     render_to_string(
-                        "components/dynamic_form_input.html",
+                        "components/dynamic_autocomplete_input.html",
                         context={
                             "autocomplete": True,
                             "single": True,

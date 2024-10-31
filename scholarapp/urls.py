@@ -33,4 +33,5 @@ urlpatterns = [
         "search_tags_for_user", views.search_tags_for_user, name="search_tags_for_user"
     ),
     path("search_tags", views.search_tags, name="search_tags"),
+    path("update_event", views.update_event, name="update_event"),
 ]

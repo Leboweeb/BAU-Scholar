@@ -208,6 +208,23 @@ def has_participated(user: CustomUser, event_id: int):
     return Event.objects.filter(id=event_id, attendees=user)
 
 
+@register.filter(name="get_event_info")
+def get_event_info(event_id):
+    event_id = int(event_id)
+    event = Event.objects.get(id=event_id)
+    event_type_dict = {choice.value: choice.label for choice in EventTypes}
+    return json.dumps(
+        {
+            "title": event.title,
+            "description": event.description,
+            "event_type": str(event_type_dict[event.event_type]),
+            "tags": event.tags,
+            "authors": [[author.id, author.name] for author in event.authors.all()],
+            "event_id": event_id,
+        }
+    )
+
+
 @register.simple_tag
 def get_group_or_proxy(group: Conversation, user_id: int, group_attr, attr):
     if len(group.users.all()) >= 3:
@@ -242,7 +259,9 @@ def profile(request, user_id: str):
     user_publications = Event.objects.filter(authors=user).exclude(
         event_type__in=events_with_participants
     )
-    user_events = Event.objects.filter(event_type__in=events_with_participants)
+    user_events = Event.objects.filter(
+        authors=user, event_type__in=events_with_participants
+    )
     if not user_publications.exists():
         scraped_publications = scrape_publications(user.profile_url)
         event_types = {choice.label: choice for choice in EventTypes}
@@ -287,6 +306,7 @@ def profile(request, user_id: str):
         ),
         "current_year": current_year,
         "options": CustomUser.objects.all(),
+        "event_types": {choice.label: choice for choice in EventTypes},
     }
     if request.method == "POST":
         eventForm = CreateEventForm(request.POST)
@@ -544,10 +564,13 @@ def search_tags(request):
 
 @api_view(["POST"])
 def search_tags_for_user(request):
+    query = ""
+    for key in request.POST:
+        if "tags" in key and "hidden" not in key:
+            query = request.POST.get(key)
     user_profile = request.user.profile
     department = user_profile.department
     program = user_profile.program
-    query = request.POST.get("eventtags") or ""
     return modular_tag_search(request, query, department, program)
 
 
@@ -628,6 +651,41 @@ def create_conversation_room(request):
         request, "components/groups.html", context={"groups": user_groups}
     )
     return response
+
+
+@api_view(["POST"])
+def update_event(request):
+    event_id = int(request.POST.get("hidden_event_id"))
+    event = get_object_or_404(Event, id=event_id)
+    if tags := request.POST.get("hidden_editeventtags"):
+        event.tags = tags
+    authors = request.POST.get("hidden_editauthors")
+    if not authors:
+        # the event creator is assumed to be the author
+        # in case someone tries to be funny
+        event.authors.add(request.user)
+    else:
+        # javascript validation saved us, we don't have any shennanigans
+        author_objects = [
+            CustomUser.objects.get(id=author_id)
+            for author_id in map(int, split_at_dot(authors))
+        ]
+        event.authors.set(author_objects)
+    event.save()
+    user_publications = Event.objects.filter(authors=request.user).exclude(
+        event_type__in=events_with_participants
+    )
+    user_events = Event.objects.filter(
+        authors=request.user, event_type__in=events_with_participants
+    )
+    return render(
+        request,
+        "components/profile/profile_events.html",
+        context={
+            "publications": user_publications.all(),
+            "user_events": user_events.all(),
+        },
+    )
 
 
 @api_view(["POST"])
