@@ -583,7 +583,7 @@ def get_groups(request):
         request,
         "components/groups.html",
         context={
-            "labeled_groups": groups,
+            "groups": groups,
         },
     )
 

@@ -3,6 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+
+from scholarapp.utils.common import send_email_notification
 from .models import Conversation, CustomUser, Message
 
 
@@ -29,6 +31,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message=message,
         )
 
+    @sync_to_async
+    def send_email_to_users(self, sender_id: int, message: str):
+        room = Conversation.objects.get(room_slug=self.room_name)
+        inactive_users = [
+            user for user in room.users.all() if not user.profile.online()
+        ]
+
+        sender_user_instance = CustomUser.objects.get(id=sender_id)
+        for user in inactive_users:
+            send_email_notification(sender_user_instance, user, message, room)
+
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)  # type: ignore
 
@@ -47,6 +60,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "user_id": sender,
             },
         )
+        # send inactive users emails about chats
+        await self.send_email_to_users(sender, message)
 
     @sync_to_async
     def prepare_message(self, message: str, user_id: int):

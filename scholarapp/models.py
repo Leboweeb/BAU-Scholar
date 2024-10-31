@@ -1,7 +1,11 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
+from django.core.cache import cache
+from django.conf import settings
+from django.utils.text import slugify
 
 # Create your models here.
 
@@ -121,3 +125,19 @@ class Profile(models.Model):
     references = models.TextField(default="")
     development_activities = models.TextField(default="")
     staff_member_achievements = models.TextField(default="")
+
+    def last_seen(self):
+        return cache.get("seen_%s" % slugify(self.user.name))
+
+    def online(self):
+        if self.last_seen():
+            now = datetime.datetime.now()
+            if now > (
+                self.last_seen()
+                + datetime.timedelta(seconds=settings.USER_ONLINE_TIMEOUT)
+            ):
+                return False
+            else:
+                return True
+        else:
+            return False

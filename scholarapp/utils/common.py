@@ -1,11 +1,14 @@
 from http import HTTPStatus
 import itertools
+import os
 import re
+import smtplib
+import ssl
 from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
 
-from scholarapp.models import CustomUser, Event
+from scholarapp.models import Conversation, CustomUser, Event
 
 
 DOT = "•"
@@ -59,3 +62,40 @@ def as_id(value: str):
 def id_to_src(user_id: str):
     user = CustomUser.objects.get(id=user_id)
     return user.avatar
+
+
+def send_email_notification(
+    sender: CustomUser,
+    receiver: CustomUser,
+    chat_message: str,
+    referenced_group: Conversation,
+):
+    port = 587  # For starttls
+    smtp_server = "smtp.gmail.com"
+    sender_email = os.environ.get("GOOGLE_APP_EMAIL")
+    receiver_email = "mys239@student.bau.edu.lb"
+    password = os.environ.get("GOOGLE_APP_PASSWORD")
+    assert sender_email
+    assert password
+    message = """\
+    
+    You have received a new message from {}.
+    
+    {} : {}
+    
+    Please check this conversation ({}) for more details.
+    You were sent this message because you participated in this app's test.
+    """.format(
+        sender.name,
+        sender.name,
+        chat_message,
+        referenced_group.title if referenced_group.title else sender.name,
+    )
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(smtp_server, port) as server:
+        server.ehlo()  # Can be omitted
+        server.starttls(context=context)
+        server.ehlo()  # Can be omitted
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
