@@ -14,27 +14,27 @@
         <title>Create An Account</title>
     </head>
     <style>
-    .center_to_page {
-        width: 100vw;
-        height: 100vh;
-    }
+        .center_to_page {
+            width: 100vw;
+            height: 100vh;
+        }
 
-    .lh-lg {
-        line-height: 2.5rem !important;
-    }
+        .lh-lg {
+            line-height: 2.5rem !important;
+        }
 
-    form .form-text {
-        display: none;
-    }
+        form .form-text {
+            display: none;
+        }
 
-    .user-profile:hover {
-        box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
-        ;
-    }
+        .user-profile:hover {
+            box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+            ;
+        }
 
-    .active {
-        box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
-    }
+        .active {
+            box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+        }
     </style>
     <body>
         {% load crispy_forms_tags %}
@@ -77,6 +77,7 @@
                         <input type="hidden" name="skills">
                         <input type="hidden" name="profile_url">
                         <input type="hidden" name="avatar">
+                        <input type="hidden" name="import_account">
                         {{ form | crispy }}
                         <!-- Bottom Panel of Signup form -->
                         <div class="mt-3">

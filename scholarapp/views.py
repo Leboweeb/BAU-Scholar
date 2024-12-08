@@ -262,7 +262,9 @@ def profile(request, user_id: str):
     user_events = Event.objects.filter(
         authors=user, event_type__in=events_with_participants
     )
-    if not user_publications.exists():
+    post_sign_up = request.GET.get("postsignup", None)
+    import_account = request.GET.get("import_account", None)
+    if import_account and (not user_publications.exists()):
         scraped_publications = scrape_publications(user.profile_url)
         event_types = {choice.label: choice for choice in EventTypes}
         chat = model.start_chat(history=[])
@@ -298,7 +300,11 @@ def profile(request, user_id: str):
         "form": CreateEventForm(),
         "data": user_profile_fields,
         "get_faculties": get_faculties,
-        "user_programs": get_programs_for_user(request.user),
+        "user_programs": (
+            get_programs_for_user(request.user)
+            if request.user.profile.department
+            else ""
+        ),
         # "cv_records": zip_if_equal(cv_labels, user_profile_fields),
         "staff_achievement_records": zip_if_equal(
             staff_achievement_labels,
@@ -307,6 +313,7 @@ def profile(request, user_id: str):
         "current_year": current_year,
         "options": CustomUser.objects.all(),
         "event_types": {choice.label: choice for choice in EventTypes},
+        "postsignup": post_sign_up,
     }
     if request.method == "POST":
         eventForm = CreateEventForm(request.POST)
@@ -713,13 +720,16 @@ def sign_in(request):
         if form.is_valid():
             model = form.save(commit=False)
             attrs = ("avatar", "profile_url", "skills")
-            profile_temp = Profile(user_id=model.pk)
-            profile_temp.save()
-            model.profile = profile_temp
             for attr in attrs:
                 setattr(model, attr, request.POST.get(attr))
             model.save()
-            return redirect("/")
+            profile_temp = Profile(user_id=model.pk)
+            profile_temp.save()
+            model.profile = profile_temp
+            import_account = request.POST.get("import_account", None)
+            return redirect(
+                f"/profile/{model.pk}?postsignup=true&import_account={import_account}"
+            )
         return render(request, "registration/signup.html", context={"form": form})
     else:
         form = SignUpForm()

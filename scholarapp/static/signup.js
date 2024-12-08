@@ -77,6 +77,7 @@ function import_if_name() {
       })
         .then((response) => {
           document.querySelector("#loadingSpinner").classList.add("d-none");
+          document.querySelector("[name=import_account]").value = "true";
           return response.json();
         })
         .then((json) => {
