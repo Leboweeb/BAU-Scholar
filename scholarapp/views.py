@@ -49,7 +49,11 @@ from scholarapp.utils.document_utils import (
     generate_form_fields,
     generate_staff_achievements,
 )
-from scholarapp.utils.scrape_user import scrape_author, scrape_publications
+from scholarapp.utils.scrape_user import (
+    get_author_json_scholar,
+    scrape_author,
+    scrape_publications,
+)
 from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.tags import (
     get_faculties,
@@ -263,8 +267,8 @@ def profile(request, user_id: str):
         authors=user, event_type__in=events_with_participants
     )
     post_sign_up = request.GET.get("postsignup", None)
-    import_account = request.GET.get("import_account", None)
-    if import_account and (not user_publications.exists()):
+    import_backend = request.GET.get("import_backend", None)
+    if import_backend and (not user_publications.exists()):
         scraped_publications = scrape_publications(user.profile_url)
         event_types = {choice.label: choice for choice in EventTypes}
         chat = model.start_chat(history=[])
@@ -701,6 +705,7 @@ def import_user(request):
     if request.method == "POST":
         if serializer.is_valid():
             name = serializer.validated_data["name"]  # type: ignore
+            backend = serializer.validated_data["backend"]  # type: ignore
             if name in list(
                 map(
                     lambda file: file.replace(".json", ""),
@@ -709,8 +714,12 @@ def import_user(request):
             ):
                 with open(f"./scholarapp/cached/{name}.json") as f:
                     return Response(json.load(f))
-            scraped_profiles = scrape_author(name)
-            return Response({"profiles": scraped_profiles})
+            else:
+                # keep this for later
+                # if backend == "googlescholar":
+                #     return get_author_json_scholar(name)
+                scraped_profiles = scrape_author(name)
+                return Response({"profiles": scraped_profiles})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

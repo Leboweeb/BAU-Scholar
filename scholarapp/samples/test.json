@@ -1,16 +1,147 @@
-[
-    {
-        "thumbnail": "https://c5.rgstatic.net/m/4671872220764/images/template/default/profile/profile_default_m.jpg",
-        "profile_page": "https://www.researchgate.net/profile/Ali-Haidar-19?_sg=gEms3uiJ2T15q_ohlDlpOzofNEfy2McXg8Mn7xMoRWjZ4ZAPf_lA_fvldr54LUTM7As6iuJDfkwLk_k",
-        "name": "Ali Haidar",
-        "Institution": "Beirut Arab University",
-        "Department": "Mechanical Engineering",
-        "Skills": [
-            "Automotive Industry",
-            "Vehicle Testing",
-            "Mechanical Processes",
-            "Design Engineering",
-            "Computer-Aided Engineering"
-        ]
-    }
-]
+{
+    "parsed_from": "google_scholar",
+    "name": "Ziad Osman",
+    "profile_url": "https://scholar.google.com/citations?view_op=medium_photo&user=TeG4GVIAAAAJ",
+    "publications": [
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Cars Identification from partial images using norm angle of feature points.",
+                "pub_year": "2023",
+                "citation": "International Journal of Data Science and Advanced Analytics 5 (5), 193-201, 2023"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:Wp0gIr-vW9MC",
+            "num_citations": 0
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "An ultra high capacity polarization division multiplexed 128-QAM radio over fiber (RoF) system",
+                "pub_year": "2023",
+                "citation": "Optical and Quantum Electronics 55 (8), 686, 2023"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:aqlVkmm33-oC",
+            "num_citations": 1,
+            "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=6869875165406234814",
+            "cites_id": [
+                "6869875165406234814"
+            ]
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Differential AGC with offset stability and wide range frequency synthesis",
+                "pub_year": "2021",
+                "citation": "Analog Integrated Circuits and Signal Processing 106, 565-575, 2021"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:3fE2CSJIrl8C",
+            "num_citations": 2,
+            "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=8415877291165242382",
+            "cites_id": [
+                "8415877291165242382"
+            ]
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Comparison of Different Modulation Schemes in ROF Communication Systems.",
+                "pub_year": "2021",
+                "citation": "International Journal of Microwave & Optical Technology 16 (1), 2021"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:qxL8FJ1GzNcC",
+            "num_citations": 0
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "A NOVEL ARABIC CORPUS FOR TEXT CLASSIFICATION USING DEEP LEARNING AND WORD EMBEDDING",
+                "pub_year": "2021",
+                "citation": "BAU Journal-Science and Technology 3 (1), 10, 2021"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:4TOpqqG69KYC",
+            "num_citations": 1,
+            "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=13085126511247611685",
+            "cites_id": [
+                "13085126511247611685"
+            ]
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "BAU Journal-Science and Technolog y",
+                "pub_year": "2020",
+                "citation": ""
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:4DMP91E08xMC",
+            "num_citations": 0
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Blind Image Quality Assessment for Face Pose Problem",
+                "pub_year": "2020",
+                "citation": "BAU Journal-Science and Technology 1 (2), 11, 2020"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:_kc_bZDykSQC",
+            "num_citations": 0
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Ensemble models for enhancement of an Arabic speech emotion recognition system",
+                "pub_year": "2020",
+                "citation": "Advances in Information and Communication: Proceedings of the 2019 Future of \u2026, 2020"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:KlAtU1dfN6UC",
+            "num_citations": 7,
+            "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=17263462295634957169",
+            "cites_id": [
+                "17263462295634957169"
+            ]
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "A no-reference image quality assessment for detecting illumination alteration",
+                "pub_year": "2019",
+                "citation": "2019 10th International Conference on Information and Communication Systems \u2026, 2019"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:ULOm3_A8WrAC",
+            "num_citations": 1,
+            "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=4603021837505250635",
+            "cites_id": [
+                "4603021837505250635"
+            ]
+        },
+        {
+            "container_type": "Publication",
+            "source": "AUTHOR_PUBLICATION_ENTRY",
+            "bib": {
+                "title": "Ensemble Models for Enhancement of an Arabic Speech Emotion Recognition System",
+                "pub_year": "2019",
+                "citation": "Advances in Information and Communication: Proceedings of the 2019 Future of \u2026, 2019"
+            },
+            "filled": false,
+            "author_pub_id": "TeG4GVIAAAAJ:Zph67rFs4hoC",
+            "num_citations": 0
+        }
+    ]
+}

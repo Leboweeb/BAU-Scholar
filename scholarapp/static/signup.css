@@ -1,0 +1,32 @@
+.center_to_page {
+  width: 100vw;
+  height: 100vh;
+}
+
+.lh-lg {
+  line-height: 2.5rem !important;
+}
+
+form .form-text {
+  display: none;
+}
+
+.user-profile:hover {
+  box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+}
+
+.active {
+  box-shadow: 1px 2px 3px 4px rgba(12, 12, 12, 0.2);
+}
+
+#importFromHeader {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+#importFromHeader > select {
+  display: inline;
+  width: 50%;
+}

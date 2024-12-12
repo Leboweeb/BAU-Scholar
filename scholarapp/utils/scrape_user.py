@@ -1,6 +1,7 @@
 from urllib.parse import quote_plus
 from parsel import Selector
 from playwright.sync_api import sync_playwright
+from scholarly import scholarly
 
 
 def get_tag_text(tag: Selector):
@@ -20,15 +21,12 @@ def scrape_author(query: str) -> list[dict[str, list[str] | str]]:
 
         authors = []
         page = context.new_page()
-        page_num = 2
-        current_page = 1
 
         page.goto(
             f"https://www.researchgate.net/search/researcher?q={quote_plus(query + ' Beirut Arab University')}&page=1",
             timeout=0,
         )
         selector = Selector(text=page.content())
-        next_page = page.locator(".mustache-pager > div:last-child> a")
 
         for author in selector.css(".nova-legacy-c-card__body--spacing-inherit"):
             author_dict = {}
@@ -93,3 +91,19 @@ def scrape_publications(link: str):
                 }
             )
         return publication_list
+
+
+def get_author_json_scholar(author_name: str):
+    author = next(scholarly.search_author(author_name))  # type: ignore
+    if author:
+        filled = scholarly.fill(
+            author, sortby="year", sections=["publications"], publication_limit=10
+        )
+        print(type(filled))
+        if isinstance(filled, bool):
+            return
+        return {
+            "name": filled["name"],
+            "profile_url": filled["url_picture"],
+            "publications": filled["publications"],
+        }

@@ -64,12 +64,16 @@ function import_if_name() {
   });
   const cardList = document.querySelector("#results");
   const modalToggle = document.getElementById("#exampleModal");
+  const importBackend = document.querySelector(
+    'select[name="import_backend"]'
+  ).value;
   if (name) {
     if (!cardList.children.length) {
       fetch("http://127.0.0.1:8000/import_user", {
         method: "POST",
         body: JSON.stringify({
           name: name,
+          backend: importBackend,
         }),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -77,7 +81,7 @@ function import_if_name() {
       })
         .then((response) => {
           document.querySelector("#loadingSpinner").classList.add("d-none");
-          document.querySelector("[name=import_account]").value = "true";
+          document.querySelector("[name=import_method]").value = importBackend;
           return response.json();
         })
         .then((json) => {
