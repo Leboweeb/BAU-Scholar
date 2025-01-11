@@ -7,7 +7,7 @@ import ssl
 from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
-
+from background_task import background
 from scholarapp.models import Conversation, CustomUser, Event
 
 
@@ -64,11 +64,12 @@ def id_to_src(user_id: str):
     return user.avatar
 
 
+@background(schedule=10)
 def send_email_notification(
-    sender: CustomUser,
-    receiver: CustomUser,
+    sender_name: str,
+    receiver: str,
     chat_message: str,
-    referenced_group: Conversation,
+    referenced_group_name: str | None,
 ):
     port = 587  # For starttls
     smtp_server = "smtp.gmail.com"
@@ -79,17 +80,12 @@ def send_email_notification(
     assert password
     message = """\
     
-    You have received a new message from {}.
-    
-    {} : {}
-    
+    You have received new message(s) from {}.
     Please check this conversation ({}) for more details.
     You were sent this message because you participated in this app's test.
     """.format(
-        sender.name,
-        sender.name,
-        chat_message,
-        referenced_group.title if referenced_group.title else sender.name,
+        sender_name,
+        referenced_group_name if referenced_group_name else sender_name,
     )
 
     context = ssl.create_default_context()

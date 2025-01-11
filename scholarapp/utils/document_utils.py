@@ -89,7 +89,7 @@ def generate_staff_achievements(
         ]
         if events:
             for ev in events:
-                doc.add_paragraph(ev, style="Bullet Number 2")
+                doc.add_paragraph(ev, style="List Bullet 2")
 
     def get_profile_field_or_blank(attr: str | None = None, index: int | None = None):
         """

@@ -161,6 +161,7 @@ input[type="file"] {
 }
 
 #chat-box {
+  max-width: 600px;
   width: 80%;
   height: 350px;
   bottom: 75px;

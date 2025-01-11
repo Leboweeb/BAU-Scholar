@@ -32,7 +32,7 @@ SECRET_KEY = key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1", "172.32.185.202"]
 
 
 # Application definition
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "rest_framework",
     "django_extensions",
+    "background_task",
     "scholarapp",
 ]
 

@@ -529,6 +529,11 @@ def get_events(request):
 
             case "people":
                 authors = CustomUser.objects.filter(name__icontains=query)[:10]
+                if not authors.exists():
+                    # user is most likely searching for tagged users
+                    authors = [
+                        p.user for p in Profile.objects.filter(tags__icontains=query)
+                    ]
                 return render(
                     request,
                     "search_authors_home.html",
@@ -546,7 +551,6 @@ def get_events(request):
                 )
 
             case "tags":
-                # leave to same as title for now
                 event_objects = event_objects.filter(tags__icontains=query)
 
         event_objects = event_objects.order_by(sort_by)
