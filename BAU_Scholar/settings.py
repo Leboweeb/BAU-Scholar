@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1", "172.32.185.202"]
 # Application definition
 
 INSTALLED_APPS = [
+    "scholarapp",
     "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -50,7 +51,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_extensions",
     "background_task",
-    "scholarapp",
 ]
 
 MIDDLEWARE = [
@@ -178,3 +178,9 @@ USER_ONLINE_TIMEOUT = 300
 # Number of seconds that we will keep track of inactive users for before
 # their last seen is removed from the cache
 USER_LASTSEEN_TIMEOUT = 60 * 60 * 24 * 7
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("GOOGLE_APP_EMAIL")
+EMAIL_HOST_PASSWORD = os.environ.get("GOOGLE_APP_PASSWORD")

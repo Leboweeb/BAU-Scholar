@@ -11,7 +11,7 @@ from django.db.models import Q, Count
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -238,7 +238,11 @@ def get_group_or_proxy(group: Conversation, user_id: int, group_attr, attr):
 
 
 def test(request):
-    return render(request, "test.html")
+    return render(
+        request,
+        "registration/password_reset_email.html",
+        context={"current_year": current_year},
+    )
 
 
 @login_required
@@ -763,3 +767,9 @@ class MyLoginView(LoginView):
     def form_invalid(self, form):
         messages.error(self.request, "Invalid username or password")
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class CustomResetPasswordView(PasswordResetView):
+    template_name = "registration/password_reset.html"
+    html_email_template_name = "registration/password_reset_email.html"
+    extra_email_context = {"current_year": current_year}

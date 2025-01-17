@@ -46,7 +46,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender_user_instance = CustomUser.objects.get(id=sender_id)
             for user in inactive_users:
                 send_email_notification(
-                    sender_user_instance.name, user.name, message, room.title
+                    sender_user_instance.name, user.name, room.title
                 )
 
     async def disconnect(self, close_code):

@@ -68,13 +68,12 @@ def id_to_src(user_id: str):
 def send_email_notification(
     sender_name: str,
     receiver: str,
-    chat_message: str,
     referenced_group_name: str | None,
 ):
     port = 587  # For starttls
     smtp_server = "smtp.gmail.com"
     sender_email = os.environ.get("GOOGLE_APP_EMAIL")
-    receiver_email = "mys239@student.bau.edu.lb"
+    # receiver_email = "mys239@student.bau.edu.lb"
     password = os.environ.get("GOOGLE_APP_PASSWORD")
     assert sender_email
     assert password
@@ -90,8 +89,6 @@ def send_email_notification(
 
     context = ssl.create_default_context()
     with smtplib.SMTP(smtp_server, port) as server:
-        server.ehlo()  # Can be omitted
         server.starttls(context=context)
-        server.ehlo()  # Can be omitted
         server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message)
+        server.sendmail(sender_email, receiver, message)

@@ -78,3 +78,17 @@ m-inline-0 {
 .card-hover {
   box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.1);
 }
+
+.center_to_page {
+  width: 100vw;
+  height: 100vh;
+}
+
+.move-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.pl-0 {
+  padding-left: 0px;
+}

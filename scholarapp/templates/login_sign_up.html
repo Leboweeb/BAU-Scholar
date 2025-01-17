@@ -13,23 +13,23 @@
         <title>{{ title }}</title>
     </head>
     <style>
-    .center_to_page {
-        width: 100vw;
-        height: 100vh;
-    }
+        .center_to_page {
+            width: 100vw;
+            height: 100vh;
+        }
 
-    .lh-lg {
-        line-height: 2.5rem !important;
-    }
+        .lh-lg {
+            line-height: 2.5rem !important;
+        }
 
-    form .form-text {
-        display : none;
-    }
+        form .form-text {
+            display: none;
+        }
     </style>
     <body>
         {% load crispy_forms_tags %}
         <div class="container d-flex justify-content-center align-items-center center_to_page">
-            <div class="card" style="width: 65%; ">
+            <div class="card" style="width: 65%; max-width:600px">
                 <div class="card-body">
                     <h4 class="card-title">{{ title }}</h4>
                     <form method="post" action="{% url endpoint %}">
@@ -58,7 +58,10 @@
                         <!-- Bottom Panel of Signup form -->
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary btn-block">{{ button_text }}</button>
-                            <a class="float-end lh-lg" href="{% url other_url %}">{{ other_text }}</a>
+                            <div class="d-flex float-end gap-2">
+                                <a class="lh-lg" href="{% url 'password_reset' %}">Forgot Password</a>
+                                <a class="lh-lg" href="{% url other_url %}">{{ other_text }}</a>
+                            </div>
                         </div>
                     </form>
                 </div>
