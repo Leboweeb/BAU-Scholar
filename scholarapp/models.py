@@ -42,8 +42,7 @@ class CustomUser(AbstractUser):
     username = None
     name = models.CharField(max_length=120)
     email = models.EmailField(_("email address"), unique=True)
-    avatar = models.URLField(default="")
-    profile_url = models.URLField(default="")
+    avatar = models.ImageField(upload_to="uploads/", default="default_icon.png")
     USERNAME_FIELD = "email"
     objects = CustomUserManager()  # type: ignore
     REQUIRED_FIELDS = ["name"]
@@ -70,7 +69,7 @@ class Event(models.Model):
     description = models.CharField(max_length=512)
     authors = models.ManyToManyField(CustomUser, blank=True)
     attendees = models.ManyToManyField(CustomUser, blank=True, related_name="attendees")
-    author_str = models.CharField(max_length=256)
+    author_str = models.CharField(max_length=256, default="")
     external_link = models.URLField(null=True)
     date_created = models.DateTimeField(default=now)
     event_type = models.CharField(max_length=3, choices=EventTypes)

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 import itertools
 import os
+import pathlib
 import re
 import smtplib
 import ssl
@@ -8,8 +9,8 @@ from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
 from background_task import background
-from scholarapp.models import Conversation, CustomUser, Event
-
+from scholarapp.models import CustomUser, Event
+from urllib.request import urlretrieve
 
 DOT = "•"
 
@@ -92,3 +93,8 @@ def send_email_notification(
         server.starttls(context=context)
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver, message)
+
+
+def save_user_image(url: str, name: str):
+    path = pathlib.Path("./BAU_Scholar/media/uploads/").resolve() / f"{name}.jpg"
+    urlretrieve(url, str(path))

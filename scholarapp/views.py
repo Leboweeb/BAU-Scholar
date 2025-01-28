@@ -7,6 +7,7 @@ from itertools import chain
 import json
 import os
 import operator
+import pathlib
 from django.db.models import Q, Count
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
@@ -21,6 +22,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import google.generativeai as genai
+from BAU_Scholar import settings
 from scholarapp.forms import CreateEventForm, SignUpForm
 from scholarapp.models import (
     Conversation,
@@ -39,6 +41,7 @@ from scholarapp.utils.common import (
     join_with_dot,
     return_with_code,
     return_with_no_content,
+    save_user_image,
     split_at_dot,
     zip_if_equal,
 )
@@ -50,9 +53,8 @@ from scholarapp.utils.document_utils import (
     generate_staff_achievements,
 )
 from scholarapp.utils.scrape_user import (
-    get_author_json_scholar,
-    scrape_author,
-    scrape_publications,
+    ImportBackend,
+    get_scraper,
 )
 from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.tags import (
@@ -271,33 +273,6 @@ def profile(request, user_id: str):
         authors=user, event_type__in=events_with_participants
     )
     post_sign_up = request.GET.get("postsignup", None)
-    import_backend = request.GET.get("import_backend", None)
-    if import_backend and (not user_publications.exists()):
-        scraped_publications = scrape_publications(user.profile_url)
-        event_types = {choice.label: choice for choice in EventTypes}
-        chat = model.start_chat(history=[])
-        generate_response = lambda title: chat.send_message(
-            """
-                                        {}
-                                        Based on the earlier title, generate only a string that contains the minimum amount of tags associated with it joined by the • character. If there is no text or random text, return an empty string
-                                        """.format(
-                title
-            )
-        ).text
-        publication_pairs = [
-            Event.objects.get_or_create(
-                title=publication["title"],
-                description=publication["description"],
-                author_str=publication["authors"],
-                date_created=parse(publication["date_created"]),
-                event_type=event_types[publication["research_type"]],
-                tags=generate_response(publication["description"]),
-            )
-            for publication in scraped_publications
-        ]
-        for publication, _ in publication_pairs:
-            publication.authors.add(user)
-
     user_profile_fields, staff_achievement_values = generate_form_fields(user_id)
     context = {
         "user": user,
@@ -714,20 +689,19 @@ def import_user(request):
         if serializer.is_valid():
             name = serializer.validated_data["name"]  # type: ignore
             backend = serializer.validated_data["backend"]  # type: ignore
-            if name in list(
-                map(
-                    lambda file: file.replace(".json", ""),
-                    os.listdir("./scholarapp/cached"),
-                )
-            ):
-                with open(f"./scholarapp/cached/{name}.json") as f:
-                    return Response(json.load(f))
+            if backend == ImportBackend.RESEARCHGATE.value:
+                if name in list(
+                    map(
+                        lambda file: file.replace(".json", ""),
+                        os.listdir("./scholarapp/cached"),
+                    )
+                ):
+                    with open(f"./scholarapp/cached/{name}.json") as f:
+                        return Response(json.load(f))
             else:
-                # keep this for later
-                # if backend == "googlescholar":
-                #     return get_author_json_scholar(name)
-                scraped_profiles = scrape_author(name)
-                return Response({"profiles": scraped_profiles})
+                scraper = get_scraper(backend)
+                scraped_profiles = scraper.scrape_user(name)
+                return Response(scraped_profiles)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -736,17 +710,67 @@ def sign_in(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             model = form.save(commit=False)
-            attrs = ("avatar", "profile_url", "skills")
+            # scrape publications in the sign in phase, no need to pass around args
+            # no need to store research gate profile URL either
+            attrs = ("skills",)
             for attr in attrs:
                 setattr(model, attr, request.POST.get(attr))
             model.save()
             profile_temp = Profile(user_id=model.pk)
             profile_temp.save()
             model.profile = profile_temp
-            import_account = request.POST.get("import_account", None)
-            return redirect(
-                f"/profile/{model.pk}?postsignup=true&import_account={import_account}"
-            )
+            import_backend = request.POST.get("import_backend", None)
+            profile_url_or_name = request.POST.get("profile_url", None) or model.name
+            assert profile_url_or_name
+            avatar = request.POST.get("avatar", None)
+            if avatar:
+                save_user_image(avatar, model.name)
+                new_path = str(
+                    (
+                        pathlib.Path(settings.MEDIA_ROOT) / f"uploads/{model.name}.jpg"
+                    ).resolve()
+                )
+                with open(new_path, "rb") as fd:
+                    model.avatar.save(f"{model.name}.jpg", fd, True)
+            scraper = get_scraper(import_backend)
+            scraped_publications = scraper.scrape_publications(profile_url_or_name)
+            event_types = {choice.label: choice for choice in EventTypes}
+            gen_model = genai.GenerativeModel()
+
+            def generate_response(title: str):
+
+                try:
+                    return gen_model.generate_content(
+                        """
+                                                {}
+                                                Based on the earlier title, generate only a string that contains the minimum amount of tags associated with it joined by the • character. If there is no text or random text, return an empty string
+                                                """.format(
+                            title
+                        )
+                    ).text
+                except Exception as e:
+                    return ""
+
+            publication_pairs = []
+            for publication in scraped_publications:
+                if not publication:
+                    continue
+                else:
+                    publication_pairs.append(
+                        Event.objects.get_or_create(
+                            title=publication["title"],
+                            description=publication["description"],
+                            date_created=parse(publication["date_created"]),
+                            event_type=event_types[publication["research_type"]],
+                            # tags=generate_response(
+                            #     publication["description"] or publication["title"]
+                            # ),
+                        )
+                    )
+
+            for publication, _ in publication_pairs:
+                publication.authors.add(model)
+            return redirect(f"/profile/{model.pk}?postsignup=true")
         return render(request, "registration/signup.html", context={"form": form})
     else:
         form = SignUpForm()

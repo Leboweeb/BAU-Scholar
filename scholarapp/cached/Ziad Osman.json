@@ -1,0 +1,25 @@
+[
+    {
+        "avatar": "https://i1.rgstatic.net/ii/profile.image/655458712944642-1533284943622_Q64/Ziad-Osman.jpg",
+        "profile_page": "https://www.researchgate.net/profile/Ziad-Osman?_sg=ugroFMJEUku7LPmdkn9pT-NA4FbWZdDWiaCjQhc9g00yYTY9u87aoU3GzLDlQg66wKWqWtSDUQwMxmU",
+        "name": "Ziad Osman",
+        "Institution": "Beirut Arab University",
+        "Department": "Department of Electrical and Computer Engineering",
+        "Skills": "Electrical & Electronics Engineering",
+        "Latest publication": "Cars Identification from partial images using norm angle of feature points."
+    },
+    {
+        "avatar": "https://c5.rgstatic.net/m/4671872220764/images/template/default/profile/profile_default_m.jpg",
+        "profile_page": "https://www.researchgate.net/profile/Colibri-Beirut?_sg=zH4VjEXV1_kuKA3i5dfZlvawOJPn1R3yrdkfSq2Xsznu7A3uy4xRUa6PDL_g0vFXcTvQ1z8TQJj9Qwc",
+        "name": "Colibri Beirut",
+        "Institution": "Beirut Arab University",
+        "Department": "Department of Business Administration",
+        "Skills": [
+            "Leadership",
+            "Strategic Management",
+            "Business",
+            "Management",
+            "Strategic Planning"
+        ]
+    }
+]

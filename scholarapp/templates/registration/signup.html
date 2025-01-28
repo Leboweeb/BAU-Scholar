@@ -27,9 +27,9 @@
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="importFromHeader">
                             <span>Import From</span>
-                            <select class="form-select" name="import_backend">
-                                <option value="researchgate">ResearchGate</option>
+                            <select class="form-select" name="import_backend" onchange="retryImport()">
                                 <option value="googlescholar">Google Scholar</option>
+                                <option value="researchgate">ResearchGate</option>
                             </select>
                         </h1>
                         <button type="button"
@@ -37,11 +37,7 @@
                                 data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        {% comment %} {% for i in '012345'|make_list %} {% endcomment %}
-                        {% include "components/profile_import.html" %}
-                        {% comment %} {% endfor %} {% endcomment %}
-                    </div>
+                    <div class="modal-body">{% include "components/profile_import.html" %}</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
@@ -61,7 +57,7 @@
                         <input type="hidden" name="skills">
                         <input type="hidden" name="profile_url">
                         <input type="hidden" name="avatar">
-                        <input type="hidden" name="import_method">
+                        <input type="hidden" name="import_backend">
                         {{ form | crispy }}
                         <!-- Bottom Panel of Signup form -->
                         <div class="mt-3">

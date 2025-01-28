@@ -1,3 +1,5 @@
+const importControlller = new AbortController();
+
 function submit_form(form) {
   const cardList = document.querySelector("#results");
   if (!cardList.children.length) return;
@@ -9,7 +11,9 @@ function submit_form(form) {
     }
     let cardJson = JSON.parse(selectedCard.dataset.profile);
     let inputNames = ["profile_url", "avatar"];
-    let attrs = ["profile_page", "thumbnail"].map((attr) => cardJson[attr]);
+    let attrs = ["profile_page", "avatar"].map(
+      (attr) => cardJson[attr] ?? null // this seems stupid but we want the server to actually understand that it is null. undefined is taken as a string.
+    );
     // fuck you cloudflare, eat a dick
     try {
       if (typeof attrs[0] === "object") attrs[0] = attrs[0].join(",");
@@ -25,7 +29,7 @@ function submit_form(form) {
 }
 
 function add_card(profileJson) {
-  let src = profileJson["thumbnail"];
+  let src = profileJson["avatar"];
   let name = profileJson["name"];
   const cardList = document.querySelector("#results");
   let node = new DOMParser().parseFromString(
@@ -57,6 +61,15 @@ function card_active(event) {
   });
 }
 
+function retryImport() {
+  try {
+    importControlller.abort(); // cancel any possible request
+  } catch (error) {
+    console.log(error);
+  }
+  import_if_name(); // then import again
+}
+
 function import_if_name() {
   const name = document.querySelector("#id_name").value || "";
   const myModal = new bootstrap.Modal("#exampleModal", {
@@ -71,6 +84,7 @@ function import_if_name() {
     if (!cardList.children.length) {
       fetch("http://127.0.0.1:8000/import_user", {
         method: "POST",
+        signal: importControlller.signal,
         body: JSON.stringify({
           name: name,
           backend: importBackend,
@@ -79,18 +93,25 @@ function import_if_name() {
           "Content-type": "application/json; charset=UTF-8",
         },
       })
+        .catch((e) => {
+          console.log("Import canceled");
+        })
         .then((response) => {
           document.querySelector("#loadingSpinner").classList.add("d-none");
-          document.querySelector("[name=import_method]").value = importBackend;
+          document.querySelector("input[name=import_backend]").value =
+            importBackend;
           return response.json();
         })
         .then((json) => {
-          for (const index in json["profiles"])
-            add_card(json["profiles"][index]);
+          for (const profile of json) {
+            add_card(profile);
+          }
         });
     }
-    myModal.show(modalToggle);
+    if (!document.querySelector(".modal-backdrop")) {
+      myModal.show(modalToggle);
+    }
   } else {
-    alert("Please provide a name to import from Research Gate.");
+    alert("Please provide a valid name to import a profile.");
   }
 }

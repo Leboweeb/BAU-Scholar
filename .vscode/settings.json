@@ -20,5 +20,6 @@
   },
   "[jinja]": {
     "djlint.enableLinting": false
-  }
+  },
+  "python.REPL.enableREPLSmartSend": false
 }

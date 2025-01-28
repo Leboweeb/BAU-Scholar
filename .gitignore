@@ -162,7 +162,9 @@ cython_debug/
 #.idea/
 
 # Django project ignores
-
+/BAU_Scholar/media/uploads
+/BAU_Scholar/media/samples
 # My Ignores
 scratch.py
 scratch.sql
+test.json

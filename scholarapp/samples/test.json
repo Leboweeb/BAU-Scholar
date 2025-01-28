@@ -1,7 +1,6 @@
 {
-    "parsed_from": "google_scholar",
     "name": "Ziad Osman",
-    "profile_url": "https://scholar.google.com/citations?view_op=medium_photo&user=TeG4GVIAAAAJ",
+    "avatar": "https://scholar.google.com/citations?view_op=medium_photo&user=TeG4GVIAAAAJ",
     "publications": [
         {
             "container_type": "Publication",
@@ -69,7 +68,7 @@
             },
             "filled": false,
             "author_pub_id": "TeG4GVIAAAAJ:4TOpqqG69KYC",
-            "num_citations": 1,
+            "num_citations": 3,
             "citedby_url": "https://scholar.google.com/scholar?oi=bibs&hl=en&cites=13085126511247611685",
             "cites_id": [
                 "13085126511247611685"
