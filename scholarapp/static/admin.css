@@ -1,0 +1,137 @@
+body {
+  background-color: #f4f4f4 !important;
+  min-height: 100%;
+}
+html {
+  height: 100%;
+}
+
+:root {
+  --rating-size: 6rem;
+  --bar-size: 1rem;
+  --background-color: #e7f2fa;
+  --rating-color-default: #2980b9;
+  --rating-color-background: #fff;
+  /* --rating-color-background: #c7e1f3; */
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 3.5rem;
+  height: 100%;
+  width: 200px;
+  background-color: #163a6c;
+  transition: width 0.3s ease;
+  z-index: 2;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  flex-grow: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.sidebar ul li span {
+  display: inline-block;
+  color: #fff;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.sidebar ul li:hover {
+  background-color: #1c4c8e;
+}
+
+#main-content {
+  margin-left: 75px;
+}
+
+hr {
+  height: 1px;
+  margin: 1rem 1rem;
+  background-color: #fff;
+  border: 0;
+  opacity: 0.25;
+}
+
+.sidebar-collapsed {
+  width: 70px;
+}
+
+.sidebar-collapsed ul li span {
+  display: none;
+}
+
+.sidebar-tab {
+  padding: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.active {
+  background-color: #0d6efd;
+}
+
+.collapsed-tabs {
+  text-align: center;
+  /* border: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color); */
+}
+
+/* Rating item */
+.rating {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  overflow: hidden;
+  background: var(--rating-color-default);
+  color: var(--rating-color-default);
+  width: var(--rating-size);
+  height: var(--rating-size);
+
+  /* Basic style for the text */
+  font-size: calc(var(--rating-size) / 3);
+  line-height: 1;
+}
+
+/* Rating circle content */
+.rating span {
+  position: relative;
+  display: flex;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.rating span small {
+  font-size: 0.5em;
+  font-weight: 900;
+  align-self: center;
+}
+
+/* Bar mask, creates an inner circle with the same color as thee background */
+.rating::after {
+  content: "";
+  position: absolute;
+  inset: var(--bar-size);
+  background: var(--rating-color-background);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Bar background */
+.rating::before {
+  content: "";
+  position: absolute;
+  inset: var(--bar-size);
+  border-radius: inherit;
+  box-shadow: 0 0 0 1rem var(--rating-color-background);
+  z-index: -1;
+}

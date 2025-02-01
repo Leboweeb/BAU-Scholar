@@ -1,100 +1,161 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
-{% block content %}
-    {# djlint: off #}
-    {% comment %} <script defer>
-        let modal = document.querySelector("#personalInfoForm");
-        document.body.onload = () => {
-            new bootstrap.Modal(modal).show()
-} {% endcomment %}
-    </script>
-    {# djlint: on #}
-    <div class="modal fade"
-         id="personalInfoForm"
-         data-bs-backdrop="static"
-         data-bs-keyboard="false"
-         tabindex="-1"
-         aria-labelledby="PersonalInfoModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Personal Information Form</h1>
-                    <button type="button"
-                            id="personalInfoModalClose"
-                            class="btn-close"
-                            data-bs-target="#personalInfoForm"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-avatar@latest/dist/avatar.min.css"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+              crossorigin="anonymous" />
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+                crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="{% static 'index.css' %}" />
+        <link rel="stylesheet" href="{% static 'admin.css' %}" />
+        <script src="{% static 'admin.js' %}"></script>
+        <script src="{% static 'chart.umd.min.js' %}"></script>
+        <title>Admin Dashboard</title>
+    </head>
+    <body>
+        <nav id="navbar-top" class="navbar navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'index' %}">
+                    {% load static %}
+                    <img id="logo"
+                         width="32"
+                         height="32"
+                         src="{% static 'bau.png' %}"
+                         alt="Bau Logo"
+                         class="d-inline-block align-text-top" />
+                    BAU Scholar
+                </a>
+            </div>
+        </nav>
+        <div id="wrapper">
+            <div id="sidebar-wrapper" class="sidebar d-flex flex-column">
+                <ul>
+                    <li class="sidebar-tab">
+                        <a>
+                            <img id="logo"
+                                 width="32"
+                                 height="32"
+                                 src="{% static 'bau.png' %}"
+                                 alt="Bau Logo"
+                                 class="d-none align-text-top" />
+                            <h4 class="dashboard-header"
+                                style="text-align: center;
+                                       color: #fff;
+                                       border: 0;
+                                       margin: 1rem 0">Dashboard</h4>
+                        </a>
+                    </li>
+                    <hr>
+                    <li class="sidebar-tab">
+                        <a class="p-0" onclick="toggleSideBar()">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 height="20px"
+                                 viewBox="0 -960 960 960"
+                                 width="20px"
+                                 fill="#FFFFFF">
+                                <path d="M288-144 96-336l192-192 51 51-105 105h582v72H234l105 105-51 51Zm384-288-51-51 105-105H144v-72h582L621-765l51-51 192 192-192 192Z" />
+                            </svg>
+                            <span>Collapse</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-tab">
+                        <a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 height="20px"
+                                 viewBox="0 -960 960 960"
+                                 width="20px"
+                                 fill="#FFFFFF">
+                                <path d="M192-192v-96l72-72v168h-72Zm126 0v-222l66-66 6 6v282h-72Zm126 0v-228l72 72v156h-72Zm126 0v-186l72-72v258h-72Zm126 0v-312l72-72v384h-72ZM192-378v-102l192-192 144 144 240-240v102L528-426 384-570 192-378Z" />
+                            </svg>
+                            <span>University Statistics</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-tab">
+                        <a href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 height="20px"
+                                 viewBox="0 -960 960 960"
+                                 width="20px"
+                                 fill="#FFFFFF">
+                                <path d="M840-288v-276L480-384 48-600l432-216 432 216v312h-72ZM480-144 216-276v-159l264 132 264-132v159L480-144Z" />
+                            </svg>
+                            <span>Staff Achievements</span>
+                        </a>
+                    </li>
+                </ul>
+                <hr style="position:relative;bottom:2.5rem">
+                <div id="profile-picture"
+                     class="dropdown sidebar-tab"
+                     style="bottom:3.5rem">
+                    <a class="text-white text-decoration-none dropdown-toggle"
+                       href="#"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img class="avatar avatar-24 rounded-circle"
+                             src="{{ user.avatar }}"
+                             alt="Profile" />
+                        <strong style="margin-left:5px" class="user-name">{{ user.name }}</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow"
+                        aria-labelledby="dropdownUser1">
+                        <li>
+                            <a class="dropdown-item" href="#">Home</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Profile</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#">Sign out</a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="modal-body">
-                    <form method="post" id="import-document">
-                        {% csrf_token %}
-                        <ul class="nav nav-underline">
-                            <li class="nav-item">
-                                <button type="button"
-                                        id="nav-fill-form"
-                                        class="nav-link active"
-                                        onclick="switchTabs('.nav.nav-underline:nth-child(2) button','#top-container >div',0)">
-                                    Fill Form
-                                </button>
-                            </li>
-                            <li class="nav-item">
-                                <button type="button"
-                                        id="nav-fill-staff-achievements"
-                                        class="nav-link"
-                                        onclick="switchTabs('.nav.nav-underline:nth-child(2) button','#top-container >div',1)">
-                                    Fill Staff Achievements Form
-                                </button>
-                            </li>
-                            <li class="nav-item">
-                                <button type="button"
-                                        id="nav-import-document"
-                                        class="nav-link"
-                                        onclick="switchTabs('.nav.nav-underline button','#top-container >div',2)">
-                                    Import Document
-                                </button>
-                            </li>
-                        </ul>
-                        <div id="top-container"
-                             class="w-100 h-100 d-flex justify-items-center align-items-center m-auto">
-                            <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
-                                {# djlint:off #}
-              {% for record,data in cv_records %}
-                {% include "components/dynamic_form_input.html" with top_label=record.label element_id=record.label|as_id required=record.required single=record.single existing_data=data autocomplete=record.autocomplete top=record.top endpoint=record.endpoint choices=record.choices select=record.select %}
-              {% endfor %}
-                                {# djlint:on#}
-                                <button class="btn btn-primary" type="button" onclick="submitDocument(event)">Submit</button>
-                            </div>
-                            <div id="staff-achievements-container"
-                                 class="row card mt-3 p-2 w-100 m-auto d-none">
-                                {% for record,data in staff_achievement_records %}
-                                    {% include "components/dynamic_form_input.html" with top_label=record element_id=record|as_id data=data single=False %}
+            </div>
+            <div id="main-content">
+                <div class="container m-auto mt-5"
+                     style="max-height: 700px;
+                            max-width: 900px">
+                    <div class="row">
+                        <div class="card col ">
+                            <canvas id="myChart"></canvas>
+                            <div class="progress-container mt-4 flex-center-row"
+                                 style="animation: fade-up 0.5s">
+                                {% for k,v in stats.items %}
+                                    <div class="progress-circle" style="width: 6rem;text-align:center;">
+                                        <div class="rating">{{ v }}</div>
+                                        <span>{{ k }}</span>
+                                    </div>
                                 {% endfor %}
-                                <button class="btn btn-primary" type="submit">Submit</button>
-                            </div>
-                            <div id="import-document-container" class="mt-3 p-2 w-100 m-auto d-none">
-                                <label for="imported_document" class="drop-area" draggable="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         height="256px"
-                                         viewBox="0 -960 960 960"
-                                         width="256px"
-                                         fill="#e8eaed">
-                                        <path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
-                                    </svg>
-                                    <span class="text-muted">Click or drag and drop documents here to upload them.</span>
-                                    <input type="file"
-                                           name="imported_document"
-                                           id="imported_document"
-                                           onchange="submitDocument(event)"
-                                           accept=".docx">
-                                </label>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-                <div class="modal-footer"></div>
             </div>
         </div>
-    </div>
-{% endblock content %}
+    </body>
+</html>
+<script>
+    displayProgressCircles();
+    toggleSideBar();
+    displayChart();
+    const sidebar = document.querySelector(".sidebar");
+    const profile = document.getElementById("profile-picture")
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            let navbarVisible = entry.isIntersecting;
+            sidebar.style.top = navbarVisible ? "3.5rem" : "0";
+            profile.style.bottom = navbarVisible ? "3.5rem" : "0";
+        }, {
+            rootMargin: "-100px"
+        });
+    });
+    observer.observe(document.getElementById("navbar-top"));
+</script>

@@ -1,13 +1,13 @@
 import base64
+import json
+import os
+import operator
+import pathlib
 from datetime import datetime
 from functools import reduce
 from http import HTTPStatus
 from io import BytesIO
 from itertools import chain
-import json
-import os
-import operator
-import pathlib
 from django.db.models import Q, Count
 from dateutil.parser import parse
 from django.http import HttpResponse, JsonResponse
@@ -128,12 +128,12 @@ events_with_participants = [
     EventTypes.THESIS_SUPERVISION,
 ]
 
+
 # env vars to make gemini less noisy
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "2"
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 def get_home_feed(user: CustomUser):
@@ -240,11 +240,17 @@ def get_group_or_proxy(group: Conversation, user_id: int, group_attr, attr):
 
 
 def test(request):
-    return render(
-        request,
-        "registration/password_reset_email.html",
-        context={"current_year": current_year},
-    )
+    labels = [
+        "International Faculty Ratio",
+        "International Student Ratio",
+        "Employment Outcomes",
+        "International Research Network",
+        "Faculty Student Ratio",
+        "Employer Reputation",
+    ]
+    stats = [88.5, 48.2, 38.2, 28, 19, 14.8]
+
+    return render(request, "test.html", context={"stats": dict(zip(labels, stats))})
 
 
 @login_required
@@ -735,21 +741,6 @@ def sign_in(request):
             scraper = get_scraper(import_backend)
             scraped_publications = scraper.scrape_publications(profile_url_or_name)
             event_types = {choice.label: choice for choice in EventTypes}
-            gen_model = genai.GenerativeModel()
-
-            def generate_response(title: str):
-
-                try:
-                    return gen_model.generate_content(
-                        """
-                                                {}
-                                                Based on the earlier title, generate only a string that contains the minimum amount of tags associated with it joined by the • character. If there is no text or random text, return an empty string
-                                                """.format(
-                            title
-                        )
-                    ).text
-                except Exception as e:
-                    return ""
 
             publication_pairs = []
             for publication in scraped_publications:
@@ -762,9 +753,6 @@ def sign_in(request):
                             description=publication["description"],
                             date_created=parse(publication["date_created"]),
                             event_type=event_types[publication["research_type"]],
-                            # tags=generate_response(
-                            #     publication["description"] or publication["title"]
-                            # ),
                         )
                     )
 
