@@ -1,0 +1,57 @@
+{% extends "admin/admin_base.html" %}
+{% block main_content %}
+    <div class="container m-auto mt-5 main-layout" style="max-width: 900px">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Research Frequency By Faculty</h5>
+                <canvas id="faculty-chart"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Faculty Report</h5>
+                <label for="faculty">Faculty</label>
+                <select name="faculty"
+                        id="faculty"
+                        class="form-select"
+                        onchange="populateDepartment()">
+                    <option value="" selected="">---------</option>
+                    {% for faculty in faculties %}<option value="{{ faculty }}">{{ faculty }}</option>{% endfor %}
+                </select>
+                <label for="department">Department</label>
+                <select name="department" id="department" class="form-select">
+                    <option value="" selected="">---------</option>
+                </select>
+                <button type="button" class="btn btn-primary m-auto mt-4">Generate Report</button>
+            </div>
+        </div>
+        <div class="card anim-fadeup" style="grid-column: 1/3;">
+            <div class="card-body">
+                <h5 class="card-title">Cumulative Report</h5>
+                <div class="flex-center-row">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Research</h5>
+                            <span>40</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Most Research This Year</h5>
+                            <span>Faculty of Engineering</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Other Activities This Year</h5>
+                            <span>10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        displayBarChart();
+    </script>
+{% endblock main_content %}

@@ -122,3 +122,7 @@ m-inline-0 {
     transform: translateY(0px) scale(1);
   }
 }
+
+.anim-fadeup {
+  animation: fade-up 0.5s;
+}

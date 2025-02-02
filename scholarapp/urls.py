@@ -59,7 +59,8 @@ urlpatterns = [
         "participate_in_event", views.participate_in_event, name="participate_in_event"
     ),
     path("get_events", views.get_events, name="get_events"),
-    path("test", views.test, name="test"),
+    path("dashboard/statistics", views.test, name="statistics"),
+    path("dashboard/staff_achievements", views.test, name="staff_achievements"),
     path("search_users", views.search_users, name="search_users"),
     path(
         "search_tags_for_user", views.search_tags_for_user, name="search_tags_for_user"

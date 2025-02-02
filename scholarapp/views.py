@@ -245,12 +245,19 @@ def test(request):
         "International Student Ratio",
         "Employment Outcomes",
         "International Research Network",
-        "Faculty Student Ratio",
-        "Employer Reputation",
     ]
-    stats = [88.5, 48.2, 38.2, 28, 19, 14.8]
+    stats = [88.5, 48.2, 38.2, 28]
+    faculties = get_faculties()
+    if request.path == "/dashboard/statistics":
+        template = "admin/admin_statistics.html"
+    else:
+        template = "admin/admin_staff_achievements.html"
 
-    return render(request, "test.html", context={"stats": dict(zip(labels, stats))})
+    return render(
+        request,
+        template,
+        context={"stats": dict(zip(labels, stats)), "faculties": faculties},
+    )
 
 
 @login_required

@@ -17,7 +17,10 @@
                 crossorigin="anonymous"></script>
         <link rel="stylesheet" href="{% static 'index.css' %}" />
         <link rel="stylesheet" href="{% static 'admin.css' %}" />
+        <link rel="stylesheet" href="{% static 'utils.css' %}" />
         <script src="{% static 'admin.js' %}"></script>
+        <script src="{% static 'tags.js' %}"></script>
+        <script src="{% static 'htmx.min.js' %}"></script>
         <script src="{% static 'chart.umd.min.js' %}"></script>
         <title>Admin Dashboard</title>
     </head>
@@ -67,8 +70,8 @@
                             <span>Collapse</span>
                         </a>
                     </li>
-                    <li class="sidebar-tab active">
-                        <a href="#">
+                    <li class="sidebar-tab {% if request.path == '/dashboard/statistics' %}active{% else %}{% endif %}">
+                        <a href='/dashboard/statistics'>
                             <svg xmlns="http://www.w3.org/2000/svg"
                                  height="20px"
                                  viewBox="0 -960 960 960"
@@ -79,8 +82,8 @@
                             <span>University Statistics</span>
                         </a>
                     </li>
-                    <li class="sidebar-tab">
-                        <a href="#">
+                    <li class="sidebar-tab {% if request.path == '/dashboard/staff_achievements' %}active{% else %}{% endif %}">
+                        <a href='/dashboard/staff_achievements'>
                             <svg xmlns="http://www.w3.org/2000/svg"
                                  height="20px"
                                  viewBox="0 -960 960 960"
@@ -120,46 +123,14 @@
                 </div>
             </div>
             <div id="main-content">
-                <div class="container m-auto mt-5 main-layout"
-                     style="max-height: 700px;
-                            max-width: 900px">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">BAU Rankings</h5>
-                            <canvas id="myChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Latest News</h5>
-                            <span>
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla, numquam. Molestiae voluptas similique obcaecati repudiandae necessitatibus ab totam quo vel consequuntur est! Nam sint quae dolorem molestiae veritatis molestias architecto?
-                            </span>
-                        </div>
-                    </div>
-                    <div class="card" style="grid-column: 1/3;">
-                        <div class="card-body">
-                            <h5 class="card-title">Ranking Criteria</h5>
-                            <div class="progress-container mt-4 flex-center-row"
-                                 style="animation: fade-up 0.5s">
-                                {% for k,v in stats.items %}
-                                    <div class="progress-circle flex-center-column">
-                                        <div class="rating">{{ v }}</div>
-                                        <span>{{ k }}</span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% block main_content %}
+                {% endblock main_content %}
             </div>
         </div>
     </body>
 </html>
 <script>
     toggleSideBar();
-    displayProgressCircles();
-    displayChart();
     const sidebar = document.querySelector(".sidebar");
     const profile = document.getElementById("profile-picture")
     const observer = new IntersectionObserver((entries) => {

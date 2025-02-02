@@ -16,7 +16,58 @@ function toggleSideBar() {
   toggleElement(dashboard_header.previousElementSibling);
 }
 
-function displayChart() {
+function displayBarChart() {
+  new Chart(document.getElementById("faculty-chart"), {
+    type: "bar",
+    data: {
+      labels: [
+        "Engineering",
+        "Medicine",
+        "Architecture",
+        "Business",
+        "Human Sciences",
+      ],
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: false,
+          },
+        },
+      },
+      datasets: [
+        {
+          data: [10, 8, 6, 7, 9],
+          label: "Research Papers",
+        },
+      ],
+    },
+
+    options: {
+      scales: {
+        y: {
+          reverse: false,
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: "BAU Research Papers by Faculty (2025)",
+        },
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          enabled: true,
+        },
+      },
+    },
+  });
+}
+
+function displayLineGraph() {
   new Chart(document.getElementById("myChart"), {
     type: "line",
     data: {
@@ -51,10 +102,10 @@ function displayChart() {
           text: "BAU Rankings 2020-2025",
         },
         legend: {
-          display: false,
+          display: true,
         },
         tooltip: {
-          enabled: false,
+          enabled: true,
         },
       },
     },
@@ -72,9 +123,8 @@ function displayProgressCircles() {
     const ratingScore = parseInt(ratingContent, 10);
     // After adding the class, get its color
     const ratingColor = window.getComputedStyle(rating).backgroundColor;
-
     // Define the background gradient according to the score and color
-    const gradient = `background: conic-gradient(${ratingColor} ${ratingScore}%, transparent 0 100%)`;
+    const gradient = `background: conic-gradient(${ratingColor} ${ratingScore}%, lightgrey 0 100%)`;
 
     // Set the gradient as the rating background
     rating.setAttribute("style", gradient);
@@ -84,4 +134,13 @@ function displayProgressCircles() {
       ratingContent.indexOf("%") >= 0 ? "<small>%</small>" : ""
     }</span>`;
   });
+}
+
+function populateDepartment() {
+  let selector = "#faculty";
+  let currentFaculty = document.querySelector(selector).value;
+  if (!currentFaculty) {
+    return;
+  }
+  populateDepartmentSelect(currentFaculty, "#department");
 }
