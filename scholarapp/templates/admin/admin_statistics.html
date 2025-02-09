@@ -30,6 +30,7 @@
             </div>
         </div>
     </div>
+    {{ graph_data | json_script:"graph-data" }}
     <script>
         displayProgressCircles();
         displayLineGraph();

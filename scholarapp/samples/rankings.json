@@ -1,0 +1,97 @@
+[
+    {
+        "command": "settings",
+        "settings": {
+            "ajaxPageState": {
+                "theme": "tu_d8",
+                "libraries": "addtoany\/addtoany.front,ckeditor_accordion\/accordion.frontend,clientside_validation_jquery\/cv.jquery.ckeditor,clientside_validation_jquery\/cv.jquery.ife,clientside_validation_jquery\/cv.jquery.validate,clientside_validation_jquery\/cv.pattern.method,core\/drupal.form,core\/drupal.states,core\/normalize,eu_cookie_compliance\/eu_cookie_compliance_default,flag\/flag.link_ajax,ga\/analytics,layout_discovery\/onecol,qs_article\/qs_article,qs_firebase_sso\/sso-lib,qs_firebase_sso\/sso-lib-header,qs_flexreg_user_flow\/qs_flexreg_user_flow,qs_global_site_search\/program_styles,qs_global_site_search\/search_header,qs_global_site_search\/university_styles,qs_otp_sender\/qs_otp_sender,qs_profiles\/highcharts,qs_profiles\/qs_profiles,qs_profiles\/qs_profiles_circle,qs_uni_prog_directory\/qs_uni_prog_compare,qs_uni_prog_directory\/qs_uni_prog_directory_filters,qs_user_profile\/qsUserProfile,statistics\/drupal.statistics,system\/base,tu_d8\/campus_location,tu_d8\/global,tu_d8\/node,tu_d8\/owl-carousel,tu_d8\/profile_header,tu_d8\/qna_forums,tu_d8\/qs_instant,tu_d8\/qs_profile_new,tu_d8\/qs_profile_new_datalayer,tu_d8\/qs_program_pages_card,tu_d8\/qs_program_tabs,tu_d8\/qs_ranking_chart,tu_d8\/qs_related_content,tu_d8\/qs_similar_programs,tu_d8\/qs_ud_pd,views\/views.module,webform\/webform.dialog"
+            },
+            "basePath": "modules\/contrib\/vote_up_down",
+            "pluralDelimiter": "",
+            "user": {
+                "uid": 0,
+                "permissionsHash": "8e125b3e2632dbcae38a7d461284eaf5b7d465b3817d011163b3b5e52413a4a8"
+            }
+        },
+        "merge": true
+    },
+    {
+        "command": "settings",
+        "settings": {
+            "qs_profiles": []
+        },
+        "merge": true
+    },
+    {
+        "command": "settings",
+        "settings": {
+            "qs_profiles": {
+                "json_data": [
+                    {
+                        "x": 2020,
+                        "y": 801,
+                        "r": "801-1000"
+                    },
+                    {
+                        "x": 2021,
+                        "y": 801,
+                        "r": "801-1000"
+                    },
+                    {
+                        "x": 2022,
+                        "y": 801,
+                        "r": "801-1000"
+                    },
+                    {
+                        "x": 2023,
+                        "y": 801,
+                        "r": "801-1000"
+                    },
+                    {
+                        "x": 2024,
+                        "y": 711,
+                        "r": "711-720"
+                    },
+                    {
+                        "x": 2025,
+                        "y": 641,
+                        "r": "641-650"
+                    }
+                ],
+                "json_zones": [
+                    {
+                        "value": 2020
+                    },
+                    {
+                        "value": 2021,
+                        "color": "#5ac648"
+                    },
+                    {
+                        "value": 2022,
+                        "color": "#5ac648"
+                    },
+                    {
+                        "value": 2023,
+                        "color": "#b00020"
+                    },
+                    {
+                        "value": 2024,
+                        "color": "#5ac648"
+                    },
+                    {
+                        "value": 2025,
+                        "color": "#5ac648"
+                    }
+                ]
+            }
+        },
+        "merge": true
+    },
+    {
+        "command": "insert",
+        "method": "html",
+        "selector": "#rankingsTab",
+        "data": "\n<div class=\"block block-\">\n  <div class=\"rnk-list-wrp\">\n    <ul class=\"nav nav-pills rnk-list qs-ranking-p2 qs-ranking-p2-js\">\n      \n    <\/ul>\n  <\/div>\n  <div id=\"rankingsTab\" class=\"tab-content\">\n    <div class=\"left\">\n      <div class=\"tit-list\">\n        <h4 class=\"rt\">QS World University Rankings<\/h4>\n        <ul class=\"nav nav-pills quicktabs-tabs no-margin chart-tabs\">\n          <li class=\"nav-item first active\">\n            <a class=\"nav-link active\" href=\"#rank-graph\" data-toggle=\"tab\" class=\"graph_tab\">Chart<\/a>\n          <\/li>\n          <li class=\"nav-item last\">\n            <a class=\"nav-link\" href=\"#rank-data\" data-toggle=\"tab\" class=\"data_tab\">Data<\/a>\n          <\/li>\n        <\/ul>\n      <\/div>\n            <div class=\"block-university-highlights\">\n        <div class=\"history\">\n          <div class=\"tab-content\">\n            <div class=\"rank tab-pane active no-padding-0\" id=\"rank-graph\">\n              <div class=\"chartwp\">\n                <div id=\"rankingsChart\"><\/div>\n              <\/div>\n            <\/div>\n            <div class=\"rank tab-pane no-padding-0\" id=\"rank-data\">\n              <ul><li>2020<div class=\"d-rank-res\"> #801-1000<\/div><\/li><li>2021<div class=\"d-rank-res\"> #801-1000<\/div><\/li><li>2022<div class=\"d-rank-res\"> #801-1000<\/div><\/li><li>2023<div class=\"d-rank-res\"> #801-1000<\/div><\/li><li>2024<div class=\"d-rank-res\"> #711-720<\/div><\/li><li>2025<div class=\"d-rank-res\"> #641-650<\/div><\/li><\/ul>\n            <\/div>\n          <\/div>\n        <\/div>\n      <\/div>\n    <\/div>\n    <div class=\"right\">\n      <div class=\"bar-chart\">\n                <h4 class=\"_ranking-chart-data\">Ranking criteria<\/h4>\n                <div class=\"criteria-wrap\">\n         <div class=\"circle\">\n    <div class=\"score\">17.7<\/div>\n    <div class=\"c100 p17\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Academic Reputation<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">3.3<\/div>\n    <div class=\"c100 p3\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Citations per Faculty<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">38.2<\/div>\n    <div class=\"c100 p38\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Employment Outcomes<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">14.8<\/div>\n    <div class=\"c100 p14\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Employer Reputation<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">19.1<\/div>\n    <div class=\"c100 p19\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Faculty Student Ratio<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">88.5<\/div>\n    <div class=\"c100 p88\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">International Faculty Ratio<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">28<\/div>\n    <div class=\"c100 p28\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">International Research Network<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">48.2<\/div>\n    <div class=\"c100 p48\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">International Student Ratio<\/div>\n  <\/div>\n   <div class=\"circle\">\n    <div class=\"score\">1<\/div>\n    <div class=\"c100 p1\">\n      <div class=\"slice\">\n        <div class=\"bar\"><\/div>\n        <div class=\"fill\"><\/div>\n      <\/div>\n    <\/div>\n    <div class=\"itm-name\">Sustainability<\/div>\n  <\/div>\n  \n        <\/div>\n      <\/div>\n      <div class=\"ranking_full_table margin-top-24px\">\n        <a class=\"white-blue-brand active\" target=\"_blank\" href=\"\/world-university-rankings\">\n          <img fetchpriority=\"low\" loading=\"lazy\" src=\"\/themes\/custom\/tu_d8\/images\/ranking-bars.svg\" class=\"active-img\" \/>View all rankings data\n        <\/a>\n      <\/div>\n    <\/div>\n  <\/div>\n<\/div>\n",
+        "settings": null
+    }
+]

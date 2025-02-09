@@ -1,10 +1,11 @@
-from http import HTTPStatus
 import itertools
 import os
 import pathlib
 import re
 import smtplib
 import ssl
+from http import HTTPStatus
+from django.db.models import Q
 from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
@@ -98,3 +99,7 @@ def send_email_notification(
 def save_user_image(url: str, name: str):
     path = pathlib.Path("./BAU_Scholar/media/uploads/").resolve() / f"{name}.jpg"
     urlretrieve(url, str(path))
+
+
+def filter_above_year(manager, year):
+    return manager.filter(date_created__year__gte=year)

@@ -4,7 +4,9 @@ from typing import Any
 from urllib.parse import quote_plus
 from parsel import Selector
 from playwright.sync_api import sync_playwright
+import requests
 from scholarly import scholarly
+from bs4 import BeautifulSoup
 
 
 def get_tag_text(tag: Selector):
@@ -183,3 +185,65 @@ def get_scraper(backend: str) -> ProfileScraper:
     if backend == ImportBackend.GOOGLESCHOLAR.value:
         return GoogleScholarScraper()
     return ResearchGateScraper()
+
+
+class DashBoardScraper:
+
+    def __init__(self) -> None:
+        self.rankings_json = self.scrape_rankings()
+
+    def scrape_rankings(self):
+        url = "https://www.topuniversities.com/qs-profiles/rank-data/513/1121/0"
+
+        querystring = {"_wrapper_format": "drupal_ajax"}
+
+        payload = "js=true&_drupal_ajax=1&ajax_page_state%5Btheme%5D=tu_d8&=ajax_page_state%5Btheme_token%5D%3D&ajax_page_state%5Blibraries%5D=addtoany%2Faddtoany.front%2Cckeditor_accordion%2Faccordion.frontend%2Cclientside_validation_jquery%2Fcv.jquery.ckeditor%2Cclientside_validation_jquery%2Fcv.jquery.ife%2Cclientside_validation_jquery%2Fcv.jquery.validate%2Cclientside_validation_jquery%2Fcv.pattern.method%2Ccore%2Fdrupal.form%2Ccore%2Fdrupal.states%2Ccore%2Fnormalize%2Ceu_cookie_compliance%2Feu_cookie_compliance_default%2Cflag%2Fflag.link_ajax%2Cga%2Fanalytics%2Clayout_discovery%2Fonecol%2Cqs_article%2Fqs_article%2Cqs_firebase_sso%2Fsso-lib%2Cqs_firebase_sso%2Fsso-lib-header%2Cqs_flexreg_user_flow%2Fqs_flexreg_user_flow%2Cqs_global_site_search%2Fprogram_styles%2Cqs_global_site_search%2Fsearch_header%2Cqs_global_site_search%2Funiversity_styles%2Cqs_otp_sender%2Fqs_otp_sender%2Cqs_profiles%2Fhighcharts%2Cqs_profiles%2Fqs_profiles%2Cqs_profiles%2Fqs_profiles_circle%2Cqs_uni_prog_directory%2Fqs_uni_prog_compare%2Cqs_uni_prog_directory%2Fqs_uni_prog_directory_filters%2Cqs_user_profile%2FqsUserProfile%2Cstatistics%2Fdrupal.statistics%2Csystem%2Fbase%2Ctu_d8%2Fcampus_location%2Ctu_d8%2Fglobal%2Ctu_d8%2Fnode%2Ctu_d8%2Fowl-carousel%2Ctu_d8%2Fprofile_header%2Ctu_d8%2Fqna_forums%2Ctu_d8%2Fqs_instant%2Ctu_d8%2Fqs_profile_new%2Ctu_d8%2Fqs_profile_new_datalayer%2Ctu_d8%2Fqs_program_pages_card%2Ctu_d8%2Fqs_program_tabs%2Ctu_d8%2Fqs_ranking_chart%2Ctu_d8%2Fqs_related_content%2Ctu_d8%2Fqs_similar_programs%2Ctu_d8%2Fqs_ud_pd%2Cviews%2Fviews.module%2Cwebform%2Fwebform.dialog"
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Referer": "https://www.topuniversities.com/universities/beirut-arab-university",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://www.topuniversities.com",
+            "DNT": "1",
+            "Sec-GPC": "1",
+            "Connection": "keep-alive",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "Pragma": "no-cache",
+            "Cache-Control": "no-cache",
+            "TE": "trailers",
+        }
+
+        response = requests.request(
+            "POST", url, data=payload, headers=headers, params=querystring
+        )
+
+        return response.json(strict=False)
+
+    def scrape_graph_data(self):
+        readings = self.rankings_json[2]["settings"]["qs_profiles"]["json_data"]
+        x_readings = []
+        y_readings = []
+        for reading in readings:
+            x_readings.append(reading["x"])
+            y_readings.append(reading["y"])
+        return {"x": x_readings, "y": y_readings}
+
+    def scrape_scores(self):
+        raw_html = self.rankings_json[3]["data"]
+        soup = BeautifulSoup(raw_html, features="lxml")
+        soup.find_all(".circle")
+        circles = soup.select(".circle")
+        circles_data = []
+        for circle in circles:
+            name = circle.select_one(".itm-name")
+            score = circle.select_one(".score")
+            assert name
+            assert score
+            circles_data.append((name.text, float(score.text)))
+
+        circles_data.sort(key=lambda x: x[1], reverse=True)
+        return dict(circles_data[:4])  # we can only fit 4 readings

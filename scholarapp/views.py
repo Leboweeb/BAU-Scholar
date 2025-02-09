@@ -38,6 +38,7 @@ from scholarapp.utils.common import (
     as_id,
     create_event_dicts,
     exclude_keys,
+    filter_above_year,
     join_with_dot,
     return_with_code,
     return_with_no_content,
@@ -52,7 +53,8 @@ from scholarapp.utils.document_utils import (
     generate_form_fields,
     generate_staff_achievements,
 )
-from scholarapp.utils.scrape_user import (
+from scholarapp.utils.scrape import (
+    DashBoardScraper,
     ImportBackend,
     get_scraper,
 )
@@ -239,24 +241,34 @@ def get_group_or_proxy(group: Conversation, user_id: int, group_attr, attr):
         return getattr(group.users.exclude(id=user_id)[0], attr)
 
 
-def test(request):
-    labels = [
-        "International Faculty Ratio",
-        "International Student Ratio",
-        "Employment Outcomes",
-        "International Research Network",
-    ]
-    stats = [88.5, 48.2, 38.2, 28]
-    faculties = get_faculties()
+def dashboard(request):
     if request.path == "/dashboard/statistics":
         template = "admin/admin_statistics.html"
+        scraper = DashBoardScraper()
+        stats = scraper.scrape_scores()
+        graph_data = scraper.scrape_graph_data()
+        context = {"stats": stats, "graph_data": graph_data}
     else:
+        all_publications = filter_above_year(
+            Event.objects.exclude(event_type__in=events_with_participants),
+            current_year - 1,
+        )
+        other_events = filter_above_year(
+            Event.objects.filter(event_type__in=events_with_participants),
+            current_year - 1,
+        )
         template = "admin/admin_staff_achievements.html"
+        faculties = get_faculties()
+        context = {
+            "faculties": faculties,
+            "total_research": all_publications.count(),
+            "other_events": other_events.count(),
+        }
 
     return render(
         request,
         template,
-        context={"stats": dict(zip(labels, stats)), "faculties": faculties},
+        context=context,
     )
 
 

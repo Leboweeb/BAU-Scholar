@@ -1,3 +1,7 @@
+let statisticsData;
+
+// fetch admin data on start
+
 function toggleElementClass(node, classParam) {
   node.classList.toggle(classParam);
 }
@@ -68,10 +72,11 @@ function displayBarChart() {
 }
 
 function displayLineGraph() {
+  let graphData = JSON.parse(document.getElementById("graph-data").textContent);
   new Chart(document.getElementById("myChart"), {
     type: "line",
     data: {
-      labels: ["2020", "2021", "2022", "2023", "2024", "2025"],
+      labels: graphData["x"],
       options: {
         plugins: {
           legend: {
@@ -84,7 +89,7 @@ function displayLineGraph() {
       },
       datasets: [
         {
-          data: [801, 801, 801, 801, 711, 641],
+          data: graphData["y"],
           label: "Rankings",
         },
       ],
