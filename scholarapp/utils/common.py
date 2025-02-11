@@ -1,3 +1,4 @@
+from datetime import datetime
 import itertools
 import os
 import pathlib
@@ -20,6 +21,9 @@ events_with_participants = [
     EventTypes.CONFERENCE_EVENT,
     EventTypes.THESIS_SUPERVISION,
 ]
+
+
+current_year = datetime.now().year
 
 
 def join_with_dot(l: list):
@@ -121,17 +125,25 @@ def get_department_data(faculty: str, department: str):
     ]
 
     return {
-        "research": Event.objects.exclude(event_type__in=events_with_participants)
+        "research": filter_above_year(
+            Event.objects.exclude(event_type__in=events_with_participants),
+            current_year - 1,
+        )
         .filter(authors__in=members)
         .count(),
-        "events": Event.objects.filter(
-            event_type__in=events_with_participants, authors__in=members
+        "events": filter_above_year(
+            Event.objects.filter(
+                event_type__in=events_with_participants, authors__in=members
+            ),
+            current_year - 1,
         ).count(),
         # sorting a dictionary will return the key that has the highest value. Ex: { "foo" : 1, "bar" : 2 }. sorted(dict) = ["bar","foo"] by default.
         # therefore, sorted(dict)[0] is the maximum
         "most_research": sorted(
             {
-                member.name: Event.objects.filter(authors=member).count()
+                member.name: filter_above_year(
+                    Event.objects.filter(authors=member), current_year - 1
+                ).count()
                 for member in members
             }
         )[0],
