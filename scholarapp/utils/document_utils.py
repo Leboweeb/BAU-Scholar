@@ -2,14 +2,27 @@ from datetime import datetime
 from io import BytesIO
 import re
 from docx import Document
+from docx.document import Document as DocumentType
 from scholarapp.models import CustomUser, Event, EventTypes, Profile
 from django.db import models
 
-from scholarapp.utils.common import split_at_dot
+from scholarapp.utils.common import (
+    get_department_data,
+    split_at_dot,
+)
 
 
 # document = Document("Staff Member Achievements Template.docx")
 document = Document()
+
+
+def generic_document_header(doc: DocumentType, heading: str):
+    current_year = datetime.now().year
+    doc.add_heading(
+        f"Beirut Arab University {heading}",
+        0,
+    )
+    doc.add_paragraph(f"Academic Year: {current_year} / {current_year+1}")
 
 
 def generate_cv(user: CustomUser, publications: list[str], buffer: BytesIO):
@@ -113,12 +126,9 @@ def generate_staff_achievements(
     doc.add_paragraph(f"Academic Year: {current_year} / {current_year+1}")
 
     # Add fields for Name, Position, and Faculty
-    doc.add_paragraph("Name:")
-    doc.add_paragraph(f"{user.name}")
-    doc.add_paragraph("Position:")
-    doc.add_paragraph(f"{get_profile_field_or_blank('rank')}")
-    doc.add_paragraph("Faculty:")
-    doc.add_paragraph(f"{get_profile_field_or_blank('department')}")
+    doc.add_paragraph(f"Name: {user.name}")
+    doc.add_paragraph(f"Position : {get_profile_field_or_blank('rank')}")
+    doc.add_paragraph(f"Faculty : {get_profile_field_or_blank('department')}")
 
     # Add section heading
 
@@ -283,3 +293,19 @@ def generate_form_fields(user_id: int | str):
         staff_achievement_values = []
 
     return user_profile_fields, staff_achievement_values
+
+
+def generate_faculty_report(faculty: str, department: str):
+    doc = Document()
+    department_data = get_department_data(faculty, department)
+    research, events, most_research = (
+        department_data["research"],
+        department_data["events"],
+        department_data["most_research"],
+    )
+    generic_document_header(doc, "Faculty/Department Biannual Report")
+    doc.add_heading(f"Faculty of {faculty}, {department} Department", 1)
+    doc.add_paragraph(f"Number of Research Papers : {research}")
+    doc.add_paragraph(f"Number of Events/Workshops/Other : {events}")
+    doc.add_paragraph(f"Most Papers : {most_research}")
+    return doc

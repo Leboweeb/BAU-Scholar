@@ -10,10 +10,16 @@ from typing import Iterable
 from django.template.defaulttags import register
 from django.http import HttpResponse
 from background_task import background
-from scholarapp.models import CustomUser, Event
+from scholarapp.models import CustomUser, Event, EventTypes, Profile
 from urllib.request import urlretrieve
 
 DOT = "•"
+
+events_with_participants = [
+    EventTypes.WORKSHOP,
+    EventTypes.CONFERENCE_EVENT,
+    EventTypes.THESIS_SUPERVISION,
+]
 
 
 def join_with_dot(l: list):
@@ -103,3 +109,30 @@ def save_user_image(url: str, name: str):
 
 def filter_above_year(manager, year):
     return manager.filter(date_created__year__gte=year)
+
+
+def get_department_data(faculty: str, department: str):
+    # yes I fucked up the naming on the database model, sue me.
+    members = [
+        p.user
+        for p in Profile.objects.filter(
+            department__icontains=faculty, program__icontains=department
+        )
+    ]
+
+    return {
+        "research": Event.objects.exclude(event_type__in=events_with_participants)
+        .filter(authors__in=members)
+        .count(),
+        "events": Event.objects.filter(
+            event_type__in=events_with_participants, authors__in=members
+        ).count(),
+        # sorting a dictionary will return the key that has the highest value. Ex: { "foo" : 1, "bar" : 2 }. sorted(dict) = ["bar","foo"] by default.
+        # therefore, sorted(dict)[0] is the maximum
+        "most_research": sorted(
+            {
+                member.name: Event.objects.filter(authors=member).count()
+                for member in members
+            }
+        )[0],
+    }

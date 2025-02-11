@@ -21,16 +21,13 @@ function toggleSideBar() {
 }
 
 function displayBarChart() {
+  let graphData = JSON.parse(
+    document.getElementById("faculty-counts").textContent
+  );
   new Chart(document.getElementById("faculty-chart"), {
     type: "bar",
     data: {
-      labels: [
-        "Engineering",
-        "Medicine",
-        "Architecture",
-        "Business",
-        "Human Sciences",
-      ],
+      labels: graphData["x"],
       options: {
         plugins: {
           legend: {
@@ -43,7 +40,7 @@ function displayBarChart() {
       },
       datasets: [
         {
-          data: [10, 8, 6, 7, 9],
+          data: graphData["y"],
           label: "Research Papers",
         },
       ],
@@ -148,4 +145,23 @@ function populateDepartment() {
     return;
   }
   populateDepartmentSelect(currentFaculty, "#department");
+}
+
+function downloadReport(event) {
+  event.preventDefault();
+  let form = document.getElementById("facultyReportForm");
+  let b64String;
+  fetch("/generate_report", {
+    method: "post",
+    headers: {
+      "X-CSRFToken": `${csrf_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(Object.fromEntries(new FormData(form))),
+  })
+    .then((response) => response.json())
+    .then((json) => {
+      b64String = json["data"];
+      downloadBase64(b64String, "Faculty Report");
+    });
 }

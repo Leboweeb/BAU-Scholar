@@ -45,11 +45,13 @@ from scholarapp.utils.common import (
     save_user_image,
     split_at_dot,
     zip_if_equal,
+    events_with_participants,
 )
 from scholarapp.utils.document_utils import (
     cv_json_to_cv_profile,
     generate_cv,
     generate_document_json,
+    generate_faculty_report,
     generate_form_fields,
     generate_staff_achievements,
 )
@@ -124,13 +126,6 @@ cv_labels = [
 ]
 
 
-events_with_participants = [
-    EventTypes.WORKSHOP,
-    EventTypes.CONFERENCE_EVENT,
-    EventTypes.THESIS_SUPERVISION,
-]
-
-
 # env vars to make gemini less noisy
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 os.environ["GLOG_minloglevel"] = "2"
@@ -192,6 +187,17 @@ def get_user_events(user: CustomUser):
             EventTypes.CONFERENCE_EVENT,
             EventTypes.THESIS_SUPERVISION,
         ),
+    )
+
+
+def get_research_for_faculty(faculty: str):
+    faculty_members = [
+        p.user for p in Profile.objects.filter(department__icontains=faculty)
+    ]
+    return (
+        Event.objects.exclude(event_type__in=events_with_participants)
+        .filter(authors__in=faculty_members)
+        .count()
     )
 
 
@@ -257,12 +263,27 @@ def dashboard(request):
             Event.objects.filter(event_type__in=events_with_participants),
             current_year - 1,
         )
+        faculty_counts = {
+            f: get_research_for_faculty(f)
+            for f in (
+                "Engineering",
+                "Medicine",
+                "Architecture",
+                "Business",
+                "Human Sciences",
+            )
+        }
         template = "admin/admin_staff_achievements.html"
         faculties = get_faculties()
         context = {
             "faculties": faculties,
             "total_research": all_publications.count(),
             "other_events": other_events.count(),
+            "faculty_counts": {
+                "x": list(faculty_counts.keys()),
+                "y": list(faculty_counts.values()),
+            },
+            "most_research": sorted(faculty_counts)[0],
         }
 
     return render(
@@ -385,6 +406,16 @@ def generate_user_document(request):
     buffer = BytesIO()
     # docx is saved to buffer now
     document_generator(request.user, user_publications, buffer)
+    b64_data = base64.b64encode(buffer.getvalue())
+    return JsonResponse({"data": b64_data.decode()})
+
+
+@api_view(["POST"])
+def generate_report(request):
+    faculty, department = request.data["faculty"], request.data["department"]
+    buffer = BytesIO()
+    doc = generate_faculty_report(faculty, department)
+    doc.save(buffer)
     b64_data = base64.b64encode(buffer.getvalue())
     return JsonResponse({"data": b64_data.decode()})
 

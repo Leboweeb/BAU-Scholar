@@ -170,3 +170,17 @@ function populateAutoCompleteInput(inputNode, attr, values) {
     addPill(event, element, attr, element, inputNode.parentElement);
   }
 }
+
+function downloadBase64(b64String, filename) {
+  var element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:application/octet-stream;base64," + b64String
+  );
+  element.setAttribute("download", `${filename}.docx`);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
