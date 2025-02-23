@@ -11,7 +11,10 @@
             <div class="card-body">
                 <h5 class="card-title">Faculty Report</h5>
                 <label for="faculty">Faculty</label>
-                <form id="facultyReportForm" method="post" onsubmit="downloadReport(event)">
+                <form id="facultyReportForm"
+                      method="post"
+                      target="_blank"
+                      action="{% url 'generate_faculty_report' %}">
                     {% csrf_token %}
                     <select name="faculty"
                             id="faculty"

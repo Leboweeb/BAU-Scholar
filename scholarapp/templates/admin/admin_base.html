@@ -97,9 +97,7 @@
                     </li>
                 </ul>
                 <hr style="position:relative;bottom:2.5rem">
-                <div id="profile-picture"
-                     class="dropdown sidebar-tab"
-                     style="bottom:3.5rem">
+                <div id="profile-picture" class="dropdown sidebar-tab">
                     <a class="text-white text-decoration-none dropdown-toggle"
                        href="#"
                        data-bs-toggle="dropdown"
@@ -132,16 +130,8 @@
 </html>
 <script>
     toggleSideBar();
-    const sidebar = document.querySelector(".sidebar");
-    const profile = document.getElementById("profile-picture")
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            let navbarVisible = entry.isIntersecting;
-            sidebar.style.top = navbarVisible ? "3.5rem" : "0";
-            profile.style.bottom = navbarVisible ? "3.5rem" : "0";
-        }, {
-            rootMargin: "-100px"
-        });
-    });
-    observer.observe(document.getElementById("navbar-top"));
+    resizeSideBar();
+    window.onscroll = function() {
+        resizeSideBar();
+    }
 </script>

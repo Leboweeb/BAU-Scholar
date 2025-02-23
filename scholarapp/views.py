@@ -133,6 +133,38 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 
+from django.shortcuts import render
+from django.views import View
+from django.http import HttpResponse
+from .models import Profile  # Replace with your actual models
+
+from django.shortcuts import render
+from django.views import View
+from .models import Profile  # Import the Profile model
+
+
+class GenerateFacultyReportView(View):
+    def post(self, request):
+        faculty_name = request.POST.get("faculty")
+        department_name = request.POST.get("department")
+
+        # Fetch profiles based on faculty and department
+        profiles = Profile.objects.filter(
+            program__icontains=faculty_name,  # Assuming 'rank' represents faculty
+            department__icontains=department_name,  # Assuming 'department' represents department
+        )
+
+        # Generate the report data
+        report_data = {
+            "faculty": faculty_name,
+            "department": department_name,
+            "profiles": profiles,  # Pass the filtered profiles to the template
+        }
+
+        # Render the report in a new template
+        return render(request, "admin/faculty_report.html", report_data)
+
+
 def get_home_feed(user: CustomUser):
     followed_users = [follow.following for follow in user.from_user.all()]  # type: ignore
     followed_events = Event.objects.filter(authors__in=followed_users)[:3]

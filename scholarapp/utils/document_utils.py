@@ -22,7 +22,7 @@ def generic_document_header(doc: DocumentType, heading: str):
         f"Beirut Arab University {heading}",
         0,
     )
-    doc.add_paragraph(f"Academic Year: {current_year-1} / {current_year}")
+    doc.add_paragraph(f"Academic Year: {current_year} / {current_year+1}")
 
 
 def generate_cv(user: CustomUser, publications: list[str], buffer: BytesIO):

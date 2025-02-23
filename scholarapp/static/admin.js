@@ -165,3 +165,18 @@ function downloadReport(event) {
       downloadBase64(b64String, "Faculty Report");
     });
 }
+
+function resizeSideBar() {
+  let navbar = document.getElementById("navbar-top");
+  let profilePicture = document.getElementById("profile-picture");
+  let sidebar = document.getElementById("sidebar-wrapper");
+  let navRect = navbar.getBoundingClientRect();
+  let top = navRect.height + navRect.top;
+  if (top > 0) {
+    sidebar.style.top = `${top}px`;
+    profilePicture.style.bottom = `${top}px`;
+  } else {
+    sidebar.style.top = "0px";
+    profilePicture.style.bottom = "0px";
+  }
+}

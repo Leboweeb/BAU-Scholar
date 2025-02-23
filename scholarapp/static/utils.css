@@ -126,3 +126,8 @@ m-inline-0 {
 .anim-fadeup {
   animation: fade-up 0.5s;
 }
+
+.grid-span-col {
+  /* see http://stackoverflow.com/questions/47319464/ddg#47320149 */
+  grid-column: 1/-1;
+}

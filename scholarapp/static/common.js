@@ -184,3 +184,32 @@ function downloadBase64(b64String, filename) {
   element.click();
   document.body.removeChild(element);
 }
+
+function getVisibleHeight(selector) {
+  var cont = document.querySelector(selector);
+  //Scroll Position (varies with scroll)
+  var pageTop = document.body.scrollTop;
+  //Visible Page Size (fixed)
+  var pageSize = window.height;
+
+  //Header Height (fixed)
+  var headerHeight = $("#header").height();
+
+  //Content top (fixed)
+  var contTop = cont.offset().top;
+  //Content top position (varies with scroll)
+  var contTopPos = contTop - pageTop;
+  //Content bottom (fixed)
+  var contBottom = cont.height() + contTop;
+  //Content position in relation to screen top (varies with scroll)
+  var contBottomPos = contBottom - pageTop;
+
+  /*
+        VISIBLE AREA
+        Take the size of screen/page, unless the bottom of the content further up
+            and subtract from it
+        The header height, unless the top of the content is below the header
+    */
+  var visibleArea =
+    Math.min(pageSize, contBottomPos) - Math.max(headerHeight, contTopPos);
+}

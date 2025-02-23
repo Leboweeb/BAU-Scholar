@@ -6,6 +6,8 @@ from django.contrib.auth.views import (
     PasswordResetCompleteView,
 )
 from . import views
+from .views import GenerateFacultyReportView
+
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -62,6 +64,7 @@ urlpatterns = [
     path("dashboard/statistics", views.dashboard, name="statistics"),
     path("dashboard/staff_achievements", views.dashboard, name="staff_achievements"),
     path("search_users", views.search_users, name="search_users"),
+    path('generate-faculty-report/', GenerateFacultyReportView.as_view(), name='generate_faculty_report'),
     path(
         "search_tags_for_user", views.search_tags_for_user, name="search_tags_for_user"
     ),

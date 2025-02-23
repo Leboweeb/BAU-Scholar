@@ -9,7 +9,6 @@ from django.utils.text import slugify
 
 # Create your models here.
 
-
 class CustomUserManager(BaseUserManager):
 
     def create_user(self, email, password, **extra_fields):
@@ -83,7 +82,6 @@ class Followers(models.Model):
     following = models.ForeignKey(
         CustomUser, related_name="to_users", on_delete=models.CASCADE
     )
-
 
 class Conversation(models.Model):
     users = models.ManyToManyField(CustomUser)

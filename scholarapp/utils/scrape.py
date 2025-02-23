@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 import requests
 from scholarly import scholarly
 from bs4 import BeautifulSoup
+import requests
 
 
 def get_tag_text(tag: Selector):
@@ -235,14 +236,14 @@ class DashBoardScraper:
     def scrape_scores(self):
         raw_html = self.rankings_json[3]["data"]
         soup = BeautifulSoup(raw_html, features="lxml")
-        soup.find_all(".circle")
-        circles = soup.select(".circle")
+        circles = soup.select(".progress-container")
         circles_data = []
         for circle in circles:
-            name = circle.select_one(".itm-name")
-            score = circle.select_one(".score")
-            assert name
-            assert score
+            name = circle.select_one(".progress-title")
+            score = circle.select_one(".progress-score")
+            # shouldn't be empty strings
+            assert bool(name)
+            assert bool(score)
             circles_data.append((name.text, float(score.text)))
 
         circles_data.sort(key=lambda x: x[1], reverse=True)
