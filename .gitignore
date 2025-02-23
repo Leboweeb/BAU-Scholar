@@ -166,5 +166,7 @@ cython_debug/
 /BAU_Scholar/media/samples
 # My Ignores
 scratch.py
+*.zip
+*.sql
 scratch.sql
 test.json
