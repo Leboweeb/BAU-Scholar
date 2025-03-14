@@ -116,11 +116,10 @@ def filter_above_year(manager, year):
 
 
 def get_department_data(faculty: str, department: str):
-    # yes I fucked up the naming on the database model, sue me.
     members = [
         p.user
         for p in Profile.objects.filter(
-            department__icontains=faculty, program__icontains=department
+            faculty__icontains=faculty, department__icontains=department
         )
     ]
 

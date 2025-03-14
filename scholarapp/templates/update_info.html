@@ -48,22 +48,23 @@
                class="w-100 h-100 d-flex justify-items-center align-items-center m-auto">
             <div id="form-container" class="row card mt-3 p-2 w-100 m-auto">
               {% include "components/dynamic_form_input.html" with top_label="Rank" required=True existing_data=data.0 single=True %}
-              {% include "components/dynamic_select_input.html" with top_label="Department" required=False existing_data=data.1 single=True choices=get_faculties %}
-              {% include "components/dynamic_select_input.html" with top_label="Program" required=True existing_data=data.2 single=True choices=user_programs %}
-              {% include "components/dynamic_form_input.html" with top_label="Research Interests" required=False existing_data=data.3 single=True %}
-              {% include "components/dynamic_form_input.html" with top_label="Rank Link" required=False existing_data=data.4 single=True %}
-              {% include "components/dynamic_autocomplete_input.html" with top_label="Tags" required=False existing_data=data.5 top="42px" endpoint="/search_tags" single=True %}
-              {% include "components/dynamic_form_input.html" with top_label="Skills" required=False existing_data=data.6 %}
-              {% include "components/dynamic_form_input.html" with top_label="Education" required=False existing_data=data.7 %}
-              {% include "components/dynamic_form_input.html" with top_label="Academic Experience" required=False existing_data=data.8 %}
-              {% include "components/dynamic_form_input.html" with top_label="Non Academic Experience" required=False existing_data=data.9 %}
-              {% include "components/dynamic_form_input.html" with top_label="Certifications" required=False existing_data=data.10 %}
-              {% include "components/dynamic_form_input.html" with top_label="Organization Membership" required=False existing_data=data.11 %}
-              {% include "components/dynamic_form_input.html" with top_label="Honors and Awards" required=False existing_data=data.12 %}
-              {% include "components/dynamic_form_input.html" with top_label="Service Activities" required=False existing_data=data.13 %}
-              {% include "components/dynamic_form_input.html" with top_label="Experience Courses" required=False existing_data=data.14 %}
-              {% include "components/dynamic_form_input.html" with top_label="References" required=False existing_data=data.15 %}
-              {% include "components/dynamic_form_input.html" with top_label="Professional Development Activities" required=False existing_data=data.16 %}
+              {% include "components/dynamic_select_input.html" with top_label="Faculty" required=True existing_data=data.1 single=True choices=get_faculties %}
+              {% include "components/dynamic_select_input.html" with top_label="Department" required=True existing_data=data.2 single=True choices=user_department %}
+              {% include "components/dynamic_form_input.html" with top_label="Program" required=True existing_data=data.3 single=True %}
+              {% include "components/dynamic_form_input.html" with top_label="Research Interests" required=False existing_data=data.4 single=True %}
+              {% include "components/dynamic_form_input.html" with top_label="Rank Link" required=False existing_data=data.5 single=True %}
+              {% include "components/dynamic_autocomplete_input.html" with top_label="Tags" required=False existing_data=data.6 top="42px" endpoint="/search_tags" single=True %}
+              {% include "components/dynamic_form_input.html" with top_label="Skills" required=False existing_data=data.7 %}
+              {% include "components/dynamic_form_input.html" with top_label="Education" required=False existing_data=data.8 %}
+              {% include "components/dynamic_form_input.html" with top_label="Academic Experience" required=False existing_data=data.9 %}
+              {% include "components/dynamic_form_input.html" with top_label="Non Academic Experience" required=False existing_data=data.10 %}
+              {% include "components/dynamic_form_input.html" with top_label="Certifications" required=False existing_data=data.11 %}
+              {% include "components/dynamic_form_input.html" with top_label="Organization Membership" required=False existing_data=data.12 %}
+              {% include "components/dynamic_form_input.html" with top_label="Honors and Awards" required=False existing_data=data.13 %}
+              {% include "components/dynamic_form_input.html" with top_label="Service Activities" required=False existing_data=data.14 %}
+              {% include "components/dynamic_form_input.html" with top_label="Experience Courses" required=False existing_data=data.15 %}
+              {% include "components/dynamic_form_input.html" with top_label="References" required=False existing_data=data.16 %}
+              {% include "components/dynamic_form_input.html" with top_label="Professional Development Activities" required=False existing_data=data.17 %}
               <button class="btn btn-primary" type="button" onclick="submitDocument(event)">Submit</button>
             </div>
             <div id="staff-achievements-container"

@@ -106,16 +106,6 @@
                  data-bs-target="#exampleModal">+ Add Event</a>
             {% endif %}
           </div>
-          {% comment %} <div class="container d-flex flex-column mt-3 gap-4">
-            {% for i in publications %}
-              {% include "components/profile/editable_research_card.html" with title=i.title description=i.description authors=i.authors.all event_id=i.pk event_type=i.get_event_type_display tags=i.tags|split_at_dot %}
-            {% endfor %}
-          </div>
-          <div class="container d-flex flex-column mt-3 gap-4 d-none">
-            {% for i in user_events %}
-              {% include "components/profile/editable_research_card.html" with title=i.title description=i.description authors=i.authors.all event_id=i.pk event_type=i.get_event_type_display tags=i.tags|split_at_dot %}
-            {% endfor %}
-          </div> {% endcomment %}
           {% include "components/profile/profile_events.html" %}
         </div>
       </div>

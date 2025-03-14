@@ -14,13 +14,13 @@ def get_programs_for_departments(department: str):
     return [k for k in TAG_DICTIONARY[department]]
 
 
-def get_tags_for_program(department: str, program: str):
-    return TAG_DICTIONARY[department][program]
+def get_tags_for_department(faculty: str, department: str):
+    return TAG_DICTIONARY[faculty][department]
 
 
-def get_programs_for_user(user: CustomUser):
-    user_department = user.profile.department  # type: ignore
-    return get_programs_for_departments(user_department)
+def get_department_for_user(user: CustomUser):
+    user_faculty = user.profile.faculty  # type: ignore
+    return get_programs_for_departments(user_faculty)
 
 
 def generate_response(title: str, tags: list[str]):

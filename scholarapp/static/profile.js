@@ -695,7 +695,7 @@ function addInput(parentId) {
 // dropArea.addEventListener("drop", submitDocument, { capture: true });
 
 function add_event_listeners() {
-  let department_select = document.querySelector("#div_id_department select");
+  let department_select = document.querySelector("#div_id_faculty select");
   let tags = document.querySelector("#div_id_tags input[type='search']");
   tags.setAttribute("hx-vals", `js:{...getTagParams()}`);
   tags.setAttribute("hx-on:htmx:response-error", "checkProgramSelected()");
@@ -706,29 +706,31 @@ function add_event_listeners() {
 add_event_listeners();
 
 function getTagParams() {
-  let department_select = document.querySelector("#div_id_department select");
-  let department = department_select.value;
-  let program = document.querySelector("#div_id_program select").value;
-  return { department, program };
+  let faculty_select = document.querySelector("#div_id_faculty select");
+  let faculty = faculty_select.value;
+  let department = document.querySelector("#div_id_department select").value;
+  return { faculty: faculty, department: department };
 }
 
 function swapProgramSelect(event) {
-  let department = event.currentTarget.value;
-  if (!department) {
+  let faculty = event.currentTarget.value;
+  if (!faculty) {
     return;
   }
-  let options = Object.keys(tags[department]);
+  let options = Object.keys(tags[faculty]);
   let template = `
     <option value="" selected="">---------</option>
   `;
   for (const option of options) {
     template += `<option value="${option}">${option}</option>`;
   }
-  htmx.swap('select[name="program "]', template, { swapStyle: "innerHTML" });
+  htmx.swap('select[name="department "]', template, { swapStyle: "innerHTML" });
 }
 
 function checkProgramSelected() {
-  if (!document.querySelector("#div_id_program > select:nth-child(2)").value) {
+  if (
+    !document.querySelector("#div_id_department > select:nth-child(2)").value
+  ) {
     alert(
       "Please select a program from the dropdown before searching for tags."
     );

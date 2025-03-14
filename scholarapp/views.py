@@ -63,8 +63,8 @@ from scholarapp.utils.scrape import (
 from scholarapp.utils.profile_info import create_user_profile
 from scholarapp.utils.tags import (
     get_faculties,
-    get_programs_for_user,
-    get_tags_for_program,
+    get_department_for_user,
+    get_tags_for_department,
 )
 
 load_dotenv()
@@ -150,7 +150,7 @@ class GenerateFacultyReportView(View):
 
         # Fetch profiles based on faculty and department
         profiles = Profile.objects.filter(
-            program__icontains=faculty_name,  # Assuming 'rank' represents faculty
+            faculty__icontains=faculty_name,  # Assuming 'rank' represents faculty
             department__icontains=department_name,  # Assuming 'department' represents department
         )
 
@@ -187,15 +187,15 @@ def get_home_feed(user: CustomUser):
     return categories
 
 
-def modular_tag_search(request, query, department, program):
-    if not department or not program:
+def modular_tag_search(request, query, faculty, department):
+    if not faculty or not department:
         return return_with_code(HTTPStatus.BAD_REQUEST)
     if not query:
         tags = []
     else:
         tags = [
             tag
-            for tag in get_tags_for_program(department, program)
+            for tag in get_tags_for_department(faculty, department)
             if query.lower() in tag.lower()
         ]
     return render(request, "components/search_tags.html", context={"tags": tags})
@@ -240,6 +240,11 @@ def split(value: str, key):
     Returns the value turned into a list.
     """
     return value.split(key)
+
+
+@register.filter(name="research_count")
+def research_count(user: CustomUser):
+    return get_user_research(user).count()
 
 
 @register.filter(name="can_participate")
@@ -315,7 +320,11 @@ def dashboard(request):
                 "x": list(faculty_counts.keys()),
                 "y": list(faculty_counts.values()),
             },
-            "most_research": sorted(faculty_counts)[0],
+            "most_research": sorted(
+                faculty_counts,
+                key=lambda faculty: faculty_counts[faculty],
+                reverse=True,
+            )[0],
         }
 
     return render(
@@ -361,9 +370,9 @@ def profile(request, user_id: str):
         "form": CreateEventForm(),
         "data": user_profile_fields,
         "get_faculties": get_faculties,
-        "user_programs": (
-            get_programs_for_user(request.user)
-            if request.user.profile.department
+        "user_department": (
+            get_department_for_user(request.user)
+            if request.user.profile.faculty
             else ""
         ),
         # "cv_records": zip_if_equal(cv_labels, user_profile_fields),
@@ -471,6 +480,7 @@ def update_profile(request):
     if request.POST:
         personal_info_labels = [
             "rank",
+            "faculty",
             "department",
             "program",
             "researchinterests",
@@ -637,11 +647,11 @@ def get_events(request):
 
 @api_view(["POST"])
 def search_tags(request):
-    department, program = (
-        request.POST.get(string) or "" for string in ("department", "program")
+    faculty, department = (
+        request.POST.get(string) or "" for string in ("faculty", "department")
     )
     query = request.POST.get("tags") or ""
-    return modular_tag_search(request, query, department, program)
+    return modular_tag_search(request, query, faculty, department)
 
 
 @api_view(["POST"])

@@ -1,59 +1,68 @@
 {% extends "admin/admin_base.html" %}
 {% block main_content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Report</title>
     <style>
         .report-section {
             margin-bottom: 20px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f4f4f4;
         }
     </style>
-</head>
-<body>
-    <h1>Faculty Report</h1>
-    <div class="report-section">
-        <h2>Faculty: {{ faculty }}</h2>
-        <p><b>Department: {{ department }}</b></p>
+    <div class="container mt-3">
+        <div class="report-section">
+            <div class="flex-start-column">
+                <h1>Faculty of {{ faculty | title }} Report</h1>
+                <h2>Department of {{ department| title }}</h2>
+            </div>
+        </div>
+        <div class="report-section mt-2">
+            <h2>Profiles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Rank</th>
+                        <th>Faculty</th>
+                        <th>Department</th>
+                        <th>Program</th>
+                        <th>Research</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in profiles %}
+                        <tr>
+                            <td>{{ profile.user.name }}</td>
+                            <td>{{ profile.rank }}</td>
+                            <td>{{ profile.faculty }}</td>
+                            <td>{{ profile.department }}</td>
+                            <td>{{ profile.program }}</td>
+                            <td>{{ profile.user | research_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="report-section">
-        <h2>Profiles</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Rank</th>
-                    <th>Department</th>
-                    <th>Research Interests</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for profile in profiles %}
-                <tr>
-                    <td>{{ profile.user.name }}</td>
-                    <td>{{ profile.rank }}</td>
-                    <td>{{ profile.department }}</td>
-                    <td>{{ profile.research_interests }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css"
+          rel="stylesheet"
+          type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"
+            type="text/javascript"></script>
+    <script>
+        let table = new simpleDatatables.DataTable("table"); // show table at start of page
+    </script>
 {% endblock main_content %}
