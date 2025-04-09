@@ -4,14 +4,19 @@
 # We Use an official Python runtime as a parent image
 FROM python:3.10
 
+# Prevents Python from writing pyc files to disk
+ENV PYTHONDONTWRITEBYTECODE=1
+#Prevents Python from buffering stdout and stderr
+ENV PYTHONUNBUFFERED=1 
 # Allows docker to cache installed dependencies between builds
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /app
 
 
 # Mounts the application code to the image
-COPY . .
+COPY . /app/
 
+# then installs dependencies
+RUN pip install -r /app/requirements.txt
 EXPOSE 8000
 
 # runs the production server

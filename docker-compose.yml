@@ -1,0 +1,50 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./app/startup.sql:/docker-entrypoint-initdb.d/startup.sql
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  memcached:
+    image: memcached
+    restart: always
+    ports:
+      - "11211:11211"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile # Ensure you have a Dockerfile for your Django app
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - memcached
+    environment:
+      DJANGO_SETTINGS_MODULE: BAU_Scholar.settings # replace your_project
+      # Add other environment variables needed for your Django app here
+    env_file:
+      - .env
+
+volumes:
+  db_data:

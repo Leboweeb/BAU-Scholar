@@ -661,9 +661,9 @@ def search_tags_for_user(request):
         if "tags" in key and "hidden" not in key:
             query = request.POST.get(key)
     user_profile = request.user.profile
+    faculty = user_profile.faculty
     department = user_profile.department
-    program = user_profile.program
-    return modular_tag_search(request, query, department, program)
+    return modular_tag_search(request, query, faculty, department)
 
 
 @api_view(["POST"])

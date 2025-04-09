@@ -32,7 +32,7 @@ SECRET_KEY = key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1", "172.32.185.202"]
+ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1", "172.32.185.202", "0.0.0.0"]
 
 
 # Application definition
@@ -91,10 +91,10 @@ WSGI_APPLICATION = "BAU_Scholar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "bauscholar",
-        "USER": "mohammad",
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
         "PASSWORD": database_password,
-        "HOST": "localhost",
+        "HOST": "db",
         "PORT": "3306",
     }
 }
@@ -103,7 +103,8 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [("redis", 6379)],
+            "symmetric_encryption_kets": [SECRET_KEY],
         },
     },
     "ROUTING": "ws.routing.application",
@@ -168,7 +169,7 @@ ASGI_APPLICATION = "BAU_Scholar.asgi.application"
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
-        "LOCATION": "127.0.0.1:11211",
+        "LOCATION": "memcached:11211",
     }
 }
 
