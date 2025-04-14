@@ -32,7 +32,14 @@ SECRET_KEY = key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.19", "127.0.0.1", "172.32.185.202", "0.0.0.0"]
+ALLOWED_HOSTS = [
+    "192.168.1.19",
+    "127.0.0.1",
+    "172.32.185.202",
+    "0.0.0.0",
+    "172.33.134.5",
+    "172.29.5.28",
+]
 
 
 # Application definition
@@ -185,3 +192,11 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("GOOGLE_APP_EMAIL")
 EMAIL_HOST_PASSWORD = os.environ.get("GOOGLE_APP_PASSWORD")
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://172.29.5.28:8000",
+#     "http://172.33.134.5:8000",
+#     # other origins
+# ]
+
+# SECURE_CROSS_ORIGIN_OPENER_POLICY = None

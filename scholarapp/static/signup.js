@@ -82,7 +82,7 @@ function import_if_name() {
   ).value;
   if (name) {
     if (!cardList.children.length) {
-      fetch("http://127.0.0.1:8000/import_user", {
+      fetch("/import_user", {
         method: "POST",
         signal: importControlller.signal,
         body: JSON.stringify({
