@@ -523,12 +523,16 @@ function uploadPicture() {
   var input = document.querySelector("#profilePicture");
   input.onchange = function () {
     let formData = new FormData();
-    formData.append("file", input.files[0]);
-    fetch("/update_profile", {
+    formData.append("profilePicture", input.files[0]);
+    fetch("/update_avatar", {
       method: "POST",
       body: formData,
       headers: { "X-CSRFToken": `${csrf_token}` },
-    });
+    })
+      .then((response) => response.text())
+      .then((text) => {
+        htmx.swap(".profilepic__image", text, { swapStyle: "outerHTML" });
+      });
   };
   input.click();
 }

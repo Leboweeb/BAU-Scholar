@@ -95,13 +95,33 @@ WSGI_APPLICATION = "BAU_Scholar.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
+# host locally or on docker container
+# in either case debug mode needs to be on to server static files because we have no reverse proxy (nginx, apache, etc...)!!
+LOCAL = True
+
+if LOCAL:
+    name = "bauscholar"
+    user = "mohammad"
+    db_host = redis_host = "localhost"
+    memcached_host = "127.0.0.1"
+
+else:
+    name = os.environ.get("DB_NAME")
+    user = os.environ.get("DB_USER")
+    assert name, user
+    db_host = "db"
+    redis_host = "redis"
+    memcached_host = "memcached"
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
+        "NAME": name,
+        "USER": user,
         "PASSWORD": database_password,
-        "HOST": "db",
+        "HOST": db_host,
         "PORT": "3306",
     }
 }
@@ -110,13 +130,20 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [(redis_host, 6379)],
             "symmetric_encryption_kets": [SECRET_KEY],
         },
     },
     "ROUTING": "ws.routing.application",
 }
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": f"{memcached_host}:11211",
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -173,12 +200,6 @@ ASGI_APPLICATION = "BAU_Scholar.asgi.application"
 
 # user online settings
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
-        "LOCATION": "memcached:11211",
-    }
-}
 
 # Number of seconds of inactivity before a user is marked offline
 USER_ONLINE_TIMEOUT = 300

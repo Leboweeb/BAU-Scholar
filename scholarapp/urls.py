@@ -55,6 +55,7 @@ urlpatterns = [
     path("get_groups", views.get_groups, name="get_groups"),
     path("get_chat_history", views.get_chat_history, name="get_chat_history"),
     path("update_profile", views.update_profile, name="update_profile"),
+    path("update_avatar", views.update_avatar, name="update_avatar"),
     path("generate_user_cv", views.generate_user_document, name="generate_user_cv"),
     path("generate_report", views.generate_report, name="generate_report"),
     path(
@@ -64,7 +65,11 @@ urlpatterns = [
     path("dashboard/statistics", views.dashboard, name="statistics"),
     path("dashboard/staff_achievements", views.dashboard, name="staff_achievements"),
     path("search_users", views.search_users, name="search_users"),
-    path('generate-faculty-report/', GenerateFacultyReportView.as_view(), name='generate_faculty_report'),
+    path(
+        "generate-faculty-report/",
+        GenerateFacultyReportView.as_view(),
+        name="generate_faculty_report",
+    ),
     path(
         "search_tags_for_user", views.search_tags_for_user, name="search_tags_for_user"
     ),

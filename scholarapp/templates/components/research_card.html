@@ -4,7 +4,7 @@
             <span class="text-muted d-block">{{ category }}</span>
             <div class="linebreak-underline my-3"></div>
         {% endif %}
-        <div class="d-flex gap-1 overflow-scroll">
+        <div class="d-flex gap-1">
             <span class="badge rounded-pill bg-secondary event_type mb-3">{{ event_type }}</span>
             {% for tag in tags %}<span class="badge rounded-pill bg-secondary event_type mb-3">{{ tag }}</span>{% endfor %}
         </div>

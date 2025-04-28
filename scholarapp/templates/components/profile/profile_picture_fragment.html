@@ -23,17 +23,11 @@
               </svg>
             </button>
           {% endif %}
-          <form id="profilePictureForm"
-                method="post"
-                enctype="multipart/form-data"
-                hx-post="/update_profile"
-                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                hx-target="#profile-info"
-                hx-swap="innerHTML">
+          <form id="profilePictureForm" method="post" enctype="multipart/form-data">
             <input class="d-none" type="file" name="profilePicture" id="profilePicture" />
             <div class="profilepic mb-2" onclick="uploadPicture();">
               <img class="profilepic__image"
-                   src="{{ user.avatar }}"
+                   src="{{ MEDIA_URL }}{{ user.avatar }}"
                    width="64"
                    height="64"
                    alt="Profibild" />

@@ -10,9 +10,10 @@ from io import BytesIO
 from itertools import chain
 from django.db.models import Q, Count
 from dateutil.parser import parse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.views import LoginView, PasswordResetView
+from django.template import Context, Template
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -362,6 +363,7 @@ def profile(request, user_id: str):
     post_sign_up = request.GET.get("postsignup", None)
     user_profile_fields, staff_achievement_values = generate_form_fields(user_id)
     context = {
+        "MEDIA_URL": settings.MEDIA_URL,
         "user": user,
         "publications": user_publications.all(),
         "user_events": user_events.all(),
@@ -473,6 +475,29 @@ def participate_in_event(request):
         event.attendees.remove(user)
     # Same as 200, but client doesn't expect HTML or JSON as response.
     return return_with_no_content()
+
+
+def update_avatar(request):
+    image_file = request.FILES.get("profilePicture")
+    if image_file:
+        user = request.user
+        user.avatar = image_file
+        user.save()
+        template = Template(
+            """
+                      <img class="profilepic__image"
+                   src="{{ MEDIA_URL }}{{ user.avatar }}"
+                   width="64"
+                   height="64"
+                   alt="Profibild" />
+    """
+        )
+        return HttpResponse(
+            template.render(
+                Context({"MEDIA_URL": settings.MEDIA_URL, "user": request.user})
+            )
+        )
+    return HttpResponseBadRequest("Invalid Image!")
 
 
 def update_profile(request):
