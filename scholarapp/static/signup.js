@@ -1,4 +1,4 @@
-const importControlller = new AbortController();
+let importControlller = new AbortController();
 
 function submit_form(form) {
   const cardList = document.querySelector("#results");
@@ -66,14 +66,15 @@ function retryImport() {
   } catch (error) {
     console.log(error);
   }
+  importControlller = new AbortController(); // Create a new controller for the retry
   import_if_name(); // then import again
 }
 
 function import_if_name() {
   const name = document.querySelector("#id_name").value || "";
-  const myModal = new bootstrap.Modal("#exampleModal", {
-    keyboard: false,
-  });
+  // const myModal = new bootstrap.Modal("#exampleModal", {
+  //   keyboard: false,
+  // });
   const cardList = document.querySelector("#results");
   const modalToggle = document.getElementById("#exampleModal");
   const importBackend = document.querySelector(
@@ -93,22 +94,30 @@ function import_if_name() {
         },
       })
         .catch((e) => {
-          console.log("Import canceled");
+          if (e.name === "AbortError") {
+            console.log("Import canceled");
+          } else {
+            console.error("Fetch error:", e);
+          }
         })
         .then((response) => {
+          if (!response || !response.ok) {
+            console.log("No valid response received (possibly aborted).");
+            return; // Exit the block early
+          }
           document.querySelector("#loadingSpinner").classList.add("d-none");
           document.querySelector("input[name=import_backend]").value =
             importBackend;
           return response.json();
         })
         .then((json) => {
-          for (const profile of json) {
+          if (!json) {
+            return; // this shit sucks
+          }
+          for (const profile of json.profiles) {
             add_card(profile);
           }
         });
-    }
-    if (!document.querySelector(".modal-backdrop")) {
-      myModal.show(modalToggle);
     }
   } else {
     alert("Please provide a valid name to import a profile.");
