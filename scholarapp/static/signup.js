@@ -11,10 +11,9 @@ function submit_form(form) {
     }
     let cardJson = JSON.parse(selectedCard.dataset.profile);
     let inputNames = ["profile_url", "avatar"];
-    let attrs = ["profile_page", "avatar"].map(
+    let attrs = ["profile_url", "avatar"].map(
       (attr) => cardJson[attr] ?? null // this seems stupid but we want the server to actually understand that it is null. undefined is taken as a string.
     );
-    // fuck you cloudflare, eat a dick
     try {
       if (typeof attrs[0] === "object") attrs[0] = attrs[0].join(",");
       attrs.forEach(

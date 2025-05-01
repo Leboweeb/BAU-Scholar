@@ -479,25 +479,29 @@ def participate_in_event(request):
 
 def update_avatar(request):
     image_file = request.FILES.get("profilePicture")
-    if image_file:
-        user = request.user
+    user = request.user
+    if (
+        image_file and "image" in image_file.content_type
+    ):  # verify uploaded file is actually an image
         user.avatar = image_file
-        user.save()
-        template = Template(
-            """
-                      <img class="profilepic__image"
-                   src="{{ MEDIA_URL }}{{ user.avatar }}"
-                   width="64"
-                   height="64"
-                   alt="Profibild" />
+    else:
+        user.avatar = f"{settings.MEDIA_URL}uploads/default_icon_white.png"
+
+    user.save()
+    template = Template(
+        """
+                    <img class="profilepic__image"
+                src="{{ MEDIA_URL }}{{ user.avatar }}"
+                width="64"
+                height="64"
+                alt="Profibild" />
     """
+    )
+    return HttpResponse(
+        template.render(
+            Context({"MEDIA_URL": settings.MEDIA_URL, "user": request.user})
         )
-        return HttpResponse(
-            template.render(
-                Context({"MEDIA_URL": settings.MEDIA_URL, "user": request.user})
-            )
-        )
-    return HttpResponseBadRequest("Invalid Image!")
+    )
 
 
 def update_profile(request):

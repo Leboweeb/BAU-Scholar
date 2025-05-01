@@ -170,3 +170,4 @@ scratch.py
 *.sql
 scratch.sql
 test.json
+scratch*

@@ -134,42 +134,55 @@ class GoogleScholarScraper(ProfileScraper):
             event_type = "Article"
         return event_type
 
-    def get_author_info(
-        self, author_name: str, sections: tuple[str, ...]
-    ) -> dict[str, Any]:
-        author = next(scholarly.search_author(author_name), None)  # type: ignore
-        if author:
-            filled = scholarly.fill(
-                author,
-                sortby="year",
-                sections=list(sections),
-                publication_limit=10,
-            )
-            if isinstance(filled, bool):
-                return {}
+    def get_author_info(self, author_name: str):
+        authors: list[dict[str, str]] = list(
+            scholarly.search_author(author_name)
+        )  # type:ignore WHY ARE YOUR TYPE ANNOTATIONS WRONG
+        results = []
+        for author in authors:
+            if author:
+                # filled = scholarly.fill(
+                #     author,
+                #     sortby="year",
+                #     sections=list(sections),
+                #     publication_limit=10,
+                # )
+                filled = scholarly.fill(author, sections=["basic info"])
+                if isinstance(filled, bool):
+                    continue  # don't add profile, skip.
 
-            return {
-                "name": filled["name"],
-                "avatar": filled["url_picture"],
-                "publications": filled.get("publications", []),
-            }
-        return {}
+                results.append(
+                    {
+                        "name": filled["name"],
+                        "avatar": filled["url_picture"],
+                        "profile_url": filled["scholar_id"],  # not really profile url
+                    }
+                )
+        return results
 
     def scrape_user(self, name: str) -> list[dict[str, Any]]:
-        return [self.get_author_info(name, ("basic_info",))]
+        return self.get_author_info(name)
 
     def scrape_publications(self, link_or_name: str) -> list[dict[str, Any]]:
-        unprocessed_publications = self.get_author_info(
-            link_or_name, ("basic_info", "publications")
-        )["publications"]
+        """
+        google scholar is a bit special here, link or name is actually scholar id, we can
+        directly get publications once profile is selected.
+        """
+        unprocessed_publications = scholarly.search_author_id(
+            link_or_name, filled=True, sortby="year", publication_limit=10
+        ).get("publications", [])
+        # unprocessed_publications = self.get_author_info(
+        #     link_or_name, ("basic_info", "publications")
+        # )["publications"]
 
         processed_publications = []
 
         for publication in unprocessed_publications:
-            bib = publication["bib"]
-            title = bib["title"]
-            date_created = bib["pub_year"]
-            event_type = self.parse_citation(bib["citation"])
+            bib = publication.get("bib")
+            assert bib
+            title = bib.get("title", "")
+            date_created = bib.get("pub_year", "")
+            event_type = self.parse_citation(bib.get("citation", ""))
             processed_publications.append(
                 {
                     "title": title,
