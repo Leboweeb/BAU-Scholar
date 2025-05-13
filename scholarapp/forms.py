@@ -23,6 +23,13 @@ class SignUpForm(UserCreationForm):
             "profile_url": forms.HiddenInput(),
         }
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already exists.")
+
+        return email
+
 
 class CreateEventForm(forms.ModelForm):
 

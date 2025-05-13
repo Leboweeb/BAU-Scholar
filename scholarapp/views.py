@@ -776,10 +776,12 @@ def create_conversation_room(request):
 
 @api_view(["POST"])
 def update_event(request):
+    event_type_dict = {choice.value: choice.label for choice in EventTypes}
     event_id = int(request.POST.get("hidden_event_id"))
     event = get_object_or_404(Event, id=event_id)
-    if tags := request.POST.get("hidden_editeventtags"):
-        event.tags = tags
+    # tags should only be string, logic error was here
+    tags = request.POST.get("hidden_editeventtags", "")
+    event.tags = tags
     authors = request.POST.get("hidden_editauthors")
     if not authors:
         # the event creator is assumed to be the author
@@ -792,6 +794,9 @@ def update_event(request):
             for author_id in map(int, split_at_dot(authors))
         ]
         event.authors.set(author_objects)
+    if event_type := request.POST.get("editeventtype"):
+        if event_type := event_type_dict.get(event_type):
+            event.event_type = event_type
     event.save()
     user_publications = Event.objects.filter(authors=request.user).exclude(
         event_type__in=events_with_participants
