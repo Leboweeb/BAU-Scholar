@@ -41,6 +41,9 @@ ALLOWED_HOSTS = [
     "172.29.5.28",
 ]
 
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
 
@@ -107,7 +110,7 @@ if LOCAL == "true":
     memcached_host = "127.0.0.1"
 
 else:
-    name = os.environ.get("DB_NAME")
+    name = os.environ.get("DB_NAME") or os.environ.get("DATABASE_URL")
     user = os.environ.get("DB_USER")
     assert name, user
     db_host = "db"
