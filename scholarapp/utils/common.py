@@ -6,6 +6,7 @@ import re
 import smtplib
 import ssl
 from http import HTTPStatus
+from urllib.error import HTTPError
 from django.db.models import Q
 from typing import Iterable
 from django.template.defaulttags import register

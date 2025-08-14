@@ -62,7 +62,7 @@ class ResearchGateScraper(ProfileScraper):
                     author.css(".nova-legacy-c-button").xpath("@href")[0].get()
                 )
                 author_dict.update(
-                    {"avatar": thumbnail, "profile_page": profile_page, "name": name}
+                    {"avatar": thumbnail, "profile_url": profile_page, "name": name}
                 )
                 for section in sections[1:]:
                     attribute = get_tag_text(section.css(".nova-legacy-e-text")[0])

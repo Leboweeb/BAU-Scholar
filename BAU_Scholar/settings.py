@@ -98,9 +98,9 @@ WSGI_APPLICATION = "BAU_Scholar.wsgi.application"
 
 # host locally or on docker container
 # in either case debug mode needs to be on to server static files because we have no reverse proxy (nginx, apache, etc...)!!
-LOCAL = True
+LOCAL = os.environ.get("LOCAL", "true")
 
-if LOCAL:
+if LOCAL == "true":
     name = "bauscholar"
     user = "mohammad"
     db_host = redis_host = "localhost"

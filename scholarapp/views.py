@@ -8,6 +8,8 @@ from functools import reduce
 from http import HTTPStatus
 from io import BytesIO
 from itertools import chain
+from urllib.error import HTTPError
+from django.db import transaction
 from django.db.models import Q, Count
 from dateutil.parser import parse
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -732,6 +734,7 @@ def get_groups(request):
     )
 
 
+@transaction.atomic
 @api_view(["POST"])
 def create_conversation_room(request):
     user_ids = [int(_id) for _id in request.data["user_ids"]]
@@ -837,6 +840,7 @@ def import_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@transaction.atomic
 def sign_in(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -856,14 +860,18 @@ def sign_in(request):
             assert profile_url_or_name
             avatar = request.POST.get("avatar", None)
             if avatar:
-                save_user_image(avatar, model.name)
-                new_path = str(
-                    (
-                        pathlib.Path(settings.MEDIA_ROOT) / f"uploads/{model.name}.jpg"
-                    ).resolve()
-                )
-                with open(new_path, "rb") as fd:
-                    model.avatar.save(f"{model.name}.jpg", fd, True)
+                try:
+                    save_user_image(avatar, model.name)
+                    new_path = str(
+                        (
+                            pathlib.Path(settings.MEDIA_ROOT)
+                            / f"uploads/{model.name}.jpg"
+                        ).resolve()
+                    )
+                    with open(new_path, "rb") as fd:
+                        model.avatar.save(f"{model.name}.jpg", fd, True)
+                except HTTPError:
+                    pass  # we got blocked by rgstatic, bummer
             scraper = get_scraper(import_backend)
             scraped_publications = scraper.scrape_publications(profile_url_or_name)
             event_types = {choice.label: choice for choice in EventTypes}
