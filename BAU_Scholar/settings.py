@@ -134,7 +134,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(redis_host, 6379)],
-            "symmetric_encryption_kets": [SECRET_KEY],
+            "symmetric_encryption_keys": [SECRET_KEY],
         },
     },
     "ROUTING": "ws.routing.application",

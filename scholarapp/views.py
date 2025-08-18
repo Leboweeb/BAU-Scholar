@@ -9,6 +9,7 @@ from http import HTTPStatus
 from io import BytesIO
 from itertools import chain
 from urllib.error import HTTPError
+from urllib.parse import urlparse
 from django.db import transaction
 from django.db.models import Q, Count
 from dateutil.parser import parse
@@ -128,6 +129,8 @@ cv_labels = [
     },
 ]
 
+
+event_type_dict = {choice.value: choice.label for choice in EventTypes}
 
 # env vars to make gemini less noisy
 os.environ["GRPC_VERBOSITY"] = "ERROR"
@@ -633,7 +636,9 @@ def get_events(request):
         match search_method:
 
             case "title":
-                event_objects = event_objects.filter(title__icontains=query)
+                event_objects = event_objects.filter(
+                    Q(title__icontains=query) | Q(authors__name__icontains=query)
+                )
 
             case "people":
                 authors = CustomUser.objects.filter(name__icontains=query)[:10]
@@ -649,8 +654,8 @@ def get_events(request):
                 )
 
             case "research":
-                event_objects = get_user_research(request.user).filter(
-                    title__icontains=query
+                event_objects = event_objects.filter(
+                    Q(title__icontains=query) | Q(authors__name__icontains=query)
                 )
 
             case "events":
@@ -738,32 +743,40 @@ def get_groups(request):
 @api_view(["POST"])
 def create_conversation_room(request):
     user_ids = [int(_id) for _id in request.data["user_ids"]]
+    if not (request.user.pk in user_ids):
+        # author would expect to be in group, add them if they haven't already
+        user_ids.append(request.user.pk)
+    users = CustomUser.objects.filter(id__in=user_ids)
+    title = slugify("_".join(user.name for user in users.all()))
+    description = ""
     if len(user_ids) > 8:
         return HttpResponse(
             {"error_reason": "Too many group members !"},
             status=HTTPStatus.BAD_REQUEST.value,
         )
-    extra_fields = [
-        request.data.get(as_id(title)) for title in ("Group Title", "Group Description")
-    ]
-    # if we have an empty title or description, return error.
-    if len(user_ids) >= 3:
-        if any(not field for field in extra_fields):
-            return HttpResponse(
-                {"error_reason": "Title or description for conversation is empty!"},
-                status=HTTPStatus.BAD_REQUEST.value,
-            )
-        elif Conversation.objects.filter(title=extra_fields[0]):
-            return HttpResponse(
-                {"error_reason": " Group already exists !"},
-                status=HTTPStatus.BAD_REQUEST.value,
-            )
+    elif len(user_ids) >= 3:
+        extra_fields = [
+            request.data.get(as_id(title))
+            for title in ("Group Title", "Group Description")
+        ]
+        # if we have an empty title or description, return error.
+        if len(user_ids) >= 3:
+            if any(not field for field in extra_fields):
+                return HttpResponse(
+                    {"error_reason": "Title or description for conversation is empty!"},
+                    status=HTTPStatus.BAD_REQUEST.value,
+                )
 
+            title = extra_fields[0]
+            description = extra_fields[1]
     # otherwise proceed normally
+    if Conversation.objects.filter(title=title):
+        return HttpResponse(
+            {"error_reason": " Group already exists !"},
+            status=HTTPStatus.BAD_REQUEST.value,
+        )
     conversation = Conversation.objects.create()
-    if len(user_ids) >= 3:
-        conversation.title = extra_fields[0]
-        conversation.description = extra_fields[1]
+    conversation.title = title
     for user in [CustomUser.objects.get(id=_id) for _id in user_ids]:
         conversation.users.add(user)
     conversation.room_slug = slugify(
@@ -872,26 +885,29 @@ def sign_in(request):
                         model.avatar.save(f"{model.name}.jpg", fd, True)
                 except HTTPError:
                     pass  # we got blocked by rgstatic, bummer
-            scraper = get_scraper(import_backend)
-            scraped_publications = scraper.scrape_publications(profile_url_or_name)
-            event_types = {choice.label: choice for choice in EventTypes}
 
-            publication_pairs = []
-            for publication in scraped_publications:
-                if not publication:
-                    continue
-                else:
-                    publication_pairs.append(
-                        Event.objects.get_or_create(
-                            title=publication["title"],
-                            description=publication["description"],
-                            date_created=parse(publication["date_created"]),
-                            event_type=event_types[publication["research_type"]],
+            # if we actually have a url, scrape posts
+            if urlparse(profile_url_or_name).scheme != "":
+                scraper = get_scraper(import_backend)
+                scraped_publications = scraper.scrape_publications(profile_url_or_name)
+                event_types = {choice.label: choice for choice in EventTypes}
+
+                publication_pairs = []
+                for publication in scraped_publications:
+                    if not publication:
+                        continue
+                    else:
+                        publication_pairs.append(
+                            Event.objects.get_or_create(
+                                title=publication["title"],
+                                description=publication["description"],
+                                date_created=parse(publication["date_created"]),
+                                event_type=event_types[publication["research_type"]],
+                            )
                         )
-                    )
 
-            for publication, _ in publication_pairs:
-                publication.authors.add(model)
+                for publication, _ in publication_pairs:
+                    publication.authors.add(model)
             return redirect(f"/profile/{model.pk}?postsignup=true")
         return render(request, "registration/signup.html", context={"form": form})
     else:

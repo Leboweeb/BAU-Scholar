@@ -24,7 +24,7 @@
             </button>
           {% endif %}
           <form id="profilePictureForm" method="post" enctype="multipart/form-data">
-            <input class="d-none" type="file" name="profilePicture" id="profilePicture" />
+            {% if is_current_user %}<input class="d-none" type="file" name="profilePicture" id="profilePicture" />{% endif %}
             <div class="profilepic mb-2" onclick="uploadPicture();">
               <img class="profilepic__image"
                    src="{{ MEDIA_URL }}{{ user.avatar }}"
@@ -43,7 +43,7 @@
                     <script xmlns="" />
 </svg>
 </span>
-<span class="profilepic__text">Edit</span>
+{% if is_current_user %}<span class="profilepic__text">Edit</span>{% endif %}
 </div>
 </div>
 <h4>
