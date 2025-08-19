@@ -43,7 +43,8 @@
                     method="post"
                     action="/create_conversation_room">
                 {% csrf_token %}
-                {% include "components/dynamic_form_input.html" with top_label="Group Title" single=True element_id="Group Title"|as_id  required=True %}
+                {% include "components/dynamic_form_input.html" with top_label="Group Title" single=True element_id="Group Title"|as_id  required=True data=False %}
+                {% comment %} # turns out values passed to view are global. Whoops! {% endcomment %}
                 <div class="mb-3">
                   <label class="form-label m-0 mb-3 align-content-center">Group Members ( Max 8 )</label>
                   <div class="d-table position-relative">
@@ -86,7 +87,7 @@
                   </div>
                 </div>
               </div>
-              {% include "components/dynamic_form_input.html" with top_label="Group Description" element_id="Group Description"|as_id  single=True required=True %}
+              {% include "components/dynamic_form_input.html" with top_label="Group Description" element_id="Group Description"|as_id  single=True required=True data=False %}
             </div>
           </div>
           <div class="modal-footer">
@@ -179,8 +180,8 @@
 </body>
 <script>
     document.body.addEventListener(
-    'htmx:configRequest', (event) => {
-      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-  })
+        'htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        })
 </script>
 </html>
