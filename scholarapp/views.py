@@ -20,7 +20,7 @@ from django.template import Context, Template
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils.text import slugify
+from django.utils.text import slugify, Truncator
 from django.template.defaulttags import register
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -846,6 +846,10 @@ def import_user(request):
                 ):
                     with open(f"./scholarapp/cached/{name}.json") as f:
                         return Response(json.load(f))
+            elif backend == ImportBackend.SEMANTICSCHOLAR.value:
+                # use cached one for now
+                with open("./scholarapp/cached/Imane Haidar ( copy ).json") as f:
+                    return Response(json.load(f))
             else:
                 scraper = get_scraper(backend)
                 scraped_profiles = scraper.scrape_user(name)
@@ -887,9 +891,18 @@ def sign_in(request):
                     pass  # we got blocked by rgstatic, bummer
 
             # if we actually have a url, scrape posts
-            if urlparse(profile_url_or_name).scheme != "":
+            if (
+                urlparse(profile_url_or_name).scheme != ""
+                or import_backend == ImportBackend.SEMANTICSCHOLAR.value
+            ):
                 scraper = get_scraper(import_backend)
-                scraped_publications = scraper.scrape_publications(profile_url_or_name)
+                if import_backend == ImportBackend.SEMANTICSCHOLAR.value:
+                    profileId = request.POST.get("selectedSemanticProfile")
+                    scraped_publications = scraper.scrape_publications(profileId)
+                else:
+                    scraped_publications = scraper.scrape_publications(
+                        profile_url_or_name
+                    )
                 event_types = {choice.label: choice for choice in EventTypes}
 
                 publication_pairs = []
@@ -900,7 +913,9 @@ def sign_in(request):
                         publication_pairs.append(
                             Event.objects.get_or_create(
                                 title=publication["title"],
-                                description=publication["description"],
+                                description=Truncator(
+                                    publication["description"] or ""
+                                ).chars(512),
                                 date_created=parse(publication["date_created"]),
                                 event_type=event_types[publication["research_type"]],
                             )

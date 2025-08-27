@@ -28,6 +28,7 @@
                         <h1 class="modal-title fs-5" id="importFromHeader">
                             <span>Import From</span>
                             <select class="form-select" name="import_backend" onchange="retryImport()">
+                                <option value="semanticscholar">Semantic Scholar</option>
                                 <option value="googlescholar">Google Scholar</option>
                                 <option value="researchgate">ResearchGate</option>
                             </select>
@@ -57,6 +58,7 @@
                         <input type="hidden" name="skills">
                         <input type="hidden" name="profile_url">
                         <input type="hidden" name="avatar">
+                        <input type="hidden" name="selectedSemanticProfile">
                         <input type="hidden" name="import_backend">
                         {{ form | crispy }}
                         <!-- Bottom Panel of Signup form -->

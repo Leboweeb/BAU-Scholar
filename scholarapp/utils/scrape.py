@@ -8,6 +8,7 @@ import requests
 from scholarly import scholarly
 from bs4 import BeautifulSoup
 import requests
+import yake
 
 
 def get_tag_text(tag: Selector):
@@ -20,6 +21,7 @@ HEADLESS = True
 class ImportBackend(Enum):
     RESEARCHGATE = "researchgate"
     GOOGLESCHOLAR = "googlescholar"
+    SEMANTICSCHOLAR = "semanticscholar"
 
 
 class ProfileScraper(ABC):
@@ -31,6 +33,80 @@ class ProfileScraper(ABC):
     @abstractmethod
     def scrape_publications(self, link_or_name: str) -> list[dict[str, Any]]:
         pass
+
+
+class SemanticScholarScraper(ProfileScraper):
+
+    def transform_scholar_json(self, author: dict):
+        modified_paper_dict = [
+            dict(
+                paper,
+                research_type="Journal Paper",
+                description=paper["abstract"],
+                date_created=str(paper["year"]),
+            )
+            for paper in author["papers"]
+        ]
+        return {
+            "authorId": author["authorId"],
+            "name": author["name"],
+            "papers": modified_paper_dict,
+        }
+
+    def scrape_user(self, name: str) -> list[dict[str, Any]]:
+        escaped_name = quote_plus(name)
+        req = requests.get(
+            f"https://api.semanticscholar.org/graph/v1/author/search?query={escaped_name}&amp;limit=10&amp;fields=name,affiliations,papers.abstract"
+        )
+
+        # caller must handle exception for two calls below themselves
+        req.raise_for_status()
+        authors = req.json()["data"]
+        result_json = []
+        custom_kw_extractor = yake.KeywordExtractor(
+            lan="en",  # language
+            n=1,  # ngram size
+            dedupLim=0.9,  # deduplication threshold
+            dedupFunc="seqm",  # deduplication function
+            windowsSize=1,  # context window
+            top=5,  # number of keywords to extract
+            features=None,  # custom features
+        )
+
+        for author in authors:
+            paper_titles = "".join(
+                [
+                    paper.get("abstract", "") or paper.get("title", "") or ""
+                    for paper in author["papers"]
+                ]
+            )
+            modified_paper_dict = [
+                dict(paper, event_type="Journal Paper", description=paper["abstract"])
+                for paper in author["papers"]
+            ]
+            result_json.append(
+                {
+                    "authorId": author["authorId"],
+                    "name": author["name"],
+                    "keywords": ",".join(
+                        map(
+                            lambda x: x[0],
+                            custom_kw_extractor.extract_keywords(paper_titles),
+                        )
+                    ),
+                    "papers": modified_paper_dict,
+                }
+            )
+
+        return result_json
+
+    def scrape_publications(self, link_or_name: str) -> list[dict[str, Any]]:
+        req = requests.get(
+            f"https://api.semanticscholar.org/graph/v1/author/{link_or_name}/?fields=name,affiliations,papers.abstract,papers.year"
+        )
+
+        req.raise_for_status()
+        return self.transform_scholar_json(req.json())["papers"]
 
 
 class ResearchGateScraper(ProfileScraper):
@@ -198,7 +274,10 @@ class GoogleScholarScraper(ProfileScraper):
 def get_scraper(backend: str) -> ProfileScraper:
     if backend == ImportBackend.GOOGLESCHOLAR.value:
         return GoogleScholarScraper()
-    return ResearchGateScraper()
+    elif backend == ImportBackend.RESEARCHGATE.value:
+        return ResearchGateScraper()
+
+    return SemanticScholarScraper()
 
 
 class DashBoardScraper:

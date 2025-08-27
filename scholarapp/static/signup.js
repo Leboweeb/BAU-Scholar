@@ -1,4 +1,7 @@
 let importControlller = new AbortController();
+let getimportBackend = () => {
+  return document.querySelector('select[name="import_backend"]').value;
+};
 
 function submit_form(form) {
   const cardList = document.querySelector("#results");
@@ -10,6 +13,11 @@ function submit_form(form) {
       return;
     }
     let cardJson = JSON.parse(selectedCard.dataset.profile);
+    if (getimportBackend() === "semanticscholar") {
+      // semantic scholar gets user info and papers all at once, so just send entire json
+      document.querySelector("[name='selectedSemanticProfile']").value =
+        cardJson;
+    }
     let inputNames = ["profile_url", "avatar"];
     let attrs = ["profile_url", "avatar"].map(
       (attr) => cardJson[attr] ?? null // this seems stupid but we want the server to actually understand that it is null. undefined is taken as a string.
@@ -30,9 +38,25 @@ function submit_form(form) {
 function add_card(profileJson) {
   let src = profileJson["avatar"];
   let name = profileJson["name"];
+
   const cardList = document.querySelector("#results");
-  let node = new DOMParser().parseFromString(
-    `
+  let node;
+  if (getimportBackend() === "semanticscholar") {
+    let keywords = profileJson["keywords"];
+    node = new DOMParser().parseFromString(
+      `
+        <div class="col-12">
+            <div class="card p-3 flex-start-column" onclick="card_active(event)" data-profile="${profileJson["authorId"]}">
+                <h5>${name}</h5>
+                <small class="text-muted">Keywords : ${keywords} </small>
+            </div>
+        </div>
+        `,
+      "text/html"
+    ).body.firstElementChild;
+  } else {
+    node = new DOMParser().parseFromString(
+      `
         <div class="col-12">
             <div class="card p-2 d-flex justify-items-center align-items-center flex-row gap-3 user-profile" onclick="card_active(event)" data-profile='${JSON.stringify(
               profileJson
@@ -44,8 +68,9 @@ function add_card(profileJson) {
             </div>
         </div>
         `,
-    "text/html"
-  ).body.firstElementChild;
+      "text/html"
+    ).body.firstElementChild;
+  }
   node.addEventListener("click", event, true);
   cardList.appendChild(node);
 }
@@ -114,7 +139,8 @@ function import_if_name() {
           if (!json) {
             return; // this shit sucks
           }
-          for (const profile of json.profiles) {
+          let profiles = json.profiles ?? json;
+          for (const profile of profiles) {
             add_card(profile);
           }
         });
