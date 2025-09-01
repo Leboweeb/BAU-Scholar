@@ -846,10 +846,6 @@ def import_user(request):
                 ):
                     with open(f"./scholarapp/cached/{name}.json") as f:
                         return Response(json.load(f))
-            elif backend == ImportBackend.SEMANTICSCHOLAR.value:
-                # use cached one for now
-                with open("./scholarapp/cached/Imane Haidar ( copy ).json") as f:
-                    return Response(json.load(f))
             else:
                 scraper = get_scraper(backend)
                 scraped_profiles = scraper.scrape_user(name)
