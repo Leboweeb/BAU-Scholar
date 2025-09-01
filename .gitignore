@@ -164,6 +164,7 @@ cython_debug/
 # Django project ignores
 /BAU_Scholar/media/uploads
 /BAU_Scholar/media/samples
+staticfiles
 # My Ignores
 scratch.py
 scholarapp/cached/

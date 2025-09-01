@@ -22,6 +22,9 @@ RUN apt update \
 RUN pip install -r /app/requirements.txt
 RUN playwright install --with-deps firefox
 
+# make sure static files for admin are collected as well
+RUN python3 manage.py collectstatic --noinput
+
 EXPOSE ${PORT:-80}
 
 # runs the production server

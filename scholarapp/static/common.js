@@ -213,3 +213,12 @@ function getVisibleHeight(selector) {
   var visibleArea =
     Math.min(pageSize, contBottomPos) - Math.max(headerHeight, contTopPos);
 }
+
+function closeModal(selector) {
+  /** @param {string} selector - the querySelector of the modal to close */
+  document.body.classList.remove("modal-open");
+  document.body.style = "";
+  document.querySelector(".modal-backdrop").remove();
+  document.querySelector(selector).click();
+  
+}

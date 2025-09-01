@@ -132,5 +132,6 @@ w3lib==2.2.1
 websocket-client==1.8.0
 wrapt==1.17.0
 wsproto==1.2.0
+whitenoise==6.9.0
 yake==0.6.0
 zope.interface==6.4.post2

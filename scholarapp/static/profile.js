@@ -781,6 +781,12 @@ function editEventHandler() {
   })
     .then((response) => response.text())
     .then((text) => {
-      htmx.swap("#profile_events", text, { swapStyle: "outerHTML" });
+      htmx.swap("#profile_events", text, { swapStyle: "outerHTML" }, 
+        {
+          afterSwapCallback: () => {
+            closeModal("editEventModal")
+          },
+        }
+      );
     });
 }
