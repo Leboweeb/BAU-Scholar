@@ -8,7 +8,7 @@ In this internship I was tasked with making an end-to-end platform that:
 - Generate CVs and other menial forms for researchers in my university.
 - Recommend research based on shared tags.
 
-Tech Stack:
+## Tech Stack:
 - Django/DRF
 - HTMX/Javascript
 - MySQL DB
